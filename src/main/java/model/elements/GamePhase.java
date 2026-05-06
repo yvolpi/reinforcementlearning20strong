@@ -1,0 +1,12 @@
+package model.elements;
+
+public enum GamePhase {
+  ACTIVATE_PILE,
+  ENGAGE_DICE,
+  USE_ITEM_BEFORE_ENGAGE,
+  USE_ITEM_BEFORE_ASSIGN,
+  ASSIGN_DICE,
+  RECOVER_DICE,
+  THROW_ITEM,
+  CLEAR
+}
