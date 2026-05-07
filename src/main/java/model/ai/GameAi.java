@@ -27,6 +27,9 @@ public class GameAi {
   private final Random random;
 
   private List<GameAction> lastActions;
+  private List<List<GameAction>> actionsInTurn;
+  private List<List<String>> encodedActionsInTurn;
+  private Map<String, String> mapEncodedStatesAndActionsThisTurn;
 
   // ===== Constructeurs =====
 
@@ -41,6 +44,9 @@ public class GameAi {
     this.selector = new ActionSelector(random, encoder);
     this.factory  = new ActionFactory();
     this.lastActions = new ArrayList<>();
+    this.actionsInTurn = new ArrayList<>();
+    this.encodedActionsInTurn = new ArrayList<>();
+    mapEncodedStatesAndActionsThisTurn = new HashMap<>();
   }
 
   // ===== Décisions =====
@@ -49,6 +55,7 @@ public class GameAi {
     if (availableEnemies.isEmpty()) {
       throw new IllegalArgumentException("Aucun ennemi disponible pour activation");
     }
+    String encodedState = encoder.encodeStateWithPile(gameState);
     GameAction action;
     if (learner.shouldExplore(random.nextDouble())) {
       action = selector.exploreActivateAction(availableEnemies);
@@ -59,58 +66,84 @@ public class GameAi {
       if (action == null) action = selector.exploreActivateAction(availableEnemies);
     }
     lastActions = List.of(action);
+    actionsInTurn.add(List.of(action));
+    encodedActionsInTurn.add(List.of(ActionKeyEncoder.encodeActivateAction(action)));
+    mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateAction(action));
     return action;
   }
 
   public List<GameAction> chooseActionsToEngage(List<Dice> availableDice,
       List<Ennemi> activeEnnemis,
       GameState gameState) {
-    if (learner.shouldExplore(random.nextDouble())) {
-      return selector.exploreEngageActions(availableDice);
-    }
+    List<GameAction> actions;
     String state = encoder.encodeStateForEngage(gameState);
-    List<GameAction> possible = factory.createPossibleEngageActions(availableDice);
-    GameAction best = selector.findBestEngageAction(possible, learner.getActionValues(state));
-    if (best == null) return selector.selectRandomEngageAction(availableDice);
-    return List.of(best);
+
+    // Exploration
+    if (learner.shouldExplore(random.nextDouble())) {
+      actions = selector.exploreEngageActions(availableDice);
+    } else {
+      String bestLearnedEngageActions = learner.getBestLearnedActionsFromState(state);
+      if (bestLearnedEngageActions == null) {
+        actions = selector.exploreEngageActions(availableDice);
+      } else {
+        actions = ActionDecoder.decodeEngageAction(availableDice, bestLearnedEngageActions);
+      }
+    }
+
+    String encodedActions = encoder.encodeEngageAction(actions, gameState.getEngageAssignStep());
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+
+    return actions;
   }
 
   public List<GameAction> chooseActionsToAssign(List<Dice> assignableDice,
       List<Ennemi> activeEnnemis,
       GameState gameState) {
     List<GameAction> actions;
+    String state = encoder.encodeStateForAssign(gameState);
+
+    boolean lastAssignPhase = gameState.getEngageAssignStep() == gameState.getPlayer().getStrategy();
+
     if (learner.shouldExplore(random.nextDouble())) {
-      //System.out.println("Exploration : assignation aléatoire");
-      // Si c'est la dernière phase d'assignation du tour, on assigne tout
-      boolean lastAssignPhase = gameState.getEngageAssignStep() == gameState.getPlayer().getStrategy();
+      // Exploration
       if (lastAssignPhase) {
-        actions = new ArrayList<>();
-        List<Ennemi> aliveEnnemis = activeEnnemis.stream()
-            .filter(e -> !e.isDefeatedFlag())
-            .toList();
-        if (!aliveEnnemis.isEmpty()) {
-          //System.out.println("Assignation naïve : " + assignableDice.size() + " dés à assigner sur " + aliveEnnemis.size() + " ennemis actifs");
-          for (Dice dice : assignableDice) {
-            // Choix naïf : tous sur le premier ennemi actif (à adapter selon ta logique)
-            actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, aliveEnnemis.get(
-                random.nextInt(aliveEnnemis.size()
-                ))));
-          }
-        }
-
-        lastActions = actions;
-        return actions;
+        actions = naiveAssignAllDice(assignableDice, activeEnnemis);
+      } else {
+        actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
       }
-      actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
-
     } else {
-      //System.out.println("Exploitation : assignation basée sur Q-values");
-      String state = encoder.encodeStateForAssign(gameState);
-      List<GameAction> possible = factory.createPossibleAssignActions(assignableDice, activeEnnemis);
-      GameAction best = selector.findBestAssignAction(possible, learner.getActionValues(state));
-      actions = best != null ? List.of(best) : new ArrayList<>();
+      // Exploitation
+      String bestLearnedAssignActions = learner.getBestLearnedActionsFromState(state);
+      if (bestLearnedAssignActions == null) {
+        // Si aucune action apprise, fallback sur assignation naïve
+        if (lastAssignPhase) {
+          actions = naiveAssignAllDice(assignableDice, activeEnnemis);
+        } else {
+          actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
+        }
+      } else {
+        actions = ActionDecoder.decodeAssignActions(assignableDice, bestLearnedAssignActions, activeEnnemis);
+      }
     }
+
     lastActions = actions;
+    String encodedActions = encoder.encodeAssignActions(actions, gameState.getEngageAssignStep());
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    return actions;
+  }
+
+  private List<GameAction> naiveAssignAllDice(List<Dice> assignableDice, List<Ennemi> activeEnnemis) {
+    List<GameAction> actions = new ArrayList<>();
+    List<Ennemi> aliveEnnemis = activeEnnemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .toList();
+    if (!aliveEnnemis.isEmpty()) {
+      for (Dice dice : assignableDice) {
+        actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, aliveEnnemis.get(
+            random.nextInt(aliveEnnemis.size())
+        )));
+      }
+    }
     return actions;
   }
 
@@ -121,21 +154,11 @@ public class GameAi {
     } else {
       String state = encoder.encodeState(gameState);
       List<GameAction> possible = factory.createPossibleUseActions(usableItems, gameState);
-      GameAction best = selector.findBestAssignAction(possible, learner.getActionValues(state));
+      GameAction best = selector.findBestUseItemAction(possible, learner.getActionValues(state));
       actions = best != null ? List.of(best) : new ArrayList<>();
     }
     lastActions = actions;
     return actions;
-  }
-
-  public Map<Dice, Ennemi> chooseDiceAssignment(List<Dice> engagedDice, List<Ennemi> activeEnnemis) {
-    Map<Dice, Ennemi> assignments = new HashMap<>();
-    if (activeEnnemis.isEmpty()) return assignments;
-    Ennemi targetEnemy = activeEnnemis.getFirst();
-    for (Dice dice : engagedDice) {
-      assignments.put(dice, targetEnemy);
-    }
-    return assignments;
   }
 
   public List<Dice> chooseDiceToRecover(List<Dice> exhaustedDice, int maxToRecover) {
@@ -168,6 +191,10 @@ public class GameAi {
     learner.learnFromExperience();
   }
 
+  public void learnFromTurnExperience(int turnExp) {
+    learner.learnFromLocalExperience(turnExp, mapEncodedStatesAndActionsThisTurn);
+  }
+
   public void decayEpsilon() {
     learner.decayEpsilon();
   }
@@ -176,6 +203,10 @@ public class GameAi {
 
   public String encodeState(GameState gameState) {
     return encoder.encodeState(gameState);
+  }
+
+  public String encodeGlobalState(GameState gameState) {
+    return encoder.encodeGlobalState(gameState);
   }
 
   public String encodeStateForEngage(GameState gameState) {
@@ -197,6 +228,7 @@ public class GameAi {
   // ===== Getters =====
 
   public List<Experience> getExperiences()                         { return learner.getExperiences(); }
-  public List<GameAction> getLastActions()                   { return lastActions; }
-  public Map<String, Map<String, Double>> getQTable()              { return learner.getQTable(); }
+  public QLearner getLearner() { return learner; }
+  public void resetActionsInTurn() { this.actionsInTurn = new ArrayList<>(); }
+
 }

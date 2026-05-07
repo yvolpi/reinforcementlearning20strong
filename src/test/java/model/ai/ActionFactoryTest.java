@@ -37,18 +37,6 @@ class ActionFactoryTest {
   }
 
   @Test
-  void createPossibleEngageActions_includesNullActionAtEnd() {
-    Dice d1 = new Dice(DiceColor.BLEU);
-    Dice d2 = new Dice(DiceColor.ROUGE);
-
-    List<GameAction> actions = factory.createPossibleEngageActions(List.of(d1, d2));
-
-    assertThat(actions).hasSize(3);
-    assertThat(actions.get(2)).isNull();
-    assertThat(actions.get(0).getDice()).isEqualTo(d1);
-  }
-
-  @Test
   void createPossibleAssignActions_returnsCartesianProductPlusNull() {
     Dice d1 = new Dice(DiceColor.BLEU);
     Ennemi e1 = new Ennemi(EnnemiType.ARACHNOPOULPE, 1);

@@ -21,7 +21,7 @@ public class GameLoop {
     this.turnExecutor = new TurnExecutor(ai);
   }
 
-  public int runGameLoop(GameState game) {
+  public int runGameLoop(GameState game, GameAi ai) {
     int turn = 0;
     int totalReward = 0;
     GameState previousState = game.clone();
@@ -34,6 +34,16 @@ public class GameLoop {
       displayTurnSummary(game, turn);
 
       int turnReward = GameService.evaluateTurn(previousState, game);
+      //encoder état global du jeu après les nouvelles actions du tour
+      //apprentissage
+      if (game.isVictory()) {
+        turnReward += VICTORY_BONUS;
+      } else if (game.isDefeat()) {
+        turnReward -= Math.max(MINIMUM_DEFEAT_MALUS, BASE_DEFEAT_MALUS - MALUS_REDUCTION_PER_TURN * turn);
+      }
+
+      ai.learnFromTurnExperience(turnReward);
+
       totalReward += turnReward;
       previousState = game.clone();
     }

@@ -13,9 +13,11 @@ public class QLearner {
   private static final double DEFAULT_LEARNING_RATE  = 0.1;
   private static final double DEFAULT_DISCOUNT_FACTOR = 0.95;
   private static final double DEFAULT_EPSILON         = 1.0;
-  private static final double EPSILON_DECAY           = 2.0 / 3.0;
+  private static final double EPSILON_DECAY           = 29.0 / 30.0;
 
   private final Map<String, Map<String, Double>> qTable;
+
+  private final Map<String, Map<String, Double>> qTableForTurns;
   private final double learningRate;
   private final double discountFactor;
   private double epsilon;
@@ -28,6 +30,7 @@ public class QLearner {
 
   public QLearner(double learningRate, double discountFactor, double epsilon) {
     this.qTable = new HashMap<>();
+    this.qTableForTurns = new HashMap<>();
     this.learningRate = learningRate;
     this.discountFactor = discountFactor;
     this.epsilon = epsilon;
@@ -58,6 +61,33 @@ public class QLearner {
     }
 
     experiences.clear();
+  }
+
+  public String getBestLearnedActionsFromState(String encodedState) {
+    Map<String, Double> learnedActions = qTableForTurns.getOrDefault(encodedState, new HashMap<>());
+
+    return learnedActions.entrySet().stream()
+        .max(Map.Entry.comparingByValue())
+        .map(Map.Entry::getKey)
+        .orElse(null);
+
+  }
+
+  /**
+   * Applique l'algorithme de Q-learning sur les expériences locales.
+   */
+  public void learnFromLocalExperience(int turnExp, Map<String, String> statesAndActionsForThisTurn) {
+    // turnExp = récompense du tour
+    // statesAndActionsForThisTurn : clé = état du jeu, value = action ou combo d'actions prises
+    for (Map.Entry<String, String> entry : statesAndActionsForThisTurn.entrySet()) {
+      String state = entry.getKey();
+      String action = entry.getValue();
+
+      Map<String, Double> stateActions = qTableForTurns.computeIfAbsent(state, k -> new HashMap<>());
+      double oldQ = stateActions.getOrDefault(action, 0.0);
+      double newQ = oldQ + learningRate * (turnExp - oldQ); // Pas de future reward pour une expérience locale
+      stateActions.put(action, newQ);
+    }
   }
 
   public void decayEpsilon() {

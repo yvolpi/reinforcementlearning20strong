@@ -119,24 +119,18 @@ public class ActionSelector {
     return bestAction;
   }
 
-  public GameAction findBestAssignAction(List<GameAction> possibleActions,
+  public GameAction findBestUseItemAction(List<GameAction> possibleActions,
       Map<String, Double> actionValues) {
     GameAction bestAction = null;
     double bestValue = Double.NEGATIVE_INFINITY;
     for (GameAction action : possibleActions) {
-      double value = actionValues.getOrDefault(encoder.encodeAssignAction(action), 0.0);
+      double value = actionValues.getOrDefault(encoder.encodeUseItemAction(action), 0.0);
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;
       }
     }
     return bestAction;
-  }
-
-  public List<GameAction> selectRandomEngageAction(List<Dice> availableDice) {
-    if (availableDice.isEmpty()) return List.of();
-    Dice randomDice = availableDice.get(random.nextInt(availableDice.size()));
-    return List.of(new GameAction(GamePhase.ENGAGE_DICE, randomDice));
   }
 
   // ===== Utilitaires =====

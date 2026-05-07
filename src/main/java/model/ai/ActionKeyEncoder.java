@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import model.elements.GameAction;
+import model.ennemis.Ennemi;
 
 public class ActionKeyEncoder {
 
@@ -31,5 +32,12 @@ public class ActionKeyEncoder {
     String rollPart = String.valueOf(action.getDice().getLastRoll());
     String targetPart = action.getTarget() != null ? action.getTarget().getName() : "NONE";
     return dicePart + ":" + rollPart + "->" + targetPart;
+  }
+
+  public static String encodeActivateAction(GameAction action) {
+    if (action == null || action.getTarget() == null)
+      return "NONE";
+    Ennemi target = action.getTarget();
+    return "ACTIVATE:PILE_" + target.getPileNumber();
   }
 }

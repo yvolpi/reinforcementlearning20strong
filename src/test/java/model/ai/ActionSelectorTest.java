@@ -114,21 +114,4 @@ class ActionSelectorTest {
 
     assertThat(best.getDice().getColor()).isEqualTo(DiceColor.ROUGE);
   }
-
-  // ===== selectRandomEngageAction =====
-
-  @Test
-  void selectRandomEngageAction_emptyDice_returnsEmptyList() {
-    assertThat(selector.selectRandomEngageAction(List.of())).isEmpty();
-  }
-
-  @Test
-  void selectRandomEngageAction_withDice_returnsSingleAction() {
-    Dice d = new Dice(DiceColor.JAUNE);
-
-    List<GameAction> actions = selector.selectRandomEngageAction(List.of(d));
-
-    assertThat(actions).hasSize(1);
-    assertThat(actions.get(0).getDice()).isEqualTo(d);
-  }
 }

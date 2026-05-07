@@ -1,6 +1,8 @@
 package model.ai;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import model.DiceState;
 import model.GameState;
@@ -28,9 +30,53 @@ public class GameStateEncoder {
     return sb.toString();
   }
 
-  public String encodeStateForEngage(GameState gameState) {
+  public String encodeGlobalState(GameState gameState) {
+    // stats joueur, items, ennemis sur chaque pile, dés disponibles
     StringBuilder sb = new StringBuilder();
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append(gameState.getPlayer().getRecovery()).append("|");
+
+    // items
+    String playerItems = gameState.getPlayer().getItems().stream()
+        .map(Item::getName)
+        .collect(Collectors.joining(";"));
+    sb.append(playerItems).append("|");
+
+    long reserveDiceCount = gameState.getDicePool().stream()
+        .filter(d -> d.getState() == DiceState.RESERVE)
+        .count();
+    sb.append(reserveDiceCount).append("|");
+    // nb d'ennemis par pile
+    long pile1Count = gameState.getPile1() != null ? gameState.getPile1().size() : 0;
+    long pile2Count = gameState.getPile2() != null ? gameState.getPile2().size() : 0;
+    long pile3Count = gameState.getPile3() != null ? gameState.getPile3().size() : 0;
+    sb.append(pile1Count).append("|").append(pile2Count).append("|").append(pile3Count).append("|");
+
+    //1ers ennemis de chaque piles
+
+    String enemies = "";
+    if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
+      enemies += gameState.getPile1().peek().getName() + ":PILE1;";
+    }
+    if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
+      enemies += gameState.getPile2().peek().getName() + ":PILE2;";
+    }
+    if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
+      enemies += gameState.getPile3().peek().getName() + ":PILE3;";
+    }
+    if (gameState.isRevealedBoss()) {
+      enemies += gameState.getBossPile().peek().getName() + ":BOSS;";
+    }
+    sb.append(enemies);
+    return sb.toString();
+  }
+
+  public String encodeStateForEngage(GameState gameState) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("ENGAGE").append(gameState.getEngageAssignStep()).append("|");
+    sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append(gameState.getPlayer().getStrategy()).append("|");
     long reserveDice = gameState.getDicePool().stream()
         .filter(d -> d.getState() == DiceState.RESERVE)
         .count();
@@ -124,10 +170,38 @@ public class GameStateEncoder {
     return "ENGAGE:" + action.getDice().getColor().name();
   }
 
-  public String encodeAssignAction(GameAction action) {
+  public String encodeEngageAction(List<GameAction> comboActions, int engagementNumber) {
+    String prefix = "ENGAGE" + engagementNumber + ":";
+    if (comboActions.isEmpty()) return prefix + "NONE";
+    // compter le nombre de dés engagés par couleur
+    Map<String, Long> colorCounts = comboActions.stream()
+        .filter(a -> a.getDice() != null)
+        .collect(Collectors.groupingBy(
+            a -> a.getDice().getColor().name(),
+            Collectors.counting()
+        ));
+    // Générer une chaîne triée pour garantir l’unicité de la clé
+    String encoded = colorCounts.entrySet().stream()
+        .sorted(Map.Entry.comparingByKey())
+        .map(e -> e.getKey() + "=" + e.getValue())
+        .collect(Collectors.joining(";"));
+    return prefix + encoded;
+  }
+
+  public String encodeAssignActions(List<GameAction> comboActions, int engagementNumber) {
+    String prefix = "ASSIGN" + engagementNumber + ":";
+    if (comboActions.isEmpty()) return prefix + "NONE";
+    String encoded = comboActions.stream()
+        .filter(a -> a.getDice() != null && a.getTarget() != null)
+        .map(a -> a.getDice().getColor().name() + ":" + a.getDice().getLastRoll() + "->" + a.getTarget().getName())
+        .sorted() // ordre alphabétique pour unicité
+        .collect(Collectors.joining(";"));
+    return prefix + encoded;
+  }
+
+  public String encodeUseItemAction(GameAction action) {
     if (action == null) return "NONE";
-    String dicePart = action.getDice().getColor().name();
-    String targetPart = action.getTarget() != null ? action.getTarget().getName() : "NONE";
-    return "ASSIGN:" + dicePart + "->" + targetPart;
+    String item = action.getItem().getName();
+    return "USE_ITEM:" + item;
   }
 }

@@ -5,11 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
 import model.Dice;
 import model.DiceColor;
-import model.DiceState;
 import model.GameState;
 import model.Player;
 import model.elements.GameAction;
@@ -70,22 +68,6 @@ class GameStateEncoderTest {
     GameAction action = new GameAction(GamePhase.ENGAGE_DICE, dice);
 
     assertThat(encoder.encodeEngageAction(action)).isEqualTo("ENGAGE:VIOLET");
-  }
-
-  @Test
-  void encodeAssignAction_nullAction_returnsNONE() {
-    assertThat(encoder.encodeAssignAction(null)).isEqualTo("NONE");
-  }
-
-  @Test
-  void encodeAssignAction_validAction_returnsFormattedKey() {
-    Dice dice = new Dice(DiceColor.ROUGE);
-    Ennemi target = new Ennemi(EnnemiType.ASSERVI, 1);
-    GameAction action = new GameAction(GamePhase.ASSIGN_DICE, dice, target);
-
-    String result = encoder.encodeAssignAction(action);
-
-    assertThat(result).isEqualTo("ASSIGN:ROUGE->ASSERVI");
   }
 
   @Test

@@ -22,15 +22,6 @@ public class ActionFactory {
     return actions;
   }
 
-  public List<GameAction> createPossibleEngageActions(List<Dice> availableDice) {
-    List<GameAction> actions = new ArrayList<>();
-    for (Dice dice : availableDice) {
-      actions.add(new GameAction(GamePhase.ENGAGE_DICE, dice));
-    }
-    actions.add(null); // Action "ne rien engager"
-    return actions;
-  }
-
   public List<GameAction> createPossibleAssignActions(List<Dice> assignableDice, List<Ennemi> activeEnnemis) {
     List<GameAction> actions = new ArrayList<>();
     for (Dice dice : assignableDice) {

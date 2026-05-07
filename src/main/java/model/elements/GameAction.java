@@ -37,16 +37,6 @@ public class GameAction {
     this.target = randomEnnemi;
   }
 
-  public List<GameAction> chooseActionsToEngage(List<Dice> availableDice, List<Ennemi> activeEnnemis) {
-    List<GameAction> actions = new ArrayList<>();
-    for (Dice dice : availableDice) {
-      // Ici, tu peux ajouter de la logique pour ne pas engager tous les dés
-      actions.add(new GameAction(GamePhase.ENGAGE_DICE, dice));
-    }
-    // Si le joueur ne veut engager aucun dé, tu peux retourner une liste vide
-    return actions;
-  }
-
   public GamePhase getType() {
     return type;
   }

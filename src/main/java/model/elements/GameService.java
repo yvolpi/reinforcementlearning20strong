@@ -118,7 +118,11 @@ public class GameService {
     gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
     rollEngagedDice(gameState);
     new ArrayList<>(gameState.getActiveEnnemis()).forEach(ennemi ->
-        ennemi.getEffects().forEach(effect -> effect.applyAfterEngagementAndRoll(gameState, ennemi))
+        {
+          System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
+          ennemi.getEffects().forEach(effect -> effect.applyAfterEngagementAndRoll(gameState, ennemi));
+          gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+        }
     );
     gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
     gameState.setPhase(GamePhase.ASSIGN_DICE);
@@ -280,6 +284,9 @@ public class GameService {
                 keepEngaged = true;
                 break;
               }
+            }
+            if (!keepEngaged) {
+              ennemi.getAssignedDice().remove(dice);
             }
           }
         }
