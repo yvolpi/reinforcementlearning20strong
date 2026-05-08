@@ -8,6 +8,7 @@ import model.items.Item;
 
 public class GameAction {
   private GamePhase type;
+  private boolean activateBoss; // pour ACTIVATE_BOSS
   private int pileNumber; // pour ACTIVATE_PILE
   private Dice dice;      // pour ENGAGE_DICE ou ASSIGN_DICE
   private Ennemi target;
@@ -19,6 +20,10 @@ public class GameAction {
     this.type = type;
     this.dice = dice;
     this.target = null;
+  }
+
+  public GameAction(boolean activateBoss) {
+    this.activateBoss = activateBoss;
   }
 
   public GameAction(GamePhase type, Dice dice, Ennemi target) {
@@ -35,6 +40,10 @@ public class GameAction {
   public GameAction(GamePhase type, Ennemi randomEnnemi) {
     this.type = type;
     this.target = randomEnnemi;
+  }
+
+  public boolean isActivateBoss() {
+    return activateBoss;
   }
 
   public GamePhase getType() {

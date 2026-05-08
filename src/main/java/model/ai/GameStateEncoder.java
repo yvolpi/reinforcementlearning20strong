@@ -146,6 +146,29 @@ public class GameStateEncoder {
     return sb.toString();
   }
 
+  public String encodeStateWithBoss(GameState gameState) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append(gameState.getPlayer().getRecovery()).append("|");
+    long reserveDiceCount = gameState.getDicePool().stream()
+        .filter(d -> d.getState() == DiceState.RESERVE)
+        .count();
+    sb.append(reserveDiceCount).append("|");
+    // boss révélé ?
+    if (gameState.isRevealedBoss()) {
+      sb.append(gameState.getBossPile().peek().getName()).append(":BOSS");
+    } else {
+      sb.append("UNKNOWN_BOSS");
+    }
+    sb.append(";");
+    String pile1 = !gameState.getPile1().isEmpty() ? gameState.getPile1().peek().getName() : "NONE";
+    String pile2 = !gameState.getPile2().isEmpty() ? gameState.getPile2().peek().getName() : "NONE";
+    String pile3 = !gameState.getPile3().isEmpty() ? gameState.getPile3().peek().getName() : "NONE";
+    sb.append(pile1).append(";").append(pile2).append(";").append(pile3);
+    return sb.toString();
+  }
+
 
   public String encodeStateWithPile(GameState gameState) {
     StringBuilder sb = new StringBuilder();
@@ -161,63 +184,8 @@ public class GameStateEncoder {
     return sb.toString();
   }
 
-  public String encodeActivateAction(GameAction action) {
-    if (action == null || action.getTarget() == null) return "NONE";
-    return "ACTIVATE:PILE_" + action.getTarget().getPileNumber();
-  }
-
   public String encodeEngageAction(GameAction action) {
     if (action == null) return "NONE";
     return "ENGAGE:" + action.getDice().getColor().name();
-  }
-
-  public String encodeEngageAction(List<GameAction> comboActions, int engagementNumber) {
-    String prefix = "ENGAGE" + engagementNumber + ":";
-    if (comboActions.isEmpty()) return prefix + "NONE";
-    // compter le nombre de dés engagés par couleur
-    Map<String, Long> colorCounts = comboActions.stream()
-        .filter(a -> a.getDice() != null)
-        .collect(Collectors.groupingBy(
-            a -> a.getDice().getColor().name(),
-            Collectors.counting()
-        ));
-    // Générer une chaîne triée pour garantir l’unicité de la clé
-    String encoded = colorCounts.entrySet().stream()
-        .sorted(Map.Entry.comparingByKey())
-        .map(e -> e.getKey() + "=" + e.getValue())
-        .collect(Collectors.joining(";"));
-    return prefix + encoded;
-  }
-
-  public String encodeAssignActions(List<GameAction> comboActions, int engagementNumber) {
-    String prefix = "ASSIGN" + engagementNumber + ":";
-    if (comboActions.isEmpty()) return prefix + "NONE";
-    String encoded = comboActions.stream()
-        .filter(a -> a.getDice() != null && a.getTarget() != null)
-        .map(a -> a.getDice().getColor().name() + ":" + a.getDice().getLastRoll() + "->" + a.getTarget().getName())
-        .sorted() // ordre alphabétique pour unicité
-        .collect(Collectors.joining(";"));
-    return prefix + encoded;
-  }
-
-  public String encodeUseItemAction(GameAction action) {
-    if (action == null) return "NONE";
-    String item = action.getItem().getName();
-    return "USE_ITEM:" + item;
-  }
-
-  public String encodeUseItemsAction(List<GameAction> actions, GamePhase phase) {
-    String prefix = phase.name() + ":";
-    String encoded = "";
-    if (actions.isEmpty()) {
-      encoded = "NONE";
-    } else {
-      encoded = actions.stream()
-          .filter(a -> a.getItem() != null)
-          .map(a -> a.getItem().getName())
-          .sorted()
-          .collect(Collectors.joining(";"));
-    }
-    return prefix + encoded;
   }
 }

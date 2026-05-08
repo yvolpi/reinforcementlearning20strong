@@ -19,7 +19,7 @@ public class GameBootstrap implements CommandLineRunner {
     GameAi ai = new GameAi(0L);
     Integer bestReward = null;
     List<List<Experience>> bestGameExperiences = new ArrayList<>();
-
+    int nbVictories = 0;
 
     for (int i = 1; i <= NB_GAMES; i++) {
       System.out.println("=== Partie " + i + " ===");
@@ -35,6 +35,7 @@ public class GameBootstrap implements CommandLineRunner {
       }
       if (totalReward > 0) {
         // victoire
+        nbVictories++;
         bestGameExperiences = new ArrayList<>(ai.getLearner().getExperiences()); // copie profonde si besoin
         System.out.println("superbe victoire ! En " + bestGameExperiences.size() + " tours, récompense : " + totalReward);
       }
@@ -54,6 +55,7 @@ public class GameBootstrap implements CommandLineRunner {
       System.out.println("Récompense totale : " + totalReward);
     }
     System.out.println("Record Récompense  : " + bestReward);
+    System.out.println("Nombre de victoires : " + nbVictories + " sur " + NB_GAMES + " parties");
     System.out.println("epsilon : " + ai.getLearner().getEpsilon());
     // afficher les meilleurs premiers coups
     bestGameExperiences = ai.getLearner().getExperiencesInBestGame();

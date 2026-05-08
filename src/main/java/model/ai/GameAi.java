@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import model.Dice;
+import model.DiceState;
 import model.GameState;
 import model.elements.GameAction;
 import model.elements.GamePhase;
@@ -50,6 +51,21 @@ public class GameAi {
 
   // ===== Décisions =====
 
+  public GameAction decideBossActivation(GameState gameState) {
+    String encodedState = encoder.encodeStateWithBoss(gameState);
+    GameAction action;
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = new GameAction(random.nextBoolean());
+    } else {
+      List<GameAction> possible = List.of(new GameAction(true), new GameAction(false));
+      action = selector.findBestDecideActivateBossAction(possible, learner.getActionValues(encodedState));
+      if (action == null) action = new GameAction(random.nextBoolean());
+    }
+
+    mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateBossAction(action));
+    return action;
+  }
+
   public GameAction choosePileToActivate(List<Ennemi> availableEnemies, GameState gameState) {
     if (availableEnemies.isEmpty()) {
       throw new IllegalArgumentException("Aucun ennemi disponible pour activation");
@@ -88,7 +104,7 @@ public class GameAi {
       }
     }
 
-    String encodedActions = encoder.encodeEngageAction(actions, gameState.getEngageAssignStep());
+    String encodedActions = ActionKeyEncoder.encodeEngageAction(actions, gameState.getEngageAssignStep());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
 
     return actions;
@@ -99,6 +115,19 @@ public class GameAi {
       GameState gameState) {
     List<GameAction> actions;
     String state = encoder.encodeStateForAssign(gameState);
+    if (gameState.isActivatedBoss()) {
+      // dés engagés non assignés
+      StringBuilder desEngages = new StringBuilder("dés engagés :");
+
+      gameState.getEngagedDices().stream()
+          .filter(dice -> dice.getState() == DiceState.ENGAGE)
+          .forEach(dice -> {
+            desEngages.append(dice.getColor().name()).append(":").append(dice.getLastRoll()).append(";");
+          });
+      System.out.println(desEngages);
+
+
+    }
 
     boolean lastAssignPhase = gameState.getEngageAssignStep() == gameState.getPlayer().getStrategy();
 
@@ -133,7 +162,7 @@ public class GameAi {
     }
 
     lastActions = actions;
-    String encodedActions = encoder.encodeAssignActions(actions, gameState.getEngageAssignStep());
+    String encodedActions = ActionKeyEncoder.encodeAssignActions(actions, gameState.getEngageAssignStep());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
     return actions;
   }
@@ -170,7 +199,7 @@ public class GameAi {
       }
     }
     lastActions = actions;
-    String encodedActions = encoder.encodeUseItemsAction(actions, gameState.getPhase());
+    String encodedActions = ActionKeyEncoder.encodeUseItemsAction(actions, gameState.getPhase());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
     return actions;
   }
@@ -184,18 +213,20 @@ public class GameAi {
 
   public GameAction chooseItemToRemove(GameState gameState, Reward reward) {
 
+    String state = encoder.encodeStateForItemsManagement(gameState, reward);
     GameAction action;
     List<Item> items = gameState.getPlayer().getItems();
 
     if (learner.shouldExplore(random.nextDouble())) {
       action = selector.exploreItemToThrowAction(items);
     } else {
-      String state = encoder.encodeStateForItemsManagement(gameState, reward);
       List<GameAction> possibleItemsToRemove = factory.createPossibleRemoveItemActions(items);
       action = selector.findBestActivateAction(possibleItemsToRemove, learner.getActionValues(state));
       if (action == null) action = selector.exploreItemToThrowAction(items);
     }
     lastActions = List.of(action);
+    String encodedActions = ActionKeyEncoder.encodeRemoveItemAction(action);
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
     return action;
   }
 
@@ -215,32 +246,6 @@ public class GameAi {
 
   public void updateBestGame() {
     learner.updateBestExperience();
-  }
-
-  // ===== Encodage (délégation pour usage externe) =====
-
-  public String encodeState(GameState gameState) {
-    return encoder.encodeState(gameState);
-  }
-
-  public String encodeGlobalState(GameState gameState) {
-    return encoder.encodeGlobalState(gameState);
-  }
-
-  public String encodeStateForEngage(GameState gameState) {
-    return encoder.encodeStateForEngage(gameState);
-  }
-
-  public String encodeStateForAssign(GameState gameState) {
-    return encoder.encodeStateForAssign(gameState);
-  }
-
-  public String encodeStateWithPile(GameState gameState) {
-    return encoder.encodeStateWithPile(gameState);
-  }
-
-  public String encodeStateForItemsManagement(GameState gameState, Reward reward) {
-    return encoder.encodeStateForItemsManagement(gameState, reward);
   }
 
   public void resetMapEncodedStatesAndActionsThisTurn() {

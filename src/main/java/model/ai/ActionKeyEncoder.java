@@ -1,12 +1,24 @@
 package model.ai;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import model.elements.GameAction;
+import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 
 public class ActionKeyEncoder {
+
+  public static String encodeActivateBossAction(GameAction action) {
+    if (action == null) return "NONE";
+    return action.isActivateBoss() ? "ACTIVATE_BOSS" : "NONE";
+  }
+
+  public static String encodeActivateAction(GameAction action) {
+    if (action == null || action.getTarget() == null) return "NONE";
+    return "ACTIVATE:PILE_" + action.getTarget().getPileNumber();
+  }
 
   public static String encodeEngageActions(List<GameAction> actions) {
     if (actions.isEmpty()) return "NONE";
@@ -34,10 +46,53 @@ public class ActionKeyEncoder {
     return dicePart + ":" + rollPart + "->" + targetPart;
   }
 
-  public static String encodeActivateAction(GameAction action) {
-    if (action == null || action.getTarget() == null)
-      return "NONE";
-    Ennemi target = action.getTarget();
-    return "ACTIVATE:PILE_" + target.getPileNumber();
+  public static String encodeEngageAction(List<GameAction> comboActions, int engagementNumber) {
+    String prefix = "ENGAGE" + engagementNumber + ":";
+    if (comboActions.isEmpty()) return prefix + "NONE";
+    // compter le nombre de dés engagés par couleur
+    Map<String, Long> colorCounts = comboActions.stream()
+        .filter(a -> a.getDice() != null)
+        .collect(Collectors.groupingBy(
+            a -> a.getDice().getColor().name(),
+            Collectors.counting()
+        ));
+    // Générer une chaîne triée pour garantir l’unicité de la clé
+    String encoded = colorCounts.entrySet().stream()
+        .sorted(Map.Entry.comparingByKey())
+        .map(e -> e.getKey() + "=" + e.getValue())
+        .collect(Collectors.joining(";"));
+    return prefix + encoded;
+  }
+
+  public static String encodeAssignActions(List<GameAction> comboActions, int engagementNumber) {
+    String prefix = "ASSIGN" + engagementNumber + ":";
+    if (comboActions.isEmpty()) return prefix + "NONE";
+    String encoded = comboActions.stream()
+        .filter(a -> a.getDice() != null && a.getTarget() != null)
+        .map(a -> a.getDice().getColor().name() + ":" + a.getDice().getLastRoll() + "->" + a.getTarget().getName())
+        .sorted() // ordre alphabétique pour unicité
+        .collect(Collectors.joining(";"));
+    return prefix + encoded;
+  }
+
+  public static String encodeUseItemsAction(List<GameAction> actions, GamePhase phase) {
+    String prefix = phase.name() + ":";
+    String encoded = "";
+    if (actions.isEmpty()) {
+      encoded = "NONE";
+    } else {
+      encoded = actions.stream()
+          .filter(a -> a.getItem() != null)
+          .map(a -> a.getItem().getName())
+          .sorted()
+          .collect(Collectors.joining(";"));
+    }
+    return prefix + encoded;
+  }
+
+  public static String encodeRemoveItemAction(GameAction action) {
+    String prefix = "THROW_ITEM:";
+    if (action == null || action.getItem() == null) return prefix + "NONE";
+    return prefix + action.getItem().getName();
   }
 }

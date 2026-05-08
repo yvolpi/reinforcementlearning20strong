@@ -91,12 +91,26 @@ public class ActionSelector {
 
   // ===== Exploitation =====
 
+  public GameAction findBestDecideActivateBossAction(List<GameAction> possibleActions,
+      Map<String, Double> actionValues) {
+    GameAction bestAction = null;
+    double bestValue = Double.NEGATIVE_INFINITY;
+    for (GameAction action : possibleActions) {
+      double value = actionValues.getOrDefault(ActionKeyEncoder.encodeActivateBossAction(action), 0.0);
+      if (value > bestValue) {
+        bestValue = value;
+        bestAction = action;
+      }
+    }
+    return bestAction;
+  }
+
   public GameAction findBestActivateAction(List<GameAction> possibleActions,
       Map<String, Double> actionValues) {
     GameAction bestAction = null;
     double bestValue = Double.NEGATIVE_INFINITY;
     for (GameAction action : possibleActions) {
-      double value = actionValues.getOrDefault(encoder.encodeActivateAction(action), 0.0);
+      double value = actionValues.getOrDefault(ActionKeyEncoder.encodeActivateAction(action), 0.0);
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;
@@ -111,20 +125,6 @@ public class ActionSelector {
     double bestValue = Double.NEGATIVE_INFINITY;
     for (GameAction action : possibleActions) {
       double value = actionValues.getOrDefault(encoder.encodeEngageAction(action), 0.0);
-      if (value > bestValue) {
-        bestValue = value;
-        bestAction = action;
-      }
-    }
-    return bestAction;
-  }
-
-  public GameAction findBestUseItemAction(List<GameAction> possibleActions,
-      Map<String, Double> actionValues) {
-    GameAction bestAction = null;
-    double bestValue = Double.NEGATIVE_INFINITY;
-    for (GameAction action : possibleActions) {
-      double value = actionValues.getOrDefault(encoder.encodeUseItemAction(action), 0.0);
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;

@@ -40,6 +40,10 @@ public class GameLoop {
       if (game.isVictory() || game.isDefeat()) {
         turnReward += computeEndGameReward(game, turn);
       }
+      if (turn < 3 && game.isVictory()) {
+        System.out.println("Victoire rapide");
+      }
+
       System.out.println("Fin tour " + turn + ", récompense : " + turnReward);
 
       ai.learnFromTurnExperience(turnReward);

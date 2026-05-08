@@ -19,11 +19,15 @@ public class TurnExecutor {
     // Reset usable items
     game.getPlayer().resetUsableItems();
     game.setWastedDiceThisTurn(0);
+    game.setEngageAssignStep(1);
 
     // Phase 1 : Activation
     game.setPhase(GamePhase.ACTIVATE_PILE);
     if (!game.isActivatedBoss() && game.forceActiveBoss()) {
       GameService.activateBoss(game);
+    } else if (!game.isActivatedBoss() && game.canActiveBoss()) {
+      // c'est à l'ia de décider s'il active le boss maintenant
+      phaseExecutor.executeDecideActiveBoss(game);
     }
     if (!game.isActivatedBoss()) {
       phaseExecutor.executeActivatePhase(game);

@@ -24,6 +24,13 @@ public class PhaseExecutor {
     this.ai = ai;
   }
 
+  public void executeDecideActiveBoss(GameState game) {
+    GameAction action = ai.decideBossActivation(game);
+    if (action.isActivateBoss()) {
+      GameService.activateBoss(game);
+    }
+  }
+
   public void executeActivatePhase(GameState game) {
     if (game.isVictory()) return;
     game.setPhase(GamePhase.ACTIVATE_PILE);
