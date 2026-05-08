@@ -29,18 +29,18 @@ public class GameLoop {
     while (!game.isVictory() && !game.isDefeat()) {
       turn++;
       System.out.println("--- Tour " + turn + " ---");
+      ai.resetMapEncodedStatesAndActionsThisTurn();
 
       turnExecutor.executeTurn(game);
-      displayTurnSummary(game, turn);
+      //displayTurnSummary(game, turn);
 
       int turnReward = GameService.evaluateTurn(previousState, game);
-      //encoder état global du jeu après les nouvelles actions du tour
+
       //apprentissage
-      if (game.isVictory()) {
-        turnReward += VICTORY_BONUS;
-      } else if (game.isDefeat()) {
-        turnReward -= Math.max(MINIMUM_DEFEAT_MALUS, BASE_DEFEAT_MALUS - MALUS_REDUCTION_PER_TURN * turn);
+      if (game.isVictory() || game.isDefeat()) {
+        turnReward += computeEndGameReward(game, turn);
       }
+      System.out.println("Fin tour " + turn + ", récompense : " + turnReward);
 
       ai.learnFromTurnExperience(turnReward);
 
@@ -48,7 +48,6 @@ public class GameLoop {
       previousState = game.clone();
     }
 
-    totalReward += computeEndGameReward(game, turn);
     return totalReward;
   }
 

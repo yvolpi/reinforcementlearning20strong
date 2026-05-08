@@ -27,9 +27,9 @@ public class FleeAfterEngagementEffect implements EnnemyEffect {
     if (countHits >= 4) {
       // les dés assignés à cet ennemi sont épuisés
       gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-      System.out.println("FleeAfterEngagementEffect : l'ennemi " + ennemi.getName() + " fuit car " + countHits + " dés engagés ont touché");
-      System.out.println(gameState.getExhaustedDice());
-      System.out.println(gameState.getEngagedDices());
+      //System.out.println("FleeAfterEngagementEffect : l'ennemi " + ennemi.getName() + " fuit car " + countHits + " dés engagés ont touché");
+      //System.out.println(gameState.getExhaustedDice());
+      //System.out.println(gameState.getEngagedDices());
       ennemi.getAssignedDice().forEach(dice -> {
         if (gameState.getExhaustedDice().contains(dice)) {
           throw new IllegalStateException("Le dé " + dice + " est déjà épuisé, ne peut pas être épuisé à nouveau");

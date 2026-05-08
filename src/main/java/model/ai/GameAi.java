@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import model.Dice;
 import model.GameState;
@@ -28,7 +29,6 @@ public class GameAi {
 
   private List<GameAction> lastActions;
   private List<List<GameAction>> actionsInTurn;
-  private List<List<String>> encodedActionsInTurn;
   private Map<String, String> mapEncodedStatesAndActionsThisTurn;
 
   // ===== Constructeurs =====
@@ -45,7 +45,6 @@ public class GameAi {
     this.factory  = new ActionFactory();
     this.lastActions = new ArrayList<>();
     this.actionsInTurn = new ArrayList<>();
-    this.encodedActionsInTurn = new ArrayList<>();
     mapEncodedStatesAndActionsThisTurn = new HashMap<>();
   }
 
@@ -67,7 +66,6 @@ public class GameAi {
     }
     lastActions = List.of(action);
     actionsInTurn.add(List.of(action));
-    encodedActionsInTurn.add(List.of(ActionKeyEncoder.encodeActivateAction(action)));
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateAction(action));
     return action;
   }
@@ -111,6 +109,7 @@ public class GameAi {
       } else {
         actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
       }
+
     } else {
       // Exploitation
       String bestLearnedAssignActions = learner.getBestLearnedActionsFromState(state);
@@ -123,6 +122,13 @@ public class GameAi {
         }
       } else {
         actions = ActionDecoder.decodeAssignActions(assignableDice, bestLearnedAssignActions, activeEnnemis);
+        //vérifier qu'on n'assigne pas 2 fois le même dé
+        Set<Dice> assignedDice = actions.stream()
+            .map(GameAction::getDice)
+            .collect(Collectors.toSet());
+        if (assignedDice.size() != actions.size()) {
+          throw new IllegalStateException("Doublon de dé détecté dans assignActions : " + actions);
+        }
       }
     }
 
@@ -149,15 +155,23 @@ public class GameAi {
 
   public List<GameAction> chooseActionsToUse(List<Item> usableItems, GameState gameState) {
     List<GameAction> actions;
+    String state = encoder.encodeGlobalState(gameState);
     if (learner.shouldExplore(random.nextDouble())) {
+      // exploration
       actions = selector.exploreUseActions(usableItems, gameState.getPhase());
     } else {
-      String state = encoder.encodeState(gameState);
-      List<GameAction> possible = factory.createPossibleUseActions(usableItems, gameState);
-      GameAction best = selector.findBestUseItemAction(possible, learner.getActionValues(state));
-      actions = best != null ? List.of(best) : new ArrayList<>();
+      String bestComboUseItems = learner.getBestLearnedActionsFromState(state);
+      if (bestComboUseItems == null) {
+        // exploration
+        actions = selector.exploreUseActions(usableItems, gameState.getPhase());
+      } else {
+        // décoder bestComboUseItems
+        actions = ActionDecoder.decodeUseActions(usableItems, bestComboUseItems, gameState.getPhase());
+      }
     }
     lastActions = actions;
+    String encodedActions = encoder.encodeUseItemsAction(actions, gameState.getPhase());
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
     return actions;
   }
 
@@ -187,8 +201,8 @@ public class GameAi {
 
   // ===== Apprentissage =====
 
-  public void learnFromExperience() {
-    learner.learnFromExperience();
+  public void learnFromExperience(int finalScore) {
+    learner.learnFromExperience(finalScore);
   }
 
   public void learnFromTurnExperience(int turnExp) {
@@ -197,6 +211,10 @@ public class GameAi {
 
   public void decayEpsilon() {
     learner.decayEpsilon();
+  }
+
+  public void updateBestGame() {
+    learner.updateBestExperience();
   }
 
   // ===== Encodage (délégation pour usage externe) =====
@@ -225,10 +243,13 @@ public class GameAi {
     return encoder.encodeStateForItemsManagement(gameState, reward);
   }
 
+  public void resetMapEncodedStatesAndActionsThisTurn() {
+    mapEncodedStatesAndActionsThisTurn = new HashMap<>();
+  }
+
   // ===== Getters =====
 
-  public List<Experience> getExperiences()                         { return learner.getExperiences(); }
   public QLearner getLearner() { return learner; }
-  public void resetActionsInTurn() { this.actionsInTurn = new ArrayList<>(); }
+
 
 }

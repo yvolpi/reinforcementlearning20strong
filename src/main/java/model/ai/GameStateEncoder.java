@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import model.DiceState;
 import model.GameState;
 import model.elements.GameAction;
+import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.items.Item;
 import recompenses.Reward;
@@ -203,5 +204,20 @@ public class GameStateEncoder {
     if (action == null) return "NONE";
     String item = action.getItem().getName();
     return "USE_ITEM:" + item;
+  }
+
+  public String encodeUseItemsAction(List<GameAction> actions, GamePhase phase) {
+    String prefix = phase.name() + ":";
+    String encoded = "";
+    if (actions.isEmpty()) {
+      encoded = "NONE";
+    } else {
+      encoded = actions.stream()
+          .filter(a -> a.getItem() != null)
+          .map(a -> a.getItem().getName())
+          .sorted()
+          .collect(Collectors.joining(";"));
+    }
+    return prefix + encoded;
   }
 }

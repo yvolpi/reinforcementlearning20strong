@@ -119,7 +119,7 @@ public class GameService {
     rollEngagedDice(gameState);
     new ArrayList<>(gameState.getActiveEnnemis()).forEach(ennemi ->
         {
-          System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
+          //System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
           ennemi.getEffects().forEach(effect -> effect.applyAfterEngagementAndRoll(gameState, ennemi));
           gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
         }
@@ -352,14 +352,9 @@ public class GameService {
   }
 
   public static void executeItemManager(GameState game, GameAi ai, Reward reward) {
-    String stateBefore = ai.encodeStateForItemsManagement(game, reward);
-
     GameAction actionChoisie = ai.chooseItemToRemove(game, reward);
     GameService.applyItemToRemove(game, actionChoisie);
 
-    String stateAfter = ai.encodeStateForItemsManagement(game, reward);
-    String actionKey = ActionKeyEncoder.encodeThrowItemAction(actionChoisie);
-    ai.getExperiences().add(new Experience(stateBefore, actionKey, 0.0, stateAfter));
   }
 
   public static void applyItemToRemove(GameState gameState, GameAction action) {

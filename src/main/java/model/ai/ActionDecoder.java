@@ -5,6 +5,7 @@ import model.Dice;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
+import model.items.Item;
 
 public class ActionDecoder {
 
@@ -44,6 +45,10 @@ public class ActionDecoder {
     List<GameAction> actions = new java.util.ArrayList<>();
     if (encodedActions == null || encodedActions.isEmpty()) return actions;
 
+    //crée une copie de la liste assignableDice modifiable
+    List<Dice> copyAssignableDice = new java.util.ArrayList<>(assignableDice); // copie modifiable
+
+
     // On enlève le préfixe "ASSIGNx:"
     String[] prefixSplit = encodedActions.split(":", 2);
     if (prefixSplit.length < 2 || prefixSplit[1].equals("NONE")) return actions;
@@ -68,9 +73,9 @@ public class ActionDecoder {
         continue;
       }
 
-      // Trouve le dé correspondant dans assignableDice
+      // Trouve le dé correspondant dans copyAssignableDice
       Dice foundDice = null;
-      for (Dice d : assignableDice) {
+      for (Dice d : copyAssignableDice) {
         if (d.getColor().name().equals(color) && d.getLastRoll() == value) {
           foundDice = d;
           break;
@@ -89,10 +94,42 @@ public class ActionDecoder {
       if (foundTarget == null) continue;
 
       actions.add(new GameAction(GamePhase.ASSIGN_DICE, foundDice, foundTarget));
+      // ne pas oublier d'enlever le dé à copyAssignableDice car un dé ne peut être être assigné qu'une fois
+      copyAssignableDice.remove(foundDice);
     }
     return actions;
   }
 
+  public static List<GameAction> decodeUseActions(List<Item> usableItems, String encodedActions, GamePhase phase) {
+    List<GameAction> actions = new java.util.ArrayList<>();
+    if (encodedActions == null || encodedActions.isEmpty()) return actions;
+
+    // On enlève le préfixe "USE_ITEM:" ou "PHASE:"
+    String[] prefixSplit = encodedActions.split(":", 2);
+    if (prefixSplit.length < 2 || prefixSplit[1].equals("NONE")) return actions;
+
+    List<Item> copyUsableItems = new java.util.ArrayList<>(usableItems); // copie modifiable
+
+    String itemsPart = prefixSplit[1]; // ex: Potion de soin;Elixir de force
+    String[] itemNames = itemsPart.split(";");
+
+    for (String itemName : itemNames) {
+      if (itemName.isEmpty()) continue;
+      // Trouve l'item correspondant dans copyUsableItems
+      Item foundItem = null;
+      for (Item i : copyUsableItems) {
+        if (i.getName().equals(itemName)) {
+          foundItem = i;
+          break;
+        }
+      }
+      if (foundItem != null) {
+        actions.add(new GameAction(phase, foundItem));
+        copyUsableItems.remove(foundItem); // éviter d'utiliser le même item plusieurs fois
+      }
+    }
+    return actions;
+  }
 
 
 }

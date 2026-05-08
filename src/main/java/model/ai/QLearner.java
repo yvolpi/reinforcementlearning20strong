@@ -10,19 +10,19 @@ import java.util.Map;
  */
 public class QLearner {
 
-  private static final double DEFAULT_LEARNING_RATE  = 0.1;
-  private static final double DEFAULT_DISCOUNT_FACTOR = 0.95;
-  private static final double DEFAULT_EPSILON         = 1.0;
-  private static final double EPSILON_DECAY           = 29.0 / 30.0;
+  public static final double DEFAULT_LEARNING_RATE  = 1.0;
+  public static final double DEFAULT_DISCOUNT_FACTOR = 0.95;
+  public static final double DEFAULT_EPSILON         = 1.0;
+  public static final double EPSILON_DECAY           = 199.0 / 200.0;
 
   private final Map<String, Map<String, Double>> qTable;
-
-  private final Map<String, Map<String, Double>> qTableForTurns;
   private final double learningRate;
   private final double discountFactor;
   private double epsilon;
 
-  private final List<Experience> experiences;
+  private final List<List<Experience>> experiencesInBestGame;
+
+  private final List<List<Experience>> experiences;
 
   public QLearner() {
     this(DEFAULT_LEARNING_RATE, DEFAULT_DISCOUNT_FACTOR, DEFAULT_EPSILON);
@@ -30,11 +30,11 @@ public class QLearner {
 
   public QLearner(double learningRate, double discountFactor, double epsilon) {
     this.qTable = new HashMap<>();
-    this.qTableForTurns = new HashMap<>();
     this.learningRate = learningRate;
     this.discountFactor = discountFactor;
     this.epsilon = epsilon;
     this.experiences = new ArrayList<>();
+    experiencesInBestGame = new ArrayList<>();
   }
 
   public boolean shouldExplore(double randomValue) {
@@ -48,23 +48,28 @@ public class QLearner {
   /**
    * Applique l'algorithme de Q-learning sur les expériences accumulées (ordre inverse).
    */
-  public void learnFromExperience() {
-    double futureMaxQ = 0.0;
+  public void learnFromExperience(int finalScore) {
+    double endGameFactor = 1.0;
+     final double trueLearningRate =
+         finalScore < 0 ? learningRate * 0.001 : learningRate; // pénaliser les mauvaises parties
+    for (int i= experiences.size() - 1; i >= 0; i--) {
+      endGameFactor *= discountFactor; // pour donner plus de poids aux expériences récentes
+      List<Experience> experiencesAtTurn = experiences.get(i);
 
-    for (int i = experiences.size() - 1; i >= 0; i--) {
-      Experience exp = experiences.get(i);
-      Map<String, Double> stateActions = qTable.computeIfAbsent(exp.state(), k -> new HashMap<>());
-      double oldQ = stateActions.getOrDefault(exp.action(), 0.0);
-      double newQ = oldQ + learningRate * (exp.reward() + discountFactor * futureMaxQ - oldQ);
-      stateActions.put(exp.action(), newQ);
-      futureMaxQ = stateActions.values().stream().max(Double::compareTo).orElse(0.0);
+      final double endGameFactorForLambda = endGameFactor; // variable finale pour la lambda
+
+      experiencesAtTurn.forEach(exp -> {
+        Map<String, Double> stateActions = qTable.computeIfAbsent(exp.state(), k -> new HashMap<>());
+        double oldQ = stateActions.getOrDefault(exp.action(), 0.0);
+        double newQ = oldQ + trueLearningRate * (exp.reward() + endGameFactorForLambda * finalScore - oldQ);
+        stateActions.put(exp.action(), newQ);
+      });
     }
-
     experiences.clear();
   }
 
   public String getBestLearnedActionsFromState(String encodedState) {
-    Map<String, Double> learnedActions = qTableForTurns.getOrDefault(encodedState, new HashMap<>());
+    Map<String, Double> learnedActions = qTable.getOrDefault(encodedState, new HashMap<>());
 
     return learnedActions.entrySet().stream()
         .max(Map.Entry.comparingByValue())
@@ -79,25 +84,29 @@ public class QLearner {
   public void learnFromLocalExperience(int turnExp, Map<String, String> statesAndActionsForThisTurn) {
     // turnExp = récompense du tour
     // statesAndActionsForThisTurn : clé = état du jeu, value = action ou combo d'actions prises
-    for (Map.Entry<String, String> entry : statesAndActionsForThisTurn.entrySet()) {
-      String state = entry.getKey();
-      String action = entry.getValue();
+    List<Experience> experiencesThisTurn = new ArrayList<>();
 
-      Map<String, Double> stateActions = qTableForTurns.computeIfAbsent(state, k -> new HashMap<>());
-      double oldQ = stateActions.getOrDefault(action, 0.0);
-      double newQ = oldQ + learningRate * (turnExp - oldQ); // Pas de future reward pour une expérience locale
-      stateActions.put(action, newQ);
+    for (Map.Entry<String, String> entry : statesAndActionsForThisTurn.entrySet()) {
+      experiencesThisTurn.add(new Experience(entry.getKey(), entry.getValue(), turnExp));
     }
+
+    experiences.add(experiencesThisTurn);
   }
 
   public void decayEpsilon() {
     epsilon *= EPSILON_DECAY;
   }
 
+  public void updateBestExperience() {
+    experiencesInBestGame.clear();
+    experiencesInBestGame.addAll(experiences);
+  }
+
   // ===== Getters =====
 
   public Map<String, Map<String, Double>> getQTable()      { return qTable; }
-  public List<Experience> getExperiences()                 { return experiences; }
   public double getEpsilon()                               { return epsilon; }
+  public List<List<Experience>> getExperiences()           { return experiences; }
+  public List<List<Experience>> getExperiencesInBestGame() { return experiencesInBestGame; }
 }
 

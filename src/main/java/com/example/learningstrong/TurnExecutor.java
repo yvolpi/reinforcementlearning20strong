@@ -18,6 +18,7 @@ public class TurnExecutor {
   public void executeTurn(GameState game) {
     // Reset usable items
     game.getPlayer().resetUsableItems();
+    game.setWastedDiceThisTurn(0);
 
     // Phase 1 : Activation
     game.setPhase(GamePhase.ACTIVATE_PILE);
@@ -38,19 +39,19 @@ public class TurnExecutor {
         break;
       }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-      System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
+      //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
       game.setPhase(GamePhase.USE_ITEM_BEFORE_ENGAGE);
       phaseExecutor.executeUsagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-      System.out.println("--- Étape " + (step + 1) + " de la stratégie --- engage dice");
+      //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- engage dice");
       game.setPhase(GamePhase.ENGAGE_DICE);
       phaseExecutor.executeEngagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-      System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
+      //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
       game.setPhase(GamePhase.USE_ITEM_BEFORE_ASSIGN);
       phaseExecutor.executeUsagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-      System.out.println("--- Étape " + (step + 1) + " de la stratégie --- assign dice");
+      //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- assign dice");
 
       game.setPhase(GamePhase.ASSIGN_DICE);
       phaseExecutor.executeAssignPhase(game);
