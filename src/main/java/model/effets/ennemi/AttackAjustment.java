@@ -1,7 +1,8 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class AttackAjustment implements EnnemyEffect {
   private int attackAjustment;
@@ -20,7 +21,7 @@ public class AttackAjustment implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
 
   }
 }

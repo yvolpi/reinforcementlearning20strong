@@ -19,6 +19,7 @@ public class TurnExecutor {
     // Reset usable items
     game.getPlayer().resetUsableItems();
     game.setWastedDiceThisTurn(0);
+    game.setPenalityKillCivilAsserviFirst(false);
     game.setEngageAssignStep(1);
 
     // Phase 1 : Activation
@@ -33,7 +34,9 @@ public class TurnExecutor {
       phaseExecutor.executeActivatePhase(game);
     }
 
-    GameService.activeEffectsBeforeEngagement(game);
+    game.resetNdEnnemisKilled();
+
+    GameService.activeEffectsBeforeAllEngagement(game);
 
     // Phase 2-3 : Boucle engagement/assignation
     int strategy = game.getPlayer().getStrategy();
@@ -48,6 +51,8 @@ public class TurnExecutor {
       phaseExecutor.executeUsagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- engage dice");
+      game.setMaxEngagedDicePerTurn(game.getDicePool().size());
+      GameService.activeEffectsBeforeEngagement(game);
       game.setPhase(GamePhase.ENGAGE_DICE);
       phaseExecutor.executeEngagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
@@ -64,6 +69,8 @@ public class TurnExecutor {
 
     // Phases finales
     GameService.sufferDamagePhase(game);
+
+
     GameService.exhaustionPhase(game);
     GameService.recoverDicePhase(game, ai);
     GameService.applyPendingRewards(game, ai);

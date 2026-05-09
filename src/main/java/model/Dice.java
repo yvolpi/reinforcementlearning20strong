@@ -2,6 +2,7 @@ package model;
 
 import java.util.Arrays;
 import java.util.Random;
+import model.random.CustomRandom;
 
 public class Dice {
   private int[] faces; // 6 faces, valeurs possibles : 0, 1, 2
@@ -31,7 +32,7 @@ public class Dice {
     return lastRoll;
   }
 
-  public void roll(Random random) {
+  public void roll(CustomRandom random) {
     int index = random.nextInt(6);
     lastRoll = faces[index];
   }

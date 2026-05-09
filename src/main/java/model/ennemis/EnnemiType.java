@@ -1,23 +1,26 @@
 package model.ennemis;
 
-import static model.effets.EnnemyEffectType.SUBSEQUENT;
+import static model.effets.ennemi.EnnemyEffectType.SUBSEQUENT;
 
 import java.util.List;
-import model.effets.AttackAjustment;
-import model.effets.BlockAssignIfFailEffect;
-import model.effets.EnnemyEffect;
-import model.effets.FleeAfterEngagementEffect;
-import model.effets.ForbidGreenDiceEffect;
-import model.effets.KeepDiceInExhaustEffect;
-import model.effets.LimitedDamageEffect;
-import model.effets.RevealBossEffect;
-import model.effets.SkipRecoverPhaseEffect;
-import recompenses.CompteurEtoilesRewerd;
-import recompenses.EncreToxiqueReward;
-import recompenses.IncreaseRecoveryReward;
-import recompenses.RecoverLifeReward;
-import recompenses.Reward;
-import recompenses.SushiSpatialReward;
+import model.effets.ennemi.AttackAjustment;
+import model.effets.ennemi.BanishDiceIfKilledEffect;
+import model.effets.ennemi.BlockAssignIfFailEffect;
+import model.effets.ennemi.EnnemyEffect;
+import model.effets.ennemi.FleeAfterEngagementEffect;
+import model.effets.ennemi.ForbidGreenDiceEffect;
+import model.effets.ennemi.KeepDiceInExhaustEffect;
+import model.effets.ennemi.LimitedDamageEffect;
+import model.effets.ennemi.MaxEngagedDicePerTurnEffect;
+import model.effets.ennemi.RevealBossEffect;
+import model.effets.ennemi.SkipRecoverPhaseEffect;
+import model.recompenses.CompteurEtoilesRewerd;
+import model.recompenses.EncreToxiqueReward;
+import model.recompenses.EnsanglanteuseReward;
+import model.recompenses.IncreaseRecoveryReward;
+import model.recompenses.RecoverLifeReward;
+import model.recompenses.Reward;
+import model.recompenses.SushiSpatialReward;
 
 public enum EnnemiType {
   // classe 3 = boss
@@ -40,6 +43,17 @@ public enum EnnemiType {
   CALAMARAIGNEE(2,7,4, List.of(new RevealBossEffect()), 0, false,
       new EncreToxiqueReward()),
 
+  //camouflard: 1,2, c1, non obligatoire, effet : subséquent : si cet ennemi est vaincu, banissez tous les dés qui lui ont été assignés
+  CAMOUFLARD(1,2,1, List.of(new BanishDiceIfKilledEffect()), 0, false,
+      new IncreaseRecoveryReward(1)
+      ),
+
+  //civil asservi : 1,3, c1, +1 activation, obligatoire, effets : maximum : 3 dés lors du tour. Spécial: si cet ennemi est le 1er vaincu, il retourne sur l'une des piles
+  //  récompense : ensanglanteuse : les touches du dé rouge font +2 dégats. La touche critique du rouge fait +1 dégat.
+  CIVIL_ASSERVI(1,1,3, List.of(new MaxEngagedDicePerTurnEffect(3)), 1, true,
+      new EnsanglanteuseReward()),
+
+
   SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceEffect()), 0, false,
       new IncreaseRecoveryReward(1)),
 
@@ -55,16 +69,12 @@ public enum EnnemiType {
   /*
   Autres ennemis : les 3 autres boss
 
-  bête alpha: 12,2, c3, +2 activations, obligatoire, effet : lors de l'étape assigner, les touches sont assignables s'il n'y a pas d'échec. A la fin du tour, les dés assignés à ce boss ne sont pas épuisés.
   mère des spores : 9,0, c3, +1 activation, obligatoire, effet : Après le lancer de dé, vous perdez 1 pv par échec. A chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
   seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
 
 
 
   plus les autres ennemis non boss :
-
-  camouflard: 1,2, c1, non obligatoire, effet : subséquent : si cet ennemi est vaincu, banissez tous les dés qui lui ont été assignés
-  récompense : 1 point de récupération
 
   civil asservi : 1,3, c1, +1 activation, obligatoire, effets : maximum : 3 dés lors du tour. Spécial: si cet ennemi est le 1er vaincu, il retourne sur l'une des piles
   récompense : ensanglanteuse : les touches du dé rouge font +2 dégats. La touche critique du rouge fait +1 dégat.

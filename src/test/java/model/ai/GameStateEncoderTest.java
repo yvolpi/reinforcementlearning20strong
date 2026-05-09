@@ -46,7 +46,7 @@ class GameStateEncoderTest {
 
   @Test
   void encodeActivateAction_nullAction_returnsNONE() {
-    assertThat(encoder.encodeActivateAction(null)).isEqualTo("NONE");
+    assertThat(ActionKeyEncoder.encodeActivateAction(null)).isEqualTo("NONE");
   }
 
   @Test
@@ -54,7 +54,7 @@ class GameStateEncoderTest {
     Ennemi ennemi = new Ennemi(EnnemiType.ARACHNOPOULPE, 2);
     GameAction action = new GameAction(GamePhase.ACTIVATE_PILE, ennemi);
 
-    assertThat(encoder.encodeActivateAction(action)).isEqualTo("ACTIVATE:PILE_2");
+    assertThat(ActionKeyEncoder.encodeActivateAction(action)).isEqualTo("ACTIVATE:PILE_2");
   }
 
   @Test

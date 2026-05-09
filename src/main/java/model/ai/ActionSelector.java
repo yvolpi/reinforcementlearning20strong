@@ -13,16 +13,17 @@ import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.items.Item;
+import model.random.CustomRandom;
 
 /**
  * Responsable de la sélection d'actions : exploration aléatoire et exploitation de la Q-table.
  */
 public class ActionSelector {
 
-  private final Random random;
+  private final CustomRandom random;
   private final GameStateEncoder encoder;
 
-  public ActionSelector(Random random, GameStateEncoder encoder) {
+  public ActionSelector(CustomRandom random, GameStateEncoder encoder) {
     this.random = random;
     this.encoder = encoder;
   }
@@ -43,7 +44,7 @@ public class ActionSelector {
 
     List<GameAction> actions = new ArrayList<>();
     List<Dice> shuffled = new ArrayList<>(availableDice);
-    Collections.shuffle(shuffled, random);
+    random.shuffle(shuffled);
     int nbDiceToEngage =  random.nextInt(availableDice.size() + 1); // 0 à tous les dés
 
     for (int i = 0; i < nbDiceToEngage; i++) {

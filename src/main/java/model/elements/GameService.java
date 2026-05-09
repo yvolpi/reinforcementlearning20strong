@@ -11,18 +11,15 @@ import model.Dice;
 import model.DiceState;
 import model.GameState;
 import model.Player;
-import model.ai.ActionKeyEncoder;
-import model.ai.Experience;
 import model.ai.GameAi;
-import model.effets.EnnemyEffect;
-import model.effets.EnnemyEffectType;
-import model.effets.KeepDiceInExhaustEffect;
-import model.effets.SkipRecoverPhaseEffect;
+import model.effets.ennemi.EnnemyEffect;
+import model.effets.ennemi.EnnemyEffectType;
+import model.effets.ennemi.KeepDiceInExhaustEffect;
+import model.effets.ennemi.SkipRecoverPhaseEffect;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
-import model.items.Item;
-import recompenses.Reward;
-import recompenses.RewardType;
+import model.recompenses.Reward;
+import model.recompenses.RewardType;
 
 /**
  * Service gérant les différentes phases du jeu 20 Strong.
@@ -75,7 +72,7 @@ public class GameService {
 
     // mélanger puis en tirer en fonction du nb d'activations supplémentaire du boss
     List<EnnemiType> shuffled = new ArrayList<>(allPossibleEnnemis);
-    Collections.shuffle(shuffled, gameState.getRandom());
+    gameState.getRandom().shuffle(shuffled);
 
     // Sélectionne les nbToActivate premiers
     for (int i = 0; i < nbToActivate && i < shuffled.size(); i++) {
@@ -201,7 +198,8 @@ public class GameService {
   }
 
   private static void checkAndApplyDefeat(GameState gameState, Ennemi ennemi) {
-    if (ennemi.isDefeated() && !ennemi.isDefeatedFlag()) {
+    ennemi.computeCurrentLife(gameState);
+    if (ennemi.isDefeated(gameState) && !ennemi.isDefeatedFlag()) {
       ennemi.setDefeated(true);
       if(gameState.getNbEnnemisKilled() > 0 && Objects.equals(ennemi.getName(),
           EnnemiType.ARACHNOPOULPE.name())) {
@@ -213,6 +211,34 @@ public class GameService {
             toRemove--;
           }
           if (toRemove == 0) break;
+        }
+      }
+      if(gameState.getNbEnnemisKilled() == 0 && Objects.equals(ennemi.getName(),
+          EnnemiType.CIVIL_ASSERVI.name())) {
+        // Si le civil asservi est le premier ennemi vaincu, il retourne sur la première pile non vide
+        // Pénalité
+        gameState.setPenalityKillCivilAsserviFirst(true);
+
+        //les dés assignés à cet ennemi sont épuisés
+        ennemi.getAssignedDice().forEach(dice -> {
+          dice.setState(DiceState.EPUISE);
+          gameState.getExhaustedDice().add(dice);
+          gameState.getEngagedDices().remove(dice);
+        });
+
+
+        if (!gameState.getPile1().isEmpty()) {
+          gameState.getPile1().addFirst(ennemi);
+          ennemi.setPileNumber(1);
+
+        } else if (!gameState.getPile2().isEmpty()) {
+          gameState.getPile2().addFirst(ennemi);
+          ennemi.setPileNumber(2);
+        } else if (!gameState.getPile3().isEmpty()) {
+          gameState.getPile3().add(ennemi);
+          ennemi.setPileNumber(3);
+        } else {
+          gameState.getActiveEnnemis().remove(ennemi);
         }
       }
       if (ennemi.getClassValue() == 3) {
@@ -241,6 +267,16 @@ public class GameService {
     gameState.getPlayer().loseLife(totalDamage);
 
     System.out.println("Le joueur subit " + totalDamage + " dégâts.");
+  }
+
+  public static void applyEnnemisSubsequentEffects(GameState gameState) {
+    for (Ennemi ennemi : gameState.getActiveEnnemis()) {
+      for (EnnemyEffect effect : ennemi.getEffects()) {
+        if (effect.getType() == EnnemyEffectType.SUBSEQUENT) {
+          effect.apply(gameState.getPlayer(), gameState, ennemi);
+        }
+      }
+    }
   }
 
   private static int calculateTotalDamage(GameState gameState) {
@@ -382,9 +418,10 @@ public class GameService {
     Player currentPlayer = current.getPlayer();
     int deltaLife = currentPlayer.getLife() - previous.getPlayer().getLife();
     int gainDes = currentPlayer.getRecovery() - current.getWastedDiceThisTurn();
+    int penalityForKillCivilAsserviFirst = current.isPenalityKillCivilAsserviFirst()? -50 : 0;
 
     // Pondération : perte de PV très pénalisante
-    return 10 * deltaLife + gainDes + currentPlayer.getStrategy();
+    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + currentPlayer.getStrategy();
   }
 
   // ===== Utilitaires =====
@@ -432,9 +469,25 @@ public class GameService {
     game.getActiveEnnemis().removeIf(ennemi -> ennemi.isDefeatedFlag() && ennemi.getClassValue() != 3);
   }
 
+  public static void activeEffectsBeforeAllEngagement(GameState game) {
+    for (int i=0; i<game.getActiveEnnemis().size(); i++) {
+      Ennemi ennemi = game.getActiveEnnemis().get(i);
+      if (!ennemi.isDefeatedFlag()) {
+        for (EnnemyEffect effect : ennemi.getEffects()) {
+          effect.applyBeforeAllEngagement(game);
+        }
+      }
+    }
+  }
+
   public static void activeEffectsBeforeEngagement(GameState game) {
-    game.getActiveEnnemis().forEach(ennemi -> {
-      ennemi.getEffects().forEach(EnnemyEffect::applyBeforeEngagement);
-    });
+    for (int i=0; i<game.getActiveEnnemis().size(); i++) {
+      Ennemi ennemi = game.getActiveEnnemis().get(i);
+      if (!ennemi.isDefeatedFlag()) {
+        for (EnnemyEffect effect : ennemi.getEffects()) {
+          effect.applyBeforeEngagement(game);
+        }
+      }
+    }
   }
 }

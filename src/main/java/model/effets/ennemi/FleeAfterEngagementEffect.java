@@ -1,4 +1,4 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.DiceState;
 import model.GameState;
@@ -13,7 +13,7 @@ public class FleeAfterEngagementEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
 
   }
 

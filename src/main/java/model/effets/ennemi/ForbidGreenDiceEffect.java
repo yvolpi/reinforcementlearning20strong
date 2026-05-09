@@ -1,9 +1,10 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class ForbidGreenDiceEffect implements EnnemyEffect {
   @Override
@@ -12,7 +13,7 @@ public class ForbidGreenDiceEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
     // Pas d'effet direct, la contrainte s'applique lors de l'engagement des dés
   }
 

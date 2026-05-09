@@ -1,8 +1,9 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.Dice;
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class LimitedDamageEffect implements EnnemyEffect {
 
@@ -20,7 +21,7 @@ public class LimitedDamageEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
   }
 
   @Override
@@ -40,7 +41,7 @@ public class LimitedDamageEffect implements EnnemyEffect {
   }
 
   @Override
-  public void applyBeforeEngagement() {
+  public void applyBeforeAllEngagement(GameState gameState) {
     degatsRecusCeTour = 0; // Réinitialise les dégâts reçus au début de chaque tour
   }
 

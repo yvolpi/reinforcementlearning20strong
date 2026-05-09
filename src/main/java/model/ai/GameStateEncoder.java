@@ -1,16 +1,13 @@
 package model.ai;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import model.DiceState;
 import model.GameState;
 import model.elements.GameAction;
-import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.items.Item;
-import recompenses.Reward;
+import model.recompenses.Reward;
 
 /**
  * Responsable de l'encodage de l'état du jeu et des actions en clés de la Q-table.

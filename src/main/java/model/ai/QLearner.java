@@ -13,7 +13,7 @@ public class QLearner {
   public static final double DEFAULT_LEARNING_RATE  = 1.0;
   public static final double DEFAULT_DISCOUNT_FACTOR = 0.95;
   public static final double DEFAULT_EPSILON         = 1.0;
-  public static final double EPSILON_DECAY           = 199.0 / 200.0;
+  public static final double EPSILON_DECAY           = 499.0 / 500.0;
 
   private final Map<String, Map<String, Double>> qTable;
   private final double learningRate;
@@ -51,7 +51,7 @@ public class QLearner {
   public void learnFromExperience(int finalScore) {
     double endGameFactor = 1.0;
      final double trueLearningRate =
-         finalScore < 0 ? learningRate * 0.001 : learningRate; // pénaliser les mauvaises parties
+         finalScore < 0 ? learningRate * 0.01 : learningRate; // pénaliser les mauvaises parties
     for (int i= experiences.size() - 1; i >= 0; i--) {
       endGameFactor *= discountFactor; // pour donner plus de poids aux expériences récentes
       List<Experience> experiencesAtTurn = experiences.get(i);

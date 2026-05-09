@@ -1,7 +1,8 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class SkipRecoverPhaseEffect implements EnnemyEffect {
   private final EnnemyEffectType type;
@@ -22,7 +23,7 @@ public class SkipRecoverPhaseEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
     // L'effet est géré dans GameService.recoverDicePhase
   }
 }

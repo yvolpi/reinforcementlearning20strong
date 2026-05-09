@@ -34,7 +34,6 @@ public class PhaseExecutor {
   public void executeActivatePhase(GameState game) {
     if (game.isVictory()) return;
     game.setPhase(GamePhase.ACTIVATE_PILE);
-    game.resetNdEnnemisKilled();
     game.setNbEnnemisToActivate(1);
 
     while (game.getNbEnnemisToAvtivate() > 0 && game.atLeastOneEnnemiOnPiles()) {

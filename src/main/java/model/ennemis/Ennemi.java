@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Dice;
-import model.effets.EnnemyEffect;
-import recompenses.Reward;
+import model.GameState;
+import model.effets.bonus.BonusEffect;
+import model.effets.ennemi.EnnemyEffect;
+import model.recompenses.Reward;
 
 /**
  * Représente un ennemi dans le jeu 20 Strong.
@@ -24,6 +26,7 @@ public class Ennemi {
 
   private int pileNumber;
   private boolean defeated;
+  private int currentLife;
 
   // ===== Constructeur =====
 
@@ -31,6 +34,7 @@ public class Ennemi {
     this.classValue = type.classValue;
     this.name = type.name;
     this.life = type.life;
+    currentLife = type.life;
     this.attack = type.attack;
     this.effects = type.effets;
     this.forcedActivations = type.forcedActivations;
@@ -47,11 +51,9 @@ public class Ennemi {
   /**
    * Calcule si l'ennemi est vaincu en fonction des dégâts assignés.
    */
-  public boolean isDefeated() {
-    int totalDamage = assignedDice.stream()
-        .mapToInt(Dice::getLastRoll)
-        .sum();
-    return totalDamage >= life;
+
+  public boolean isDefeated(GameState gameState) {
+    return currentLife <= 0;
   }
 
   public void assignDice(Dice dice) {
@@ -126,9 +128,23 @@ public class Ennemi {
   }
 
   public int getCurrentLife() {
+    return currentLife;
+  }
+
+  public void setCurrentLife(int currentLife) {
+    this.currentLife = currentLife;
+  }
+
+  public void computeCurrentLife(GameState gameState) {
     int totalDamage = assignedDice.stream()
         .mapToInt(Dice::getLastRoll)
         .sum();
-    return Math.max(0, life - totalDamage);
+
+    int bonusDamage = 0;
+    for (BonusEffect bonusEffect : gameState.getBonusEffectsTurn()) {
+      bonusDamage += bonusEffect.getBonusDamage(gameState, this);
+    }
+
+    currentLife = Math.max(0, life - (totalDamage + bonusDamage));
   }
 }

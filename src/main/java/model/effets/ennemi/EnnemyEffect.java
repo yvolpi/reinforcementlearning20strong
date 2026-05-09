@@ -1,4 +1,4 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.Dice;
 import model.GameState;
@@ -7,7 +7,10 @@ import model.ennemis.Ennemi;
 
 public interface EnnemyEffect {
   EnnemyEffectType getType();
-  void apply(Player player, GameState gameState);
+  default void apply(Player player, GameState gameState, Ennemi ennemi) {
+    // Par défaut, les effets n'ont pas d'impact immédiat sur le joueur ou l'état du jeu
+  }
+
   default boolean canEngage(Dice dice) {
     return true; // Par défaut, tous les dés peuvent être engagés
   }
@@ -28,7 +31,11 @@ public interface EnnemyEffect {
     return true; // Par défaut, tous les dés peuvent être assignés
   }
 
-  default void applyBeforeEngagement() {
+  default void applyBeforeEngagement(GameState gameState) {
+    // Par défaut, les ennemis ne font rien de spécial avant l'engagement
+  }
+
+  default void applyBeforeAllEngagement(GameState gameState) {
     // Par défaut, les ennemis ne font rien de spécial avant l'engagement
   }
 

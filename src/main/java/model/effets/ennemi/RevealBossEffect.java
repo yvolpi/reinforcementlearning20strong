@@ -1,7 +1,8 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class RevealBossEffect implements EnnemyEffect {
 
@@ -11,7 +12,7 @@ public class RevealBossEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
     if (gameState.isRevealedBoss() && gameState.getBossPile().size() > 1) {
       // Enlever le premier boss de la pile
       gameState.getBossPile().remove();

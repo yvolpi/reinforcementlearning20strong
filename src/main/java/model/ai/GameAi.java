@@ -15,7 +15,8 @@ import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.items.Item;
-import recompenses.Reward;
+import model.random.CustomRandom;
+import model.recompenses.Reward;
 
 /**
  * Façade de l'IA : orchestre l'encodage, la sélection d'actions et l'apprentissage Q-learning.
@@ -26,7 +27,7 @@ public class GameAi {
   private final GameStateEncoder encoder;
   private final ActionSelector selector;
   private final ActionFactory factory;
-  private final Random random;
+  private final CustomRandom random;
 
   private List<GameAction> lastActions;
   private List<List<GameAction>> actionsInTurn;
@@ -34,14 +35,14 @@ public class GameAi {
 
   // ===== Constructeurs =====
 
-  public GameAi(Long seed) {
-    this(new QLearner(), seed);
+  public GameAi(CustomRandom random) {
+    this(new QLearner(), random);
   }
 
-  private GameAi(QLearner learner, Long seed) {
+  private GameAi(QLearner learner, CustomRandom random) {
     this.learner  = learner;
     this.encoder  = new GameStateEncoder();
-    this.random   = new Random(seed);
+    this.random   = random;
     this.selector = new ActionSelector(random, encoder);
     this.factory  = new ActionFactory();
     this.lastActions = new ArrayList<>();
@@ -55,11 +56,11 @@ public class GameAi {
     String encodedState = encoder.encodeStateWithBoss(gameState);
     GameAction action;
     if (learner.shouldExplore(random.nextDouble())) {
-      action = new GameAction(random.nextBoolean());
+      action = new GameAction(random.nextDouble() < 0.5);
     } else {
       List<GameAction> possible = List.of(new GameAction(true), new GameAction(false));
       action = selector.findBestDecideActivateBossAction(possible, learner.getActionValues(encodedState));
-      if (action == null) action = new GameAction(random.nextBoolean());
+      if (action == null) action = new GameAction(random.nextDouble() < 0.5);
     }
 
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateBossAction(action));

@@ -1,8 +1,9 @@
-package model.effets;
+package model.effets.ennemi;
 
 import model.Dice;
 import model.GameState;
 import model.Player;
+import model.ennemis.Ennemi;
 
 public class BlockAssignIfFailEffect implements EnnemyEffect {
 
@@ -12,7 +13,7 @@ public class BlockAssignIfFailEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState) {
+  public void apply(Player player, GameState gameState, Ennemi ennemi) {
 
   }
 

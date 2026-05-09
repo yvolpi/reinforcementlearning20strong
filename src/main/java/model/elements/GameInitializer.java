@@ -3,6 +3,7 @@ package model.elements;
 import static model.ennemis.EnnemiType.*;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -14,6 +15,7 @@ import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
+import model.random.CustomRandom;
 
 /**
  * Fabrique pour créer l'état initial du jeu.
@@ -30,7 +32,10 @@ public class GameInitializer {
       ACOLYTE_ESSAIM,
       APOTRE_ESSAIM,
       ARACHNOPOULPE,
-      ASSERVI
+      ASSERVI,
+      CALAMARAIGNEE,
+      CAMOUFLARD,
+      CIVIL_ASSERVI
   );
 
   public static final List<EnnemiType> bossList = List.of(
@@ -44,14 +49,12 @@ public class GameInitializer {
 
   /**
    * Crée un nouvel état de jeu avec la configuration initiale.
-   * @param seed graine pour le générateur pseudo-aléatoire
    */
-  public static GameState createInitialGameState(Long seed) {
+  public static GameState createInitialGameState(CustomRandom customRandom) {
     Player player = createPlayer();
     List<Dice> dicePool = createDicePool();
-    Random random = new Random(seed);
-    List<Queue<Ennemi>> piles = createEnemyPiles(random);
-    Queue<Ennemi> bossPile = createBossPile(random);
+    List<Deque<Ennemi>> piles = createEnemyPiles(customRandom);
+    Queue<Ennemi> bossPile = createBossPile(customRandom);
     return new GameState(
         player,
         dicePool,
@@ -59,7 +62,7 @@ public class GameInitializer {
         piles.get(1),
         piles.get(2),
         bossPile,
-        seed
+        customRandom
     );
   }
 
@@ -90,14 +93,14 @@ public class GameInitializer {
     return dicePool;
   }
 
-  private static List<Queue<Ennemi>> createEnemyPiles(Random random) {
-    Queue<Ennemi> pile1 = new LinkedList<>();
-    Queue<Ennemi> pile2 = new LinkedList<>();
-    Queue<Ennemi> pile3 = new LinkedList<>();
+  private static List<Deque<Ennemi>> createEnemyPiles(CustomRandom random) {
+    Deque<Ennemi> pile1 = new LinkedList<>();
+    Deque<Ennemi> pile2 = new LinkedList<>();
+    Deque<Ennemi> pile3 = new LinkedList<>();
 
     // Mélanger les ennemis et les répartir dans les piles
     List<EnnemiType> shuffledEnnemis = new ArrayList<>(ennemis);
-    java.util.Collections.shuffle(shuffledEnnemis, random);
+    random.shuffle(shuffledEnnemis);
     // Chaque pile doit avoir le même nombre d'ennemis, à 1 près
     int total = shuffledEnnemis.size();
     int pileSize = total / 3;
@@ -117,9 +120,9 @@ public class GameInitializer {
     return List.of(pile1, pile2, pile3);
   }
 
-  private static Queue<Ennemi> createBossPile(Random random) {
+  private static Queue<Ennemi> createBossPile(CustomRandom random) {
     List<EnnemiType> shuffledBosses = new ArrayList<>(bossList);
-    java.util.Collections.shuffle(shuffledBosses, random);
+    random.shuffle(shuffledBosses);
     Queue<Ennemi> bossPile = new LinkedList<>();
     for (EnnemiType bossType : shuffledBosses) {
       bossPile.add(new Ennemi(bossType, 0)); // Les boss n'ont pas de pile spécifique, on peut leur attribuer 0 ou une valeur spéciale

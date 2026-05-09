@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,10 +10,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import model.effets.EnnemyEffect;
+import model.effets.bonus.BonusEffect;
+import model.effets.ennemi.EnnemyEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
+import model.random.CustomRandom;
 
 /**
  * Représente l'état complet du jeu à un instant donné.
@@ -28,14 +31,15 @@ public class GameState implements Cloneable {
   private List<Dice> exhaustedDices;     // Dés épuisés
 
   // ===== Piles d'ennemis =====
-  private Queue<Ennemi> pile1;
-  private Queue<Ennemi> pile2;
-  private Queue<Ennemi> pile3;
+  private Deque<Ennemi> pile1;
+  private Deque<Ennemi> pile2;
+  private Deque<Ennemi> pile3;
   private Queue<Ennemi> bossPile; // (optionnel, si tu veux gérer un boss séparément)
   private List<Ennemi> activeEnnemis;
   private int nbEnnemisKilled;
   private int nbEnnemisToAvtivate;
   private int wastedDiceThisTurn;
+  private boolean penalityKillCivilAsserviFirst;
   private boolean revealedBoss;
   private boolean activatedBoss;
   private boolean bosskilled;
@@ -43,19 +47,22 @@ public class GameState implements Cloneable {
   // ===== État du tour =====
   private GamePhase phase;
   private int engageAssignStep;
+  private int maxEngagedDicePerTurn;
+  private List<BonusEffect> bonusEffectsTurn;
 
   // ===== Générateur pseudo-aléatoire =====
-  private final Long seed;
-  private final Random random;
+  private final CustomRandom random;
 
   // ===== Constructeur =====
 
   public GameState(Player player, List<Dice> dicePool,
-      Queue<Ennemi> pile1, Queue<Ennemi> pile2, Queue<Ennemi> pile3,
+      Deque<Ennemi> pile1, Deque<Ennemi> pile2, Deque<Ennemi> pile3,
       Queue<Ennemi> bossPile,
-      Long seed) {
+      CustomRandom random) {
     this.player = player;
     this.dicePool = dicePool;
+    maxEngagedDicePerTurn = dicePool.size();
+    bonusEffectsTurn = new ArrayList<>();
     this.pile1 = pile1;
     this.pile2 = pile2;
     this.pile3 = pile3;
@@ -64,8 +71,7 @@ public class GameState implements Cloneable {
     activatedBoss = false;
     bosskilled = false;
 
-    this.seed = seed;
-    this.random = new Random(seed);
+    this.random = random;
 
     this.engagedDices = new ArrayList<>();
     this.exhaustedDices = new ArrayList<>();
@@ -87,7 +93,7 @@ public class GameState implements Cloneable {
         new LinkedList<>(pile2),
         new LinkedList<>(pile3),
         new LinkedList<>(bossPile),
-        seed
+        random
     );
 
     clone.engagedDices = cloneDiceList(engagedDices);
@@ -220,15 +226,15 @@ public class GameState implements Cloneable {
     return exhaustedDices;
   }
 
-  public Queue<Ennemi> getPile1() {
+  public Deque<Ennemi> getPile1() {
     return pile1;
   }
 
-  public Queue<Ennemi> getPile2() {
+  public Deque<Ennemi> getPile2() {
     return pile2;
   }
 
-  public Queue<Ennemi> getPile3() {
+  public Deque<Ennemi> getPile3() {
     return pile3;
   }
 
@@ -248,7 +254,7 @@ public class GameState implements Cloneable {
     return engageAssignStep;
   }
 
-  public Random getRandom() {
+  public CustomRandom getRandom() {
     return random;
   }
 
@@ -286,6 +292,14 @@ public class GameState implements Cloneable {
 
   public int getWastedDiceThisTurn() { return wastedDiceThisTurn; }
 
+  public boolean isPenalityKillCivilAsserviFirst() {
+    return penalityKillCivilAsserviFirst;
+  }
+
+  public void setPenalityKillCivilAsserviFirst(boolean penalityKillCivilAsserviFirst) {
+    this.penalityKillCivilAsserviFirst = penalityKillCivilAsserviFirst;
+  }
+
   public boolean isRevealedBoss() {
     return revealedBoss;
   }
@@ -308,6 +322,22 @@ public class GameState implements Cloneable {
 
   public void setBosskilled(boolean bosskilled) {
     this.bosskilled = bosskilled;
+  }
+
+  public int getMaxEngagedDicePerTurn() {
+    return maxEngagedDicePerTurn;
+  }
+
+  public void setMaxEngagedDicePerTurn(int maxEngagedDicePerTurn) {
+    this.maxEngagedDicePerTurn = maxEngagedDicePerTurn;
+  }
+
+  public List<BonusEffect> getBonusEffectsTurn() {
+    return bonusEffectsTurn;
+  }
+
+  public void addBonusEffectTurn(BonusEffect effect) {
+    this.bonusEffectsTurn.add(effect);
   }
 
   public boolean atLeastOneEnnemiOnPiles() {

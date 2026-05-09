@@ -1,4 +1,4 @@
-package model.effets;
+package model.effets.ennemi;
 
 public enum EnnemyEffectType {
   PERMANENT,

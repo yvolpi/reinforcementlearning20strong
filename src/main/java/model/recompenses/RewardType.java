@@ -1,4 +1,4 @@
-package recompenses;
+package model.recompenses;
 
 public enum RewardType {
   INSTANT,
