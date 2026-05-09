@@ -1,23 +1,11 @@
 package model.effets.ennemi;
 
-import model.GameState;
-import model.Player;
-import model.ennemis.Ennemi;
-
-public class KeepDiceInExhaustEffect implements EnnemyEffect {
+public class ExhaustHitWhenAssignCritHitEffect implements EnnemyEffect {
   private boolean activated = true;
-
-  public KeepDiceInExhaustEffect() {
-  }
 
   @Override
   public EnnemyEffectType getType() {
     return EnnemyEffectType.PERMANENT;
-  }
-
-  @Override
-  public void apply(Player player, GameState gameState, Ennemi ennemi) {
-
   }
 
   @Override
@@ -29,5 +17,4 @@ public class KeepDiceInExhaustEffect implements EnnemyEffect {
   public void desactivate() {
     activated = false;
   }
-
 }

@@ -5,7 +5,7 @@ import model.Player;
 import model.ennemis.Ennemi;
 
 public class BanishDiceIfKilledEffect implements EnnemyEffect {
-
+  private boolean activated = true;
 
   @Override
   public EnnemyEffectType getType() {
@@ -19,5 +19,15 @@ public class BanishDiceIfKilledEffect implements EnnemyEffect {
       gameState.getEngagedDices().removeAll(ennemi.getAssignedDice());
     }
 
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }

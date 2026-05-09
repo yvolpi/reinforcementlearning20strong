@@ -89,7 +89,7 @@ public class GameService {
   /**
    * Phase d'usage d'objets : les objets choisis par l'IA sont utilisés.
    */
-  public static void useItemsPhase(GameState gameState, List<GameAction> actions) {
+  public static void useItemsPhase(GameState gameState, List<GameAction> actions, GameAi ai) {
     // inventaire du joueur
     /*System.out.println("Inventaire du joueur : " + gameState.getPlayer().getItems().stream()
         .map(Item::getName)
@@ -100,6 +100,15 @@ public class GameService {
           && action.getItem() != null) {
         //System.out.println("Utilisation de l'objet : " + action.getItem().getName());
         action.getItem().use(gameState.getPlayer(), gameState);
+        if (action.getItem().getName().equals("Lunoculation")) {
+          // à l'ia de décider quel effet ennemi il désactive
+          GameAction lunoculationAction = ai.chooseEnnemiEffectToDesactivate(gameState);
+          lunoculationAction.getTarget().getEffects().stream()
+              .filter(ennemyEffect -> ennemyEffect.getName().equals(lunoculationAction.getEnnemyEffect().getName()))
+              .forEach(EnnemyEffect::desactivate);
+
+        }
+
       }
     }
   }
@@ -117,7 +126,10 @@ public class GameService {
     new ArrayList<>(gameState.getActiveEnnemis()).forEach(ennemi ->
         {
           //System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
-          ennemi.getEffects().forEach(effect -> effect.applyAfterEngagementAndRoll(gameState, ennemi));
+          ennemi.getEffects()
+              .stream()
+              .filter(EnnemyEffect::isActivated)
+              .forEach(effect -> effect.applyAfterEngagementAndRoll(gameState, ennemi));
           gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
         }
     );
@@ -184,13 +196,15 @@ public class GameService {
 
   private static void assignDiceToEnemy(GameState gameState, Dice dice, Ennemi ennemi) {
     for (EnnemyEffect effect : ennemi.getEffects()) {
-      if (!effect.canAssignDice(gameState, dice)) {
+      if (effect.isActivated() && !effect.canAssignDice(gameState, dice)) {
         // Refuser l’assignation
         return;
       }
     }
     for (EnnemyEffect effect : ennemi.getEffects()) {
-      effect.receiveDamage(dice.getLastRoll());
+      if (effect.isActivated()) {
+        effect.receiveDamage(dice.getLastRoll());
+      }
     }
     dice.setState(DiceState.ASSIGNE);
     ennemi.assignDice(dice);
@@ -272,7 +286,7 @@ public class GameService {
   public static void applyEnnemisSubsequentEffects(GameState gameState) {
     for (Ennemi ennemi : gameState.getActiveEnnemis()) {
       for (EnnemyEffect effect : ennemi.getEffects()) {
-        if (effect.getType() == EnnemyEffectType.SUBSEQUENT) {
+        if (effect.getType() == EnnemyEffectType.SUBSEQUENT && effect.isActivated()) {
           effect.apply(gameState.getPlayer(), gameState, ennemi);
         }
       }
@@ -445,7 +459,7 @@ public class GameService {
 
   private static boolean shouldSkipEffect(Ennemi ennemi, EnnemyEffect effect) {
     // Les effets permanents ne s'appliquent plus si l'ennemi est vaincu
-    return EnnemyEffectType.PERMANENT.equals(effect.getType()) && ennemi.isDefeatedFlag();
+    return (EnnemyEffectType.PERMANENT.equals(effect.getType()) && ennemi.isDefeatedFlag()) || !effect.isActivated();
   }
 
   private static boolean canRecoverDices(GameState gameState) {
@@ -474,7 +488,9 @@ public class GameService {
       Ennemi ennemi = game.getActiveEnnemis().get(i);
       if (!ennemi.isDefeatedFlag()) {
         for (EnnemyEffect effect : ennemi.getEffects()) {
-          effect.applyBeforeAllEngagement(game);
+          if (effect.isActivated()) {
+            effect.applyBeforeAllEngagement(game);
+          }
         }
       }
     }
@@ -485,7 +501,9 @@ public class GameService {
       Ennemi ennemi = game.getActiveEnnemis().get(i);
       if (!ennemi.isDefeatedFlag()) {
         for (EnnemyEffect effect : ennemi.getEffects()) {
-          effect.applyBeforeEngagement(game);
+          if (effect.isActivated()) {
+            effect.applyBeforeEngagement(game);
+          }
         }
       }
     }

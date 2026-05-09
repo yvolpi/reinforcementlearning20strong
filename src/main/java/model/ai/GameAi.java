@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import model.Dice;
 import model.DiceState;
 import model.GameState;
+import model.effets.ennemi.EnnemyEffect;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
@@ -95,11 +96,11 @@ public class GameAi {
 
     // Exploration
     if (learner.shouldExplore(random.nextDouble())) {
-      actions = selector.exploreEngageActions(availableDice);
+      actions = selector.exploreEngageActions(availableDice, gameState);
     } else {
       String bestLearnedEngageActions = learner.getBestLearnedActionsFromState(state);
       if (bestLearnedEngageActions == null) {
-        actions = selector.exploreEngageActions(availableDice);
+        actions = selector.exploreEngageActions(availableDice, gameState);
       } else {
         actions = ActionDecoder.decodeEngageAction(availableDice, bestLearnedEngageActions);
       }
@@ -116,20 +117,6 @@ public class GameAi {
       GameState gameState) {
     List<GameAction> actions;
     String state = encoder.encodeStateForAssign(gameState);
-    if (gameState.isActivatedBoss()) {
-      // dés engagés non assignés
-      StringBuilder desEngages = new StringBuilder("dés engagés :");
-
-      gameState.getEngagedDices().stream()
-          .filter(dice -> dice.getState() == DiceState.ENGAGE)
-          .forEach(dice -> {
-            desEngages.append(dice.getColor().name()).append(":").append(dice.getLastRoll()).append(";");
-          });
-      System.out.println(desEngages);
-
-
-    }
-
     boolean lastAssignPhase = gameState.getEngageAssignStep() == gameState.getPlayer().getStrategy();
 
     if (learner.shouldExplore(random.nextDouble())) {
@@ -227,6 +214,25 @@ public class GameAi {
     }
     lastActions = List.of(action);
     String encodedActions = ActionKeyEncoder.encodeRemoveItemAction(action);
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    return action;
+  }
+
+  // ===== Décisions lors de l'usage de certains objets =====
+
+  // Lunoculation
+  public GameAction chooseEnnemiEffectToDesactivate(GameState gameState) {
+    GameAction action;
+    String state = encoder.encodeStateForLunoculation(gameState);
+
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = selector.exploreLunoculationEffectAction(gameState.getActiveEnnemis());
+    } else {
+      List<GameAction> possibleEffectsToDesactivate = factory.createPossibleDesactivateEffectActions(gameState.getActiveEnnemis());
+      action = selector.findBestLunoculationAction(possibleEffectsToDesactivate, learner.getActionValues(state));
+    }
+
+    String encodedActions = ActionKeyEncoder.encodeLunoculationAction(action);
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
     return action;
   }

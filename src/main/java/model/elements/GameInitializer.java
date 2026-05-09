@@ -35,7 +35,8 @@ public class GameInitializer {
       ASSERVI,
       CALAMARAIGNEE,
       CAMOUFLARD,
-      CIVIL_ASSERVI
+      CIVIL_ASSERVI,
+      DUODRONE
   );
 
   public static final List<EnnemiType> bossList = List.of(

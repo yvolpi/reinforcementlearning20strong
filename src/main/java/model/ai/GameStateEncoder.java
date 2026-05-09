@@ -84,7 +84,10 @@ public class GameStateEncoder {
     sb.append(reserveDice).append("|").append(engagedDice).append("|");
     String enemies = gameState.getActiveEnnemis().stream()
         .filter(e -> !e.isDefeatedFlag())
-        .map(e -> e.getName() + ":" + e.getCurrentLife())
+        .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
+            e.getEffects().stream()
+                .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
+                .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
     sb.append(enemies);
     return sb.toString();
@@ -102,7 +105,10 @@ public class GameStateEncoder {
 
     String enemies = gameState.getActiveEnnemis().stream()
         .filter(e -> !e.isDefeatedFlag())
-        .map(e -> e.getName() + ":" + e.getCurrentLife())
+        .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
+            e.getEffects().stream()
+                .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
+                .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
     sb.append(enemies);
     return sb.toString();
@@ -184,5 +190,19 @@ public class GameStateEncoder {
   public String encodeEngageAction(GameAction action) {
     if (action == null) return "NONE";
     return "ENGAGE:" + action.getDice().getColor().name();
+  }
+
+  public String encodeStateForLunoculation(GameState gameState) {
+    // dépend des ennemis actifs, avec leurs effets actifs
+    StringBuilder sb = new StringBuilder();
+    sb.append("LUNOCULATION|");
+    gameState.getActiveEnnemis().forEach(ennemi -> {
+      sb.append(ennemi.getName()).append(":").append(ennemi.getClassValue()).append(":");
+      String effects = ennemi.getEffects().stream()
+          .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
+          .collect(Collectors.joining(","));
+      sb.append(effects).append(";");
+    });
+    return sb.toString();
   }
 }

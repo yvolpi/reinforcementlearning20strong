@@ -95,4 +95,11 @@ public class ActionKeyEncoder {
     if (action == null || action.getItem() == null) return prefix + "NONE";
     return prefix + action.getItem().getName();
   }
+
+  public static String encodeLunoculationAction(GameAction action) {
+    String prefix = "EFFECT_TO_DESACTIVATE:";
+    // fonction de l'ennemi et de l'effet
+    if (action == null || action.getItem() == null) return prefix + "NONE";
+    return prefix + action.getTarget().getName() + ":" + action.getEnnemyEffect().getName();
+  }
 }

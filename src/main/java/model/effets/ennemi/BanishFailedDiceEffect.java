@@ -1,28 +1,19 @@
 package model.effets.ennemi;
 
-import model.Dice;
-import model.DiceColor;
 import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 
-public class ForbidGreenDiceEffect implements EnnemyEffect {
+public class BanishFailedDiceEffect implements EnnemyEffect {
   private boolean activated = true;
 
   @Override
   public EnnemyEffectType getType() {
-    return EnnemyEffectType.PERMANENT;
+    return EnnemyEffectType.SUBSEQUENT;
   }
 
-  @Override
   public void apply(Player player, GameState gameState, Ennemi ennemi) {
-    // Pas d'effet direct, la contrainte s'applique lors de l'engagement des dés
-  }
-
-  // Méthode utilitaire pour la logique d'engagement
-  @Override
-  public boolean canEngage(Dice dice) {
-    return dice.getColor() != DiceColor.VERT;
+    gameState.getEngagedDices().removeIf(dice -> dice.getLastRoll() == 0);
   }
 
   @Override
@@ -34,4 +25,5 @@ public class ForbidGreenDiceEffect implements EnnemyEffect {
   public void desactivate() {
     activated = false;
   }
+
 }

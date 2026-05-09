@@ -53,7 +53,7 @@ public class PhaseExecutor {
         .collect(Collectors.toList());
 
     List<GameAction> actionsToUse = ai.chooseActionsToUse(usableItems, game);
-    GameService.useItemsPhase(game, actionsToUse);
+    GameService.useItemsPhase(game, actionsToUse, ai);
   }
 
   public void executeEngagePhase(GameState game) {

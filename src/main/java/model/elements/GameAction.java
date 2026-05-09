@@ -3,6 +3,7 @@ package model.elements;
 import java.util.ArrayList;
 import java.util.List;
 import model.Dice;
+import model.effets.ennemi.EnnemyEffect;
 import model.ennemis.Ennemi;
 import model.items.Item;
 
@@ -12,6 +13,7 @@ public class GameAction {
   private int pileNumber; // pour ACTIVATE_PILE
   private Dice dice;      // pour ENGAGE_DICE ou ASSIGN_DICE
   private Ennemi target;
+  private EnnemyEffect ennemyEffect;
   private Item item;
   // ... autres champs selon le type d’action
   private List<Dice> diceList;
@@ -20,6 +22,11 @@ public class GameAction {
     this.type = type;
     this.dice = dice;
     this.target = null;
+  }
+
+  public GameAction(EnnemyEffect ennemyEffect, Ennemi target) {
+    this.ennemyEffect = ennemyEffect;
+    this.target = target;
   }
 
   public GameAction(boolean activateBoss) {
@@ -60,5 +67,9 @@ public class GameAction {
 
   public Item getItem() {
     return item;
+  }
+
+  public EnnemyEffect getEnnemyEffect() {
+    return ennemyEffect;
   }
 }

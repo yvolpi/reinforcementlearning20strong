@@ -5,6 +5,7 @@ import model.Player;
 import model.ennemis.Ennemi;
 
 public class RevealBossEffect implements EnnemyEffect {
+  private boolean activated = true;
 
   @Override
   public EnnemyEffectType getType() {
@@ -19,5 +20,15 @@ public class RevealBossEffect implements EnnemyEffect {
     }
     gameState.setRevealedBoss(true);
 
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }

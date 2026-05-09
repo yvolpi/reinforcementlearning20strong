@@ -5,13 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import model.Dice;
 import model.DiceColor;
+import model.GameState;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
+import model.random.CustomRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,7 @@ class ActionSelectorTest {
   @BeforeEach
   void setUp() {
     encoder = new GameStateEncoder();
-    selector = new ActionSelector(new Random(42), encoder);
+    selector = new ActionSelector(new CustomRandom(41,2,1,0), encoder);
   }
 
   // ===== exploreActivateAction =====
@@ -46,8 +47,10 @@ class ActionSelectorTest {
     Dice d1 = new Dice(DiceColor.BLEU);
     Dice d2 = new Dice(DiceColor.ROUGE);
     Dice d3 = new Dice(DiceColor.VERT);
+    GameState gameState = new GameState(null, List.of(d1, d2, d3), null, null, null, null, new CustomRandom(41,2,1,0));
 
-    List<GameAction> actions = selector.exploreEngageActions(List.of(d1, d2, d3));
+
+    List<GameAction> actions = selector.exploreEngageActions(List.of(d1, d2, d3), gameState);
 
     assertThat(actions.size()).isBetween(0, 3);
   }
@@ -55,8 +58,10 @@ class ActionSelectorTest {
   @Test
   void exploreEngageActions_throwsOnDuplicateDice() {
     Dice d = new Dice(DiceColor.BLEU);
+    GameState gameState = new GameState(null, List.of(d), null, null, null, null, new CustomRandom(41,2,1,0));
 
-    assertThatThrownBy(() -> selector.exploreEngageActions(List.of(d, d)))
+
+    assertThatThrownBy(() -> selector.exploreEngageActions(List.of(d, d), gameState))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("Doublon");
   }

@@ -6,6 +6,11 @@ import model.Player;
 import model.ennemis.Ennemi;
 
 public interface EnnemyEffect {
+
+  public default String getName() {
+    return this.getClass().getSimpleName();
+  }
+
   EnnemyEffectType getType();
   default void apply(Player player, GameState gameState, Ennemi ennemi) {
     // Par défaut, les effets n'ont pas d'impact immédiat sur le joueur ou l'état du jeu
@@ -38,5 +43,10 @@ public interface EnnemyEffect {
   default void applyBeforeAllEngagement(GameState gameState) {
     // Par défaut, les ennemis ne font rien de spécial avant l'engagement
   }
+
+  boolean isActivated();
+
+  void desactivate();
+
 
 }

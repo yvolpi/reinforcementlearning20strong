@@ -180,7 +180,7 @@ public class GameState implements Cloneable {
     for (Ennemi ennemi : activeEnnemis) {
       if (!ennemi.isDefeatedFlag()) {
         for (EnnemyEffect effect : ennemi.getEffects()) {
-          if (!effect.isDiceAssignable(this, dice)) {
+          if (effect.isActivated() && !effect.isDiceAssignable(this, dice)) {
             return false;
           }
         }

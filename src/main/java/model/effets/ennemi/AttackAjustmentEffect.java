@@ -4,10 +4,11 @@ import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 
-public class AttackAjustment implements EnnemyEffect {
+public class AttackAjustmentEffect implements EnnemyEffect {
   private int attackAjustment;
+  private boolean activated = true;
 
-  public AttackAjustment(int attackAjustment) {
+  public AttackAjustmentEffect(int attackAjustment) {
     this.attackAjustment = attackAjustment;
   }
 
@@ -23,5 +24,15 @@ public class AttackAjustment implements EnnemyEffect {
   @Override
   public void apply(Player player, GameState gameState, Ennemi ennemi) {
 
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }

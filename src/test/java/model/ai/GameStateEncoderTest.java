@@ -10,6 +10,7 @@ import model.Dice;
 import model.DiceColor;
 import model.GameState;
 import model.Player;
+import model.effets.ennemi.EnnemyEffect;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
@@ -68,6 +69,35 @@ class GameStateEncoderTest {
     GameAction action = new GameAction(GamePhase.ENGAGE_DICE, dice);
 
     assertThat(encoder.encodeEngageAction(action)).isEqualTo("ENGAGE:VIOLET");
+  }
+
+  @Test
+  void encodeEngageAction_depends_desactivated_effects() {
+    Dice dice = new Dice(DiceColor.VIOLET);
+    GameAction action = new GameAction(GamePhase.ENGAGE_DICE, dice);
+
+    GameState gs1 = mock(GameState.class);
+    GameState gs2 = mock(GameState.class);
+    Player player = mock(Player.class);
+    when(player.getLife()).thenReturn(2);
+
+
+    Ennemi ennemi1 = new Ennemi(EnnemiType.APOTRE_ESSAIM, 1);
+    Ennemi ennemi2 = new Ennemi(EnnemiType.APOTRE_ESSAIM, 1);
+    // effet de l'ennemi1 : activé
+
+    when(player.getLife()).thenReturn(10);
+    when(gs1.getPlayer()).thenReturn(player);
+    when(gs1.getDicePool()).thenReturn(List.of(new Dice(DiceColor.BLEU)));
+    when(gs1.getActiveEnnemis()).thenReturn(List.of(ennemi1));
+    when(gs2.getPlayer()).thenReturn(player);
+    when(gs2.getDicePool()).thenReturn(List.of(new Dice(DiceColor.BLEU)));
+    when(gs2.getActiveEnnemis()).thenReturn(List.of(ennemi2));
+
+    String result1 = encoder.encodeStateForEngage(gs1);
+    ennemi2.getEffects().forEach(EnnemyEffect::desactivate);
+    String result2 = encoder.encodeStateForEngage(gs2);
+    assertThat(result1).isNotEqualTo(result2);
   }
 
   @Test

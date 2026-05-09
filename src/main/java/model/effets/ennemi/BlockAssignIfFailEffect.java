@@ -6,6 +6,7 @@ import model.Player;
 import model.ennemis.Ennemi;
 
 public class BlockAssignIfFailEffect implements EnnemyEffect {
+  private boolean activated = true;
 
   @Override
   public EnnemyEffectType getType() {
@@ -22,5 +23,15 @@ public class BlockAssignIfFailEffect implements EnnemyEffect {
     // false s'il existe un dé engagé en échec
     return gameState.getEngagedDices().stream()
         .noneMatch(d -> d.getLastRoll() == 0);
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }

@@ -36,4 +36,8 @@ public abstract class Item {
     return List.of(); // Par défaut, aucun dé à choisir
   }
 
+  public void triggeredBeforeActivationPhase(GameState gameState) {
+    // Par défaut, ne fait rien avant la phase d'activation
+  }
+
 }

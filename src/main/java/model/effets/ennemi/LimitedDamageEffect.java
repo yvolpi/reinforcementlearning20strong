@@ -6,9 +6,9 @@ import model.Player;
 import model.ennemis.Ennemi;
 
 public class LimitedDamageEffect implements EnnemyEffect {
-
   private int degatsRecusCeTour;
   private int maxDamage;
+  private boolean activated = true;
 
   public LimitedDamageEffect(int maxDamage) {
     this.degatsRecusCeTour = 0;
@@ -43,6 +43,16 @@ public class LimitedDamageEffect implements EnnemyEffect {
   @Override
   public void applyBeforeAllEngagement(GameState gameState) {
     degatsRecusCeTour = 0; // Réinitialise les dégâts reçus au début de chaque tour
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 
 }

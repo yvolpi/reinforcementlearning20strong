@@ -8,8 +8,8 @@ import model.GameState;
  */
 
 public class MaxEngagedDicePerTurnEffect implements EnnemyEffect {
-
   private final int maxEngagedDicePerTurn;
+  private boolean activated = true;
 
   public MaxEngagedDicePerTurnEffect(int maxEngagedDicePerTurn) {
     this.maxEngagedDicePerTurn = maxEngagedDicePerTurn;
@@ -27,5 +27,15 @@ public class MaxEngagedDicePerTurnEffect implements EnnemyEffect {
   @Override
   public void applyBeforeEngagement(GameState gameState) {
     gameState.setMaxEngagedDicePerTurn(Math.min(maxEngagedDicePerTurn, gameState.getMaxEngagedDicePerTurn()));
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }

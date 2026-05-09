@@ -3,10 +3,12 @@ package model.ennemis;
 import static model.effets.ennemi.EnnemyEffectType.SUBSEQUENT;
 
 import java.util.List;
-import model.effets.ennemi.AttackAjustment;
+import model.effets.ennemi.AttackAjustmentEffect;
 import model.effets.ennemi.BanishDiceIfKilledEffect;
+import model.effets.ennemi.BanishFailedDiceEffect;
 import model.effets.ennemi.BlockAssignIfFailEffect;
 import model.effets.ennemi.EnnemyEffect;
+import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
 import model.effets.ennemi.FleeAfterEngagementEffect;
 import model.effets.ennemi.ForbidGreenDiceEffect;
 import model.effets.ennemi.KeepDiceInExhaustEffect;
@@ -18,6 +20,8 @@ import model.recompenses.CompteurEtoilesRewerd;
 import model.recompenses.EncreToxiqueReward;
 import model.recompenses.EnsanglanteuseReward;
 import model.recompenses.IncreaseRecoveryReward;
+import model.recompenses.LunoculationReward;
+import model.recompenses.PizzaReward;
 import model.recompenses.RecoverLifeReward;
 import model.recompenses.Reward;
 import model.recompenses.SushiSpatialReward;
@@ -39,19 +43,20 @@ public enum EnnemiType {
   ),
   ASSERVI(2,4,2, List.of(new FleeAfterEngagementEffect()), 1, false,
       new CompteurEtoilesRewerd()),
-
   CALAMARAIGNEE(2,7,4, List.of(new RevealBossEffect()), 0, false,
       new EncreToxiqueReward()),
-
-  //camouflard: 1,2, c1, non obligatoire, effet : subséquent : si cet ennemi est vaincu, banissez tous les dés qui lui ont été assignés
   CAMOUFLARD(1,2,1, List.of(new BanishDiceIfKilledEffect()), 0, false,
       new IncreaseRecoveryReward(1)
       ),
-
-  //civil asservi : 1,3, c1, +1 activation, obligatoire, effets : maximum : 3 dés lors du tour. Spécial: si cet ennemi est le 1er vaincu, il retourne sur l'une des piles
-  //  récompense : ensanglanteuse : les touches du dé rouge font +2 dégats. La touche critique du rouge fait +1 dégat.
   CIVIL_ASSERVI(1,1,3, List.of(new MaxEngagedDicePerTurnEffect(3)), 1, true,
       new EnsanglanteuseReward()),
+  DUODRONE(1,4,2, List.of(new ExhaustHitWhenAssignCritHitEffect()), 0, false,
+      new PizzaReward()),
+
+  //  escrocafard : 3,2, c1, non obligatoire, effet : subséquent : bannir tous les dés engagés en échec.
+  //  récompense : lunoculation : annulez le ou les effets d'un ennemi de classe 1 ou 2
+  ESCROCAFARD(1,3,2, List.of(new BanishFailedDiceEffect(), new ForbidGreenDiceEffect()), 0, false,
+      new LunoculationReward()),
 
 
   SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceEffect()), 0, false,
@@ -61,7 +66,7 @@ public enum EnnemiType {
   BETE_ALPHA(3,12,2, List.of(new BlockAssignIfFailEffect(), new KeepDiceInExhaustEffect()), 2, false,
       null),
 
-  MONARQUE_RUCHE(3,8,1, List.of(new LimitedDamageEffect(3), new AttackAjustment(1), new KeepDiceInExhaustEffect()), 2, false,
+  MONARQUE_RUCHE(3,8,1, List.of(new LimitedDamageEffect(3), new AttackAjustmentEffect(1), new KeepDiceInExhaustEffect()), 2, false,
       null)
 
   ;
@@ -75,13 +80,6 @@ public enum EnnemiType {
 
 
   plus les autres ennemis non boss :
-
-  civil asservi : 1,3, c1, +1 activation, obligatoire, effets : maximum : 3 dés lors du tour. Spécial: si cet ennemi est le 1er vaincu, il retourne sur l'une des piles
-  récompense : ensanglanteuse : les touches du dé rouge font +2 dégats. La touche critique du rouge fait +1 dégat.
-
-  duodrone : 4,2, c1, non obligatoire, effet : pour chaque critique assignée à un ennemi, épuiser une touche non-assignée
-  récompense : pizza : continu : +1 pv au début de chaque tour si les pvs <= 3.
-
   escrocafard : 3,2, c1, non obligatoire, effet : subséquent : bannir tous les dés engagés en échec.
   récompense : lunoculation : annulez le ou les effets d'un ennemi de classe 1 ou 2
 

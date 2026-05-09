@@ -6,6 +6,7 @@ import model.ennemis.Ennemi;
 
 public class SkipRecoverPhaseEffect implements EnnemyEffect {
   private final EnnemyEffectType type;
+  private boolean activated = true;
 
   // Constructeur par défaut : PERMANENT
   public SkipRecoverPhaseEffect() {
@@ -25,5 +26,15 @@ public class SkipRecoverPhaseEffect implements EnnemyEffect {
   @Override
   public void apply(Player player, GameState gameState, Ennemi ennemi) {
     // L'effet est géré dans GameService.recoverDicePhase
+  }
+
+  @Override
+  public boolean isActivated() {
+    return activated;
+  }
+
+  @Override
+  public void desactivate() {
+    activated = false;
   }
 }
