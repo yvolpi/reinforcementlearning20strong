@@ -48,6 +48,10 @@ public class PhaseExecutor {
   }
 
   public void executeUsagePhase(GameState game) {
+    // enlever l'effet bonus IchorVeriteEffect s'il y est
+    game.getBonusEffectsTurn().removeIf(effect -> effect.getClass().getSimpleName().equals("IchorVeriteEffect"));
+
+
     List<Item> usableItems = game.getPlayer().getItems().stream()
         .filter(item -> item.canBeUsed(game.getPlayer(), game))
         .collect(Collectors.toList());

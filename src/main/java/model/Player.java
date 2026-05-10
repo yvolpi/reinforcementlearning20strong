@@ -30,12 +30,11 @@ public class Player {
 
   // Setters
   public void setRecovery(int recovery) { this.recovery = recovery; }
+  public void setStrategy(int strategy) { this.strategy = strategy; }
 
   // Méthodes utilitaires (exemples)
   public void loseLife(int amount) { this.life = Math.max(0, this.life - amount); }
   public void gainLife(int amount) { this.life += amount; }
-  public void recover(int amount) { this.recovery += amount; }
-
   public void addItem(Item item) {
     items.add(item);
   }

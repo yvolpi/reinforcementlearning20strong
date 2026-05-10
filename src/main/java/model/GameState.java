@@ -340,6 +340,10 @@ public class GameState implements Cloneable {
     this.bonusEffectsTurn.add(effect);
   }
 
+  public void resetBonusEffectTurn() {
+    this.bonusEffectsTurn.clear();
+  }
+
   public boolean atLeastOneEnnemiOnPiles() {
     return !pile1.isEmpty() || !pile2.isEmpty() || !pile3.isEmpty();
   }

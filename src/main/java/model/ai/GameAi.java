@@ -122,9 +122,9 @@ public class GameAi {
     if (learner.shouldExplore(random.nextDouble())) {
       // Exploration
       if (lastAssignPhase) {
-        actions = naiveAssignAllDice(assignableDice, activeEnnemis);
+        actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 1.0);
       } else {
-        actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
+        actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 0.5);
       }
 
     } else {
@@ -133,9 +133,9 @@ public class GameAi {
       if (bestLearnedAssignActions == null) {
         // Si aucune action apprise, fallback sur assignation naïve
         if (lastAssignPhase) {
-          actions = naiveAssignAllDice(assignableDice, activeEnnemis);
+          actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 1.0);
         } else {
-          actions = selector.exploreAssignActions(assignableDice, activeEnnemis);
+          actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 0.5);
         }
       } else {
         actions = ActionDecoder.decodeAssignActions(assignableDice, bestLearnedAssignActions, activeEnnemis);
@@ -152,21 +152,6 @@ public class GameAi {
     lastActions = actions;
     String encodedActions = ActionKeyEncoder.encodeAssignActions(actions, gameState.getEngageAssignStep());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
-    return actions;
-  }
-
-  private List<GameAction> naiveAssignAllDice(List<Dice> assignableDice, List<Ennemi> activeEnnemis) {
-    List<GameAction> actions = new ArrayList<>();
-    List<Ennemi> aliveEnnemis = activeEnnemis.stream()
-        .filter(e -> !e.isDefeatedFlag())
-        .toList();
-    if (!aliveEnnemis.isEmpty()) {
-      for (Dice dice : assignableDice) {
-        actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, aliveEnnemis.get(
-            random.nextInt(aliveEnnemis.size())
-        )));
-      }
-    }
     return actions;
   }
 

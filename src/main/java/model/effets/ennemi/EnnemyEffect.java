@@ -36,6 +36,10 @@ public interface EnnemyEffect {
     return true; // Par défaut, tous les dés peuvent être assignés
   }
 
+  default boolean canAssignDiceToThisEnnemi(GameState gameState, Dice dice, Ennemi ennemi) {
+    return true; // Par défaut, tous les dés peuvent être assignés
+  }
+
   default void applyBeforeEngagement(GameState gameState) {
     // Par défaut, les ennemis ne font rien de spécial avant l'engagement
   }

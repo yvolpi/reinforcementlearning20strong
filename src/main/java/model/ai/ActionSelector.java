@@ -12,6 +12,8 @@ import model.DiceColor;
 import model.GameState;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
+import model.effets.ennemi.MaxAssignDiceEffect;
+import model.effets.ennemi.MustAssignPairDiceEffect;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
@@ -61,33 +63,28 @@ public class ActionSelector {
     return actions;
   }
 
-  public List<GameAction> exploreAssignActions(List<Dice> assignableDice, List<Ennemi> activeEnnemis) {
+  public List<GameAction> exploreAssignActions(List<Dice> assignableDice, List<Ennemi> activeEnnemis, double assignRate) {
+    if (activeEnnemis.isEmpty()) return List.of();
+
+    boolean mustExhaustOnCrit = hasMustExhaustOnCritEffect(activeEnnemis);
+    boolean mustAssignByPair  = hasMustAssignByPairEffect(activeEnnemis);
+    Integer assignLimit = getMaxAssignDiceEffectValue(activeEnnemis);
+
+    List<Dice> exhausted  = new ArrayList<>();
+    List<Dice> assigned   = new ArrayList<>();
+    List<Dice> remaining  = new ArrayList<>(assignableDice);
     List<GameAction> actions = new ArrayList<>();
 
-    boolean mustExhaustHitWhenAssignCritHitEffect =
-        activeEnnemis.stream().anyMatch(ennemi -> !ennemi.isDefeatedFlag() &&
-            ennemi.getEffects().stream().anyMatch(effect -> effect instanceof ExhaustHitWhenAssignCritHitEffect));
-
-    List<Dice> diceBecomeExhausted = new ArrayList<>();
-    List<Dice> diceBeingAssigned = new ArrayList<>();
-
     for (Dice dice : assignableDice) {
-      if (diceBecomeExhausted.contains(dice)) {
-        continue; // ce dé est déjà épuisé, on ne peut pas lui assigner une touche critique
-      }
-      if (!activeEnnemis.isEmpty() && random.nextDouble() < 0.5) {
-        if (mustExhaustHitWhenAssignCritHitEffect && dice.getLastRoll() == dice.getFaces()[5]) {
-          // parcourir la liste assignableDice pour tirer un dé à épuiser. Si c'est lui même, ou si le dé est dans diceBecomeExhausted, alors la touche critique ne sera pas assigné
-          Dice diceToExhaust = pickDiceToExhaust(assignableDice, dice, diceBeingAssigned, diceBecomeExhausted);
-          if (diceToExhaust == null) {
-            // la touche critique n'est pas assignée, on continue comme si de rien n'était
-            continue;
-          }
-          diceBecomeExhausted.add(diceToExhaust);
-        }
-        Ennemi randomEnemy = activeEnnemis.get(random.nextInt(activeEnnemis.size()));
-        actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, randomEnemy));
-        diceBeingAssigned.add(dice);
+      if (isUnavailable(dice, exhausted, assigned)) continue;
+      if (random.nextDouble() >= assignRate) continue;
+      if (assigned.size() >= assignLimit) break;
+
+      if (mustAssignByPair) {
+        if (assigned.size() >= assignLimit - 1) break; // S'assurer qu'on a la place d'assigner les 2 dés
+        tryAssignPair(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions);
+      } else {
+        tryAssignSingle(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions);
       }
     }
     return actions;
@@ -204,6 +201,108 @@ public class ActionSelector {
       case VERT   -> 2;
       case JAUNE  -> 1;
     };
+  }
+
+  // ---- Effets actifs ----
+
+  private boolean hasMustExhaustOnCritEffect(List<Ennemi> ennemis) {
+    return ennemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .flatMap(e -> e.getEffects().stream())
+        .anyMatch(effect -> effect instanceof ExhaustHitWhenAssignCritHitEffect);
+  }
+
+  private boolean hasMustAssignByPairEffect(List<Ennemi> ennemis) {
+    return ennemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .flatMap(e -> e.getEffects().stream())
+        .anyMatch(effect -> effect instanceof MustAssignPairDiceEffect);
+  }
+
+  private Integer getMaxAssignDiceEffectValue(List<Ennemi> ennemis) {
+    return ennemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .flatMap(e -> e.getEffects().stream())
+        .filter(effect -> effect instanceof MaxAssignDiceEffect)
+        .map(effect -> ((MaxAssignDiceEffect) effect).getMaxDice())
+        .min(Integer::compareTo)
+        .orElse(Integer.MAX_VALUE);
+  }
+
+  private void tryAssignSingle(Dice dice, List<Ennemi> activeEnnemis,
+      List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
+      boolean mustExhaustOnCrit, List<GameAction> actions) {
+
+    if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
+
+    Ennemi target = pickRandomEnemy(activeEnnemis);
+    actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
+    markAssigned(dice, assigned, remaining);
+  }
+
+  // ---- Assignation par paire ----
+
+  private void tryAssignPair(Dice dice, List<Ennemi> activeEnnemis,
+      List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
+      boolean mustExhaustOnCrit, List<GameAction> actions) {
+
+    Dice partner = findPartner(dice, remaining, assigned, exhausted);
+    if (partner == null) return;
+
+    if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
+    if (!prepareExhaustIfCrit(partner, dice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
+
+    Ennemi target = pickRandomEnemy(activeEnnemis);
+
+    actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
+    actions.add(new GameAction(GamePhase.ASSIGN_DICE, partner, target));
+    markAssigned(dice, assigned, remaining);
+    markAssigned(partner, assigned, remaining);
+  }
+
+  // ---- Utilitaires ----
+
+  private boolean isUnavailable(Dice dice, List<Dice> exhausted, List<Dice> assigned) {
+    return exhausted.contains(dice) || assigned.contains(dice);
+  }
+
+  private Dice findPartner(Dice dice, List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted) {
+    return remaining.stream()
+        .filter(d -> d.getColor() == dice.getColor()
+            && !d.equals(dice)
+            && !assigned.contains(d)
+            && !exhausted.contains(d))
+        .findFirst().orElse(null);
+  }
+
+
+  /**
+   * Si le dé est un critique et que l'effet l'exige, on choisit un dé à épuiser.
+   * Retourne false si l'assignation doit être annulée.
+   *
+   * @param forbidden dé qui ne peut pas être choisi comme cible d'épuisement (ex: le partenaire déjà choisi)
+   */
+  private boolean prepareExhaustIfCrit(Dice dice, Dice forbidden,
+      List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
+      boolean mustExhaustOnCrit) {
+
+    if (!mustExhaustOnCrit || dice.getLastRoll() != dice.getFaces()[5]) return true;
+
+    Dice toExhaust = pickDiceToExhaust(remaining, dice, assigned, exhausted);
+    if (toExhaust == null || toExhaust.equals(forbidden)) return false;
+
+    exhausted.add(toExhaust);
+    remaining.remove(toExhaust);
+    return true;
+  }
+
+  private void markAssigned(Dice dice, List<Dice> assigned, List<Dice> remaining) {
+    assigned.add(dice);
+    remaining.remove(dice);
+  }
+
+  private Ennemi pickRandomEnemy(List<Ennemi> activeEnnemis) {
+    return activeEnnemis.get(random.nextInt(activeEnnemis.size()));
   }
 
   private Dice pickDiceToExhaust(List<Dice> assignableDice, Dice current, List<Dice> diceBeingAssigned, List<Dice> diceBecomeExhausted) {

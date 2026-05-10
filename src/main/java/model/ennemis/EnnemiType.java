@@ -11,16 +11,25 @@ import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
 import model.effets.ennemi.FleeAfterEngagementEffect;
 import model.effets.ennemi.ForbidGreenDiceEffect;
+import model.effets.ennemi.GuepeChercheuseEffect;
 import model.effets.ennemi.KeepDiceInExhaustEffect;
 import model.effets.ennemi.LimitedDamageEffect;
+import model.effets.ennemi.MaxAssignDiceEffect;
+import model.effets.ennemi.MaxAssignDiceToItEffect;
 import model.effets.ennemi.MaxEngagedDicePerTurnEffect;
+import model.effets.ennemi.MustAssignPairDiceEffect;
 import model.effets.ennemi.RevealBossEffect;
 import model.effets.ennemi.SkipRecoverPhaseEffect;
+import model.effets.ennemi.SwitchAllDiceEffect;
 import model.recompenses.CompteurEtoilesRewerd;
 import model.recompenses.EncreToxiqueReward;
 import model.recompenses.EnsanglanteuseReward;
+import model.recompenses.FusilBlasterReward;
+import model.recompenses.IchorVeriteReward;
 import model.recompenses.IncreaseRecoveryReward;
+import model.recompenses.IncreaseStrategyRewerd;
 import model.recompenses.LunoculationReward;
+import model.recompenses.MegaEpinephrineReward;
 import model.recompenses.PizzaReward;
 import model.recompenses.RecoverLifeReward;
 import model.recompenses.Reward;
@@ -52,12 +61,27 @@ public enum EnnemiType {
       new EnsanglanteuseReward()),
   DUODRONE(1,4,2, List.of(new ExhaustHitWhenAssignCritHitEffect()), 0, false,
       new PizzaReward()),
-
-  //  escrocafard : 3,2, c1, non obligatoire, effet : subséquent : bannir tous les dés engagés en échec.
-  //  récompense : lunoculation : annulez le ou les effets d'un ennemi de classe 1 ou 2
   ESCROCAFARD(1,3,2, List.of(new BanishFailedDiceEffect(), new ForbidGreenDiceEffect()), 0, false,
       new LunoculationReward()),
 
+  FANATIQUE_ESSAIM(2,5,2, List.of(new SwitchAllDiceEffect()), 1, false,
+      new FusilBlasterReward()),
+
+  GROS_SCARAB(1,4,2, List.of(new MustAssignPairDiceEffect()), 0, false,
+      new IncreaseStrategyRewerd()),
+
+  GUEPE_CHERCHEUSE(1,4,2, List.of(new GuepeChercheuseEffect(), new MaxEngagedDicePerTurnEffect(3)), 0, true,
+      new RecoverLifeReward(2)),
+
+  //guêpe déchainée : 5,3, c2, +0 activation, non obligatoire, effet : après chaque lancer, vous pouvez assigner un maximum de 2 dés aux ennemis
+  //  récompense : méga-épinéphrine : permanent : après chaque étape de lancer, s'il y a au moins 3 couleurs différentes, on peut échanger un échec en touche
+  GUEPE_DECHAINEE(2,5,3, List.of(new MaxAssignDiceEffect(2)), 0, false,
+      new MegaEpinephrineReward()),
+
+  //ichorkyste : 4,0, c2, +0 activation, obligatoire, effet : on ne peut assigner qu'un maximum de 2 dés à cet ennemi
+  //  récompense : ichor de vérité : permanent : pendant l'étape lancer, vous n'êtes pas obligé de relancer les touches non assignés
+  ICHORKYSTE(2,4,0, List.of(new MaxAssignDiceToItEffect(2)), 0, true,
+      new IchorVeriteReward()),
 
   SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceEffect()), 0, false,
       new IncreaseRecoveryReward(1)),
@@ -72,28 +96,12 @@ public enum EnnemiType {
   ;
 
   /*
-  Autres ennemis : les 3 autres boss
+  Autres boss :
 
   mère des spores : 9,0, c3, +1 activation, obligatoire, effet : Après le lancer de dé, vous perdez 1 pv par échec. A chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
   seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
 
-
-
-  plus les autres ennemis non boss :
-  escrocafard : 3,2, c1, non obligatoire, effet : subséquent : bannir tous les dés engagés en échec.
-  récompense : lunoculation : annulez le ou les effets d'un ennemi de classe 1 ou 2
-
-  fanatique de l'essaim : 5,2, c2, +1 activation, non obligatoire, effet : après chaque lancer, les touches autre que ROUGE deviennent des échecs et vice-versa.
-  récompense : fusil blaster : épuiser 3 dés pour vaincre immédiatement un ennemi de classe 1 ou 2
-
-  gros scarab : 4,2, c1, effet : vous ne pouvez assigner des touches aux ennemis que par paires de dés de même couleur
-  récompense : 1 point de stratégie
-
-  guêpe chercheuse : 4,2, c1, effet : pour chaque dé assigné à cet ennemi, vous devez défausser un ennemi d'une pile
-  récompense : 2 points de vie
-
-  guêpe déchainée : 5,3, c2, +0 activation, non obligatoire, effet : après chaque lancer, vous pouvez assigner un maximum de 2 dés aux ennemis
-  récompense : méga-épinéphrine : permanent : après chaque étape de lancer, s'il y a au moins 3 couleurs différentes, on peut échanger un échec en touche
+Autres ennemis :
 
   ichorkyste : 4,0, c2, +0 activation, obligatoire, effet : on ne peut assigner qu'un maximum de 2 dés à cet ennemi
   récompense : ichor de vérité : permanent : pendant l'étape lancer, vous n'êtes pas obligé de relancer les touches non assignés

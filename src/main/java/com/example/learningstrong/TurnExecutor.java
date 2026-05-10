@@ -21,6 +21,7 @@ public class TurnExecutor {
     game.setWastedDiceThisTurn(0);
     game.setPenalityKillCivilAsserviFirst(false);
     game.setEngageAssignStep(1);
+    game.resetBonusEffectTurn();
 
     // Phase 1 : Activation
     game.setPhase(GamePhase.ACTIVATE_PILE);

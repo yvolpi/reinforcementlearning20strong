@@ -12,7 +12,7 @@ public class Lunoculation extends Item {
 
   @Override
   public String getName() {
-    return "";
+    return "Luniculation";
   }
 
   public boolean canBeUsed(Player player, GameState gameState) {

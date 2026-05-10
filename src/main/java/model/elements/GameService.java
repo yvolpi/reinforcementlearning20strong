@@ -8,12 +8,14 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import model.Dice;
+import model.DiceColor;
 import model.DiceState;
 import model.GameState;
 import model.Player;
 import model.ai.GameAi;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.EnnemyEffectType;
+import model.effets.ennemi.GuepeChercheuseEffect;
 import model.effets.ennemi.KeepDiceInExhaustEffect;
 import model.effets.ennemi.SkipRecoverPhaseEffect;
 import model.ennemis.Ennemi;
@@ -120,9 +122,18 @@ public class GameService {
    */
   public static void engageDicePhase(GameState gameState, List<GameAction> actions) {
     gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-    engageSelectedDice(gameState, actions);
-    gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
-    rollEngagedDice(gameState);
+    if (gameState.getBonusEffectsTurn().stream().anyMatch(effect -> effect.getClass().getSimpleName().equals("IchorVeriteEffect"))) {
+      // ne pas relancer les touches, excepté celle du dé rouge
+      List<Dice> dicesNotToReroll = gameState.getEngagedDices().stream()
+          .filter(dice -> (dice.getColor() == DiceColor.ROUGE && dice.getLastRoll() == dice.getFaces()[5])
+              || (dice.getColor() != DiceColor.ROUGE && dice.getLastRoll() != 0))
+          .toList();
+
+      engageSelectedDice(gameState, actions);
+      rollEngagedDice(gameState, dicesNotToReroll);
+    } else {
+      rollEngagedDice(gameState);
+    }
     new ArrayList<>(gameState.getActiveEnnemis()).forEach(ennemi ->
         {
           //System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
@@ -151,6 +162,12 @@ public class GameService {
   private static void rollEngagedDice(GameState gameState) {
     gameState.getEngagedDices().stream()
         .filter(dice -> dice.getState() == DiceState.ENGAGE)
+        .forEach(dice -> dice.roll(gameState.getRandom()));
+  }
+
+  private static void rollEngagedDice(GameState gameState, List<Dice> diceWhichDoNotRoll) {
+    gameState.getEngagedDices().stream()
+        .filter(dice -> dice.getState() == DiceState.ENGAGE && !diceWhichDoNotRoll.contains(dice))
         .forEach(dice -> dice.roll(gameState.getRandom()));
   }
 
@@ -196,7 +213,7 @@ public class GameService {
 
   private static void assignDiceToEnemy(GameState gameState, Dice dice, Ennemi ennemi) {
     for (EnnemyEffect effect : ennemi.getEffects()) {
-      if (effect.isActivated() && !effect.canAssignDice(gameState, dice)) {
+      if (effect.isActivated() && (!effect.canAssignDice(gameState, dice) || !effect.canAssignDiceToThisEnnemi(gameState, dice, ennemi))) {
         // Refuser l’assignation
         return;
       }

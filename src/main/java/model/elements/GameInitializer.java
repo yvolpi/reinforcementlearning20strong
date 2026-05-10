@@ -36,7 +36,13 @@ public class GameInitializer {
       CALAMARAIGNEE,
       CAMOUFLARD,
       CIVIL_ASSERVI,
-      DUODRONE
+      DUODRONE,
+      ESCROCAFARD,
+      FANATIQUE_ESSAIM,
+      GROS_SCARAB,
+      GUEPE_CHERCHEUSE,
+      GUEPE_DECHAINEE,
+      ICHORKYSTE
   );
 
   public static final List<EnnemiType> bossList = List.of(
