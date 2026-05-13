@@ -2,6 +2,7 @@ package model.elements;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +21,7 @@ import model.effets.ennemi.KeepDiceInExhaustEffect;
 import model.effets.ennemi.SkipRecoverPhaseEffect;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
+import model.items.Item;
 import model.recompenses.Reward;
 import model.recompenses.RewardType;
 
@@ -34,6 +36,12 @@ public class GameService {
       return mandatoryEnemies;
     }
     return gameState.getFirstEnemiesOfEachNonEmptyPile();
+  }
+
+  public static void triggeredAutomaticItemsEffectBeforeActivation(GameState gameState) {
+    for (Item item : gameState.getPlayer().getItems()) {
+      item.triggeredBeforeActivationPhase(gameState);
+    }
   }
 
   /**
@@ -69,6 +77,11 @@ public class GameService {
 
     // Récupère le nombre d'ennemis à attirer (gardes du boss)
     int nbToActivate = boss.getForcedActivations();
+
+    // moins une activation s'il y a le bonus FleauLunaire
+    if (gameState.getBonusEffectsTurn().stream().anyMatch(effect -> effect.getName().equals("FleauLunaireEffect"))) {
+      nbToActivate = Math.max(0, nbToActivate - 1);
+    }
 
     List<EnnemiType> allPossibleEnnemis = GameInitializer.ennemis;
 
@@ -235,7 +248,11 @@ public class GameService {
       if(gameState.getNbEnnemisKilled() > 0 && Objects.equals(ennemi.getName(),
           EnnemiType.ARACHNOPOULPE.name())) {
         int toRemove = 2;
-        Queue<Ennemi>[] piles = new Queue[] {gameState.getPile1(), gameState.getPile2(), gameState.getPile3()};
+        List<Deque<Ennemi>> piles = List.of(
+            gameState.getPile1(),
+            gameState.getPile2(),
+            gameState.getPile3()
+        );
         for (Queue<Ennemi> pile : piles) {
           while (toRemove > 0 && !pile.isEmpty()) {
             pile.remove();
@@ -256,6 +273,7 @@ public class GameService {
           gameState.getExhaustedDice().add(dice);
           gameState.getEngagedDices().remove(dice);
         });
+        gameState.getActiveEnnemis().remove(ennemi); // on le retire temporairement de la zone active pour éviter les interactions avec les effets des ennemis actifs
 
 
         if (!gameState.getPile1().isEmpty()) {
@@ -283,8 +301,27 @@ public class GameService {
 
   private static void applyInstantReward(GameState gameState, Ennemi ennemi) {
     Reward reward = ennemi.getReward();
-    if (reward != null && reward.getType() == RewardType.INSTANT) {
+    if (reward == null) {
+      return;
+    }
+
+    if (reward.getType() == RewardType.INSTANT) {
       reward.apply(gameState);
+    }
+    // si le joueur a le réplicateur et s'il n'y a pas d'ennemi actif vivant avec BlockUseItemsEffect :
+    // son réplicateur est défaussé et il gagne la récompense de l'ennemi vaincu une seconde fois
+
+    Item replicateur = gameState.getPlayer().getItems().stream()
+        .filter(item -> item.getName().equals("Replicateur"))
+        .findFirst()
+        .orElse(null);
+    if (replicateur != null
+        && gameState.getActiveEnnemis().stream()
+        .filter(blockerEnnemi -> !blockerEnnemi.isDefeatedFlag())
+        .flatMap(blockerEnnemi -> blockerEnnemi.getEffects().stream())
+        .noneMatch(effect -> effect.isActivated() && effect.getClass().getSimpleName().equals("BlockUseItemsEffect"))) {
+      reward.apply(gameState);
+      gameState.getPlayer().removeItem(replicateur);
     }
   }
 
@@ -452,7 +489,7 @@ public class GameService {
     int penalityForKillCivilAsserviFirst = current.isPenalityKillCivilAsserviFirst()? -50 : 0;
 
     // Pondération : perte de PV très pénalisante
-    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + currentPlayer.getStrategy();
+    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + 5 * currentPlayer.getStrategy() + 4 * currentPlayer.getRecovery();
   }
 
   // ===== Utilitaires =====

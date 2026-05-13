@@ -3,37 +3,8 @@ package model.ennemis;
 import static model.effets.ennemi.EnnemyEffectType.SUBSEQUENT;
 
 import java.util.List;
-import model.effets.ennemi.AttackAjustmentEffect;
-import model.effets.ennemi.BanishDiceIfKilledEffect;
-import model.effets.ennemi.BanishFailedDiceEffect;
-import model.effets.ennemi.BlockAssignIfFailEffect;
-import model.effets.ennemi.EnnemyEffect;
-import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
-import model.effets.ennemi.FleeAfterEngagementEffect;
-import model.effets.ennemi.ForbidGreenDiceEffect;
-import model.effets.ennemi.GuepeChercheuseEffect;
-import model.effets.ennemi.KeepDiceInExhaustEffect;
-import model.effets.ennemi.LimitedDamageEffect;
-import model.effets.ennemi.MaxAssignDiceEffect;
-import model.effets.ennemi.MaxAssignDiceToItEffect;
-import model.effets.ennemi.MaxEngagedDicePerTurnEffect;
-import model.effets.ennemi.MustAssignPairDiceEffect;
-import model.effets.ennemi.RevealBossEffect;
-import model.effets.ennemi.SkipRecoverPhaseEffect;
-import model.effets.ennemi.SwitchAllDiceEffect;
-import model.recompenses.CompteurEtoilesRewerd;
-import model.recompenses.EncreToxiqueReward;
-import model.recompenses.EnsanglanteuseReward;
-import model.recompenses.FusilBlasterReward;
-import model.recompenses.IchorVeriteReward;
-import model.recompenses.IncreaseRecoveryReward;
-import model.recompenses.IncreaseStrategyRewerd;
-import model.recompenses.LunoculationReward;
-import model.recompenses.MegaEpinephrineReward;
-import model.recompenses.PizzaReward;
-import model.recompenses.RecoverLifeReward;
-import model.recompenses.Reward;
-import model.recompenses.SushiSpatialReward;
+import model.effets.ennemi.*;
+import model.recompenses.*;
 
 public enum EnnemiType {
   // classe 3 = boss
@@ -50,7 +21,7 @@ public enum EnnemiType {
       false, // forcedActivationMandatory
       new SushiSpatialReward() // récompense spéciale (voir ci-dessous)
   ),
-  ASSERVI(2,4,2, List.of(new FleeAfterEngagementEffect()), 1, false,
+  ASSERVI(2,4,2, List.of(new FleeAfterFourHitEffect()), 1, false,
       new CompteurEtoilesRewerd()),
   CALAMARAIGNEE(2,7,4, List.of(new RevealBossEffect()), 0, false,
       new EncreToxiqueReward()),
@@ -61,7 +32,7 @@ public enum EnnemiType {
       new EnsanglanteuseReward()),
   DUODRONE(1,4,2, List.of(new ExhaustHitWhenAssignCritHitEffect()), 0, false,
       new PizzaReward()),
-  ESCROCAFARD(1,3,2, List.of(new BanishFailedDiceEffect(), new ForbidGreenDiceEffect()), 0, false,
+  ESCROCAFARD(1,3,2, List.of(new BanishFailedDiceEffect(), new ForbidGreenDiceToEngageEffect()), 0, false,
       new LunoculationReward()),
 
   FANATIQUE_ESSAIM(2,5,2, List.of(new SwitchAllDiceEffect()), 1, false,
@@ -73,17 +44,37 @@ public enum EnnemiType {
   GUEPE_CHERCHEUSE(1,4,2, List.of(new GuepeChercheuseEffect(), new MaxEngagedDicePerTurnEffect(3)), 0, true,
       new RecoverLifeReward(2)),
 
-  //guêpe déchainée : 5,3, c2, +0 activation, non obligatoire, effet : après chaque lancer, vous pouvez assigner un maximum de 2 dés aux ennemis
-  //  récompense : méga-épinéphrine : permanent : après chaque étape de lancer, s'il y a au moins 3 couleurs différentes, on peut échanger un échec en touche
   GUEPE_DECHAINEE(2,5,3, List.of(new MaxAssignDiceEffect(2)), 0, false,
       new MegaEpinephrineReward()),
 
-  //ichorkyste : 4,0, c2, +0 activation, obligatoire, effet : on ne peut assigner qu'un maximum de 2 dés à cet ennemi
-  //  récompense : ichor de vérité : permanent : pendant l'étape lancer, vous n'êtes pas obligé de relancer les touches non assignés
   ICHORKYSTE(2,4,0, List.of(new MaxAssignDiceToItEffect(2)), 0, true,
       new IchorVeriteReward()),
 
-  SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceEffect()), 0, false,
+  LARVE_A_MOELLE(2,2,4, List.of(new LarveAMoelleEffect()), 0, false,
+      null),
+
+  LOCUSTE_DE_CHAIR(1,6,2, List.of(new BanishDiceIfNotKilledEffect()), 1, false,
+      new IncreaseStrategyRewerd()),
+
+  MACHOIRE_MASSACREUSE(2,2,2, List.of(new MaxOneEnnemiToKillEffect()), 2, false,
+      new FilAMassacreReward()),
+
+  MACHOIRE_SANGLANTE(1,4,1, List.of(new ForbidRedAndPurpleHitsEffect()), 0, false,
+      new TrancheEclipseReward()),
+
+  MANTE_EGORGEUSE(1,4,1, List.of(new ForbidCriticHitsEffect()), 0, false,
+      new StimulantReward(3)),
+
+  MANTE_PURULENTE(2,5,3, List.of(new BlockUseItemsEffect()), 0, false,
+      new AmputateurReward()),
+
+  MAREE_DE_LARVES(1,3,1, List.of(new ForbidPurpleDiceToAssignEffect()), 2, false,
+      new ReplicateurReward()),
+
+  MILITAIRE_ASSERVI(1,5,1, List.of(new FleeIfAtLeastTwoFailsEffect()), 1, false,
+      new AntenneDeSourcierReward()),
+
+  SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceToEngageEffect()), 0, false,
       new IncreaseRecoveryReward(1)),
 
   // Boss
@@ -102,33 +93,6 @@ public enum EnnemiType {
   seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
 
 Autres ennemis :
-
-  ichorkyste : 4,0, c2, +0 activation, obligatoire, effet : on ne peut assigner qu'un maximum de 2 dés à cet ennemi
-  récompense : ichor de vérité : permanent : pendant l'étape lancer, vous n'êtes pas obligé de relancer les touches non assignés
-
-  larve à moelle : 2,4, c2, +0 activation, non obligatoire, effet : subséquent : si cet ennemi n'est pas vaincu, il retourne sur sa pile et sa récompense devient : fléau lunaire Consommable : vous pouvez diminuer le nb d'ennemis à activer de 1
-  récompense : aucune
-
-  locuste de chair : 6,2, c1, +1 activation, non obligatoire, effet : subséquent: maximum : si cet ennemi n'est pas vaincu, banissez le plus fort dé de votre réserve (s’il y en a)
-  récompense : 1 point de stratégie
-
-  mâchoire massacreuse : 2,2, c2, +2 activations, non obligatoire, effet : à chaque étape assigner, vous ne pouvez vaincre qu'un ennemi
-  récompense : fil à massacre : continue : quand vous vainquez un ennemi c2, vous récupérez 1 pv
-
-  mâchoire sanglante : 4,1, c1, +0 activation, non obligatoire, effet : les touches simples rouges et violettes font 0 dégât
-  récompense : tranche-éclipse : continu: vous pouvez épuiser un dé de la réserve. Les touches des dés jaunes font +1 dégât
-
-  mante égorgeuse : 4,1, c1, +0 activation, non obligatoire, effet : les touches critiques ne font pas de dégâts
-  récompense : stimulant : consommable : vous récupérez 3 pv
-
-  mante purulente : 5,3, c2, +0 activation, non obligatoire, effet : vous ne pouvez utiliser aucun item
-  récompense : amputateur : consommable : banissez les dés les plus faibles de votre réserve pour vaincre un ennemi c1
-
-  marée de larves : 3,1, c1, +2 activations, non obligatoire, effet : vous ne pouvez pas assigner de dé violet aux ennemis
-  récompense : réplicateur : consommable : quand vous gagnez une récompense immédiate, vous la gagnez une seconde fois
-
-  militaire asservi : 5,1, c1, +1 activation, non obligatoire, effet : fuit si un lancer de dés donne au moins 2 échecs
-  récompense : antenne de sourcier : consommable : épuiser un dé de votre réserve pour régler les pv d'un ennemi c1 ou c2 à 2
 
   mouche des cratères : 6,1, c1, +0 activation, non obligatoire, effet : les touches jaunes et vertes font +1 dégât
   récompense : récupérez 2 dés

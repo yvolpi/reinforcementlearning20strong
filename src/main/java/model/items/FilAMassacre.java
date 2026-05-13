@@ -2,16 +2,12 @@ package model.items;
 
 import model.GameState;
 import model.Player;
-import model.elements.GamePhase;
+import model.effets.bonus.FilAMassacreEffect;
 
-/**
- Au début de chaque tour, si le joueur a moins de 4 pv, il regagne 1 pv.
- */
-public class Pizza extends Item {
-
+public class FilAMassacre extends Item {
   @Override
   public String getName() {
-    return "Pizza";
+    return "Fil a Massacre";
   }
 
   @Override
@@ -25,9 +21,6 @@ public class Pizza extends Item {
   }
 
   public void triggeredBeforeActivationPhase(GameState gameState) {
-    Player player = gameState.getPlayer();
-    if(player.getLife() < 4) {
-      player.gainLife(1);
-    }
+    gameState.getBonusEffectsTurn().add(new FilAMassacreEffect());
   }
 }

@@ -6,7 +6,7 @@ import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 
-public class ForbidGreenDiceEffect implements EnnemyEffect {
+public class ForbidGreenDiceToEngageEffect implements EnnemyEffect {
   private boolean activated = true;
 
   @Override

@@ -23,7 +23,14 @@ public class TurnExecutor {
     game.setEngageAssignStep(1);
     game.resetBonusEffectTurn();
 
+    GameService.triggeredAutomaticItemsEffectBeforeActivation(game);
+
     // Phase 1 : Activation
+    if (game.playerCanUseItem()) {
+      game.setPhase(GamePhase.USE_ITEM_BEFORE_ACTIVATE);
+      phaseExecutor.executeUsagePhase(game);
+    }
+
     game.setPhase(GamePhase.ACTIVATE_PILE);
     if (!game.isActivatedBoss() && game.forceActiveBoss()) {
       GameService.activateBoss(game);
@@ -48,8 +55,11 @@ public class TurnExecutor {
       }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
-      game.setPhase(GamePhase.USE_ITEM_BEFORE_ENGAGE);
-      phaseExecutor.executeUsagePhase(game);
+      // check si le joueur peut utiliser un item avant d'engager les dés
+      if (game.playerCanUseItem()) {
+        game.setPhase(GamePhase.USE_ITEM_BEFORE_ENGAGE);
+        phaseExecutor.executeUsagePhase(game);
+      }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- engage dice");
       game.setMaxEngagedDicePerTurn(game.getDicePool().size());
@@ -58,8 +68,10 @@ public class TurnExecutor {
       phaseExecutor.executeEngagePhase(game);
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- use item");
-      game.setPhase(GamePhase.USE_ITEM_BEFORE_ASSIGN);
-      phaseExecutor.executeUsagePhase(game);
+      if (game.playerCanUseItem()) {
+        game.setPhase(GamePhase.USE_ITEM_BEFORE_ASSIGN);
+        phaseExecutor.executeUsagePhase(game);
+      }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- assign dice");
 

@@ -13,6 +13,7 @@ import model.GameState;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
 import model.effets.ennemi.MaxAssignDiceEffect;
+import model.effets.ennemi.MaxOneEnnemiToKillEffect;
 import model.effets.ennemi.MustAssignPairDiceEffect;
 import model.elements.GameAction;
 import model.elements.GamePhase;
@@ -69,22 +70,30 @@ public class ActionSelector {
     boolean mustExhaustOnCrit = hasMustExhaustOnCritEffect(activeEnnemis);
     boolean mustAssignByPair  = hasMustAssignByPairEffect(activeEnnemis);
     Integer assignLimit = getMaxAssignDiceEffectValue(activeEnnemis);
+    boolean maxOneEnnemiToKill = getMaxOneEnnemiToKillEffect(activeEnnemis);
 
     List<Dice> exhausted  = new ArrayList<>();
     List<Dice> assigned   = new ArrayList<>();
     List<Dice> remaining  = new ArrayList<>(assignableDice);
     List<GameAction> actions = new ArrayList<>();
 
+    Ennemi uniqueTarget = null;
+
     for (Dice dice : assignableDice) {
       if (isUnavailable(dice, exhausted, assigned)) continue;
       if (random.nextDouble() >= assignRate) continue;
       if (assigned.size() >= assignLimit) break;
 
+      // Si la contrainte est active, on choisit la cible unique au premier passage
+      if (maxOneEnnemiToKill && uniqueTarget == null) {
+        uniqueTarget = pickRandomEnemy(activeEnnemis);
+      }
+
       if (mustAssignByPair) {
         if (assigned.size() >= assignLimit - 1) break; // S'assurer qu'on a la place d'assigner les 2 dés
-        tryAssignPair(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions);
+        tryAssignPair(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions, maxOneEnnemiToKill, uniqueTarget);
       } else {
-        tryAssignSingle(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions);
+        tryAssignSingle(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions, maxOneEnnemiToKill, uniqueTarget);
       }
     }
     return actions;
@@ -229,13 +238,27 @@ public class ActionSelector {
         .orElse(Integer.MAX_VALUE);
   }
 
+  private boolean getMaxOneEnnemiToKillEffect(List<Ennemi> ennemis) {
+    for (Ennemi ennemi : ennemis) {
+      if (!ennemi.isDefeatedFlag()) {
+        for (var effect : ennemi.getEffects()) {
+          if (effect instanceof MaxOneEnnemiToKillEffect && effect.isActivated()) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+
   private void tryAssignSingle(Dice dice, List<Ennemi> activeEnnemis,
       List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
-      boolean mustExhaustOnCrit, List<GameAction> actions) {
+      boolean mustExhaustOnCrit, List<GameAction> actions, boolean maxOneEnnemiToKill, Ennemi uniqueTarget) {
 
     if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
 
-    Ennemi target = pickRandomEnemy(activeEnnemis);
+    Ennemi target = maxOneEnnemiToKill ? uniqueTarget : pickRandomEnemy(activeEnnemis);
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
     markAssigned(dice, assigned, remaining);
   }
@@ -244,7 +267,7 @@ public class ActionSelector {
 
   private void tryAssignPair(Dice dice, List<Ennemi> activeEnnemis,
       List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
-      boolean mustExhaustOnCrit, List<GameAction> actions) {
+      boolean mustExhaustOnCrit, List<GameAction> actions, boolean maxOneEnnemiToKill, Ennemi uniqueTarget) {
 
     Dice partner = findPartner(dice, remaining, assigned, exhausted);
     if (partner == null) return;
@@ -252,7 +275,7 @@ public class ActionSelector {
     if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
     if (!prepareExhaustIfCrit(partner, dice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
 
-    Ennemi target = pickRandomEnemy(activeEnnemis);
+    Ennemi target = maxOneEnnemiToKill ? uniqueTarget : pickRandomEnemy(activeEnnemis);
 
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, partner, target));

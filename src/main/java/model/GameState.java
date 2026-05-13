@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import model.effets.bonus.BonusEffect;
+import model.effets.ennemi.BlockUseItemsEffect;
 import model.effets.ennemi.EnnemyEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
@@ -407,5 +408,27 @@ public class GameState implements Cloneable {
         throw new IllegalStateException("Dé trouvé à la fois dans engagedDices et exhaustedDices : " + d);
       }
     }
+  }
+
+  public boolean playerCanUseItem() {
+    if (player.getItems().isEmpty()) {
+      return false;
+    }
+    for (Ennemi ennemi : activeEnnemis) {
+      if (!ennemi.isDefeatedFlag()) {
+        for (EnnemyEffect effect : ennemi.getEffects()) {
+          if (effect instanceof BlockUseItemsEffect && effect.isActivated()) {
+            return false; // Un effet bloque l'utilisation des objets
+          }
+        }
+      }
+    }
+
+    for (model.items.Item item : player.getItems()) {
+      if (item.canBeUsed(player, this)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

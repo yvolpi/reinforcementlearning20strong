@@ -2,10 +2,9 @@ package model.effets.ennemi;
 
 import model.DiceState;
 import model.GameState;
-import model.Player;
 import model.ennemis.Ennemi;
 
-public class FleeAfterEngagementEffect implements EnnemyEffect {
+public class FleeIfAtLeastTwoFailsEffect implements EnnemyEffect {
   private boolean activated = true;
 
   @Override
@@ -14,18 +13,13 @@ public class FleeAfterEngagementEffect implements EnnemyEffect {
   }
 
   @Override
-  public void apply(Player player, GameState gameState, Ennemi ennemi) {
-
-  }
-
-  @Override
   public void applyAfterEngagementAndRoll(GameState gameState, Ennemi ennemi) {
     if (ennemi.isDefeatedFlag()) return;
-    // fuit si 4 dés engagés non assignés ont donné une touche
-    long countHits = gameState.getEngagedDices().stream()
-        .filter(dice -> dice.getState() == DiceState.ENGAGE && dice.getLastRoll() > 0)
+    // fuit si 2 dés engagés non assignés ont donné un échec (0)
+    long countFails = gameState.getEngagedDices().stream()
+        .filter(dice -> dice.getState() == DiceState.ENGAGE && dice.getLastRoll() == 0)
         .count();
-    if (countHits >= 4) {
+    if (countFails >= 2) {
       // les dés assignés à cet ennemi sont épuisés
       gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("FleeAfterEngagementEffect : l'ennemi " + ennemi.getName() + " fuit car " + countHits + " dés engagés ont touché");
@@ -48,6 +42,7 @@ public class FleeAfterEngagementEffect implements EnnemyEffect {
 
   }
 
+
   @Override
   public boolean isActivated() {
     return activated;
@@ -57,5 +52,4 @@ public class FleeAfterEngagementEffect implements EnnemyEffect {
   public void desactivate() {
     activated = false;
   }
-
 }

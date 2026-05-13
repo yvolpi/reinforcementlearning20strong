@@ -41,6 +41,14 @@ public class Dice {
     return color;
   }
 
+  public boolean isNormalHit() {
+    return lastRoll == faces[4]; // suppose que la cinquième face est toujours 1
+  }
+
+  public boolean isCriticHit() {
+    return lastRoll == faces[5]; // suppose que la sixième face est toujours 2
+  }
+
   public void setToFail() {
     lastRoll = faces[0]; // suppose que la première face est toujours 0
   }
@@ -51,6 +59,23 @@ public class Dice {
 
   public void setToCriticalHit() {
     lastRoll = faces[5]; // suppose que la sixième face est toujours 2
+  }
+
+  public int getStrengthRanking() {
+    switch (color) {
+      case JAUNE:
+        return 1;
+      case VERT:
+        return 2;
+      case BLEU:
+        return 3;
+      case VIOLET:
+        return 4;
+      case ROUGE:
+        return 5;
+      default:
+        throw new IllegalArgumentException("Couleur de dé inconnue : " + color);
+    }
   }
 
 }

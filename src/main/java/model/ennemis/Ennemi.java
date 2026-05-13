@@ -16,17 +16,17 @@ public class Ennemi {
 
   private final String name;
   private final int classValue;
-  private final int life;
   private final int attack;
   private final List<EnnemyEffect> effects;
   private final int forcedActivations;
   private final boolean forcedActivationMandatory;
-  private final Reward reward;
   private final List<Dice> assignedDice;
 
   private int pileNumber;
   private boolean defeated;
+  private final int life;
   private int currentLife;
+  private Reward reward;
 
   // ===== Constructeur =====
 
@@ -116,6 +116,18 @@ public class Ennemi {
     this.defeated = defeated;
   }
 
+  public void setLife(int life) {
+    this.currentLife = life;
+  }
+
+  public void setCurrentLife(int currentLife) {
+    this.currentLife = currentLife;
+  }
+
+  public void setReward(Reward reward) {
+    this.reward = reward;
+  }
+
   // ===== Représentation textuelle =====
 
   @Override
@@ -129,10 +141,6 @@ public class Ennemi {
 
   public int getCurrentLife() {
     return currentLife;
-  }
-
-  public void setCurrentLife(int currentLife) {
-    this.currentLife = currentLife;
   }
 
   public void computeCurrentLife(GameState gameState) {

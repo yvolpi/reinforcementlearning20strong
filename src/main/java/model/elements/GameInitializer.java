@@ -42,7 +42,15 @@ public class GameInitializer {
       GROS_SCARAB,
       GUEPE_CHERCHEUSE,
       GUEPE_DECHAINEE,
-      ICHORKYSTE
+      ICHORKYSTE,
+      LARVE_A_MOELLE,
+      LOCUSTE_DE_CHAIR,
+      MACHOIRE_MASSACREUSE,
+      MACHOIRE_SANGLANTE,
+      MANTE_EGORGEUSE,
+      MANTE_PURULENTE,
+      MAREE_DE_LARVES,
+      MILITAIRE_ASSERVI
   );
 
   public static final List<EnnemiType> bossList = List.of(
