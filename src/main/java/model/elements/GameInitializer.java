@@ -50,7 +50,16 @@ public class GameInitializer {
       MANTE_EGORGEUSE,
       MANTE_PURULENTE,
       MAREE_DE_LARVES,
-      MILITAIRE_ASSERVI
+      MILITAIRE_ASSERVI,
+      MOUCHE_DES_CRATERES,
+      MOUCHE_EVENTREUSE,
+      MOUCHE_TRUCIDEUSE,
+      PARAKYSTE,
+      PISTOGUEPE,
+      PLASMAKYSTE,
+      PORTE_SPORES_CHERCHEUR,
+      PORTE_SPORES_EXPECTORANT,
+      PORTE_SPORES_FRENETIQUE
   );
 
   public static final List<EnnemiType> bossList = List.of(

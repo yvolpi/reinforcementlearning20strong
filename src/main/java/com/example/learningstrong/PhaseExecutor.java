@@ -11,6 +11,7 @@ import model.ai.ActionKeyEncoder;
 import model.ai.Experience;
 import model.ai.GameAi;
 import model.elements.GameAction;
+import model.elements.GameInitializer;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
@@ -35,6 +36,10 @@ public class PhaseExecutor {
     if (game.isVictory()) return;
     game.setPhase(GamePhase.ACTIVATE_PILE);
     game.setNbEnnemisToActivate(1);
+    if (game.isActivateOneMoreEnnemiNextTurn()) {
+      game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() + 1);
+      game.setActivateOneMoreEnnemiNextTurn(false);
+    }
 
     while (game.getNbEnnemisToAvtivate() > 0 && game.atLeastOneEnnemiOnPiles()) {
 
@@ -44,6 +49,13 @@ public class PhaseExecutor {
 
       game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() - 1 + newEnnemi.getForcedActivations());
 
+    }
+
+    while (game.getNbEnnemisToAvtivate() > 0) {
+      // Si on doit encore activer des ennemis mais qu'il n'y en a plus à activer, on active des ennemis aléatoires
+      Ennemi ennemi = new Ennemi(GameInitializer.ennemis.get(game.getRandom().nextInt(GameInitializer.ennemis.size())), 1);
+      Ennemi newEnnemi = GameService.activateEnemy(game, ennemi);
+      game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() - 1 + newEnnemi.getForcedActivations());
     }
   }
 

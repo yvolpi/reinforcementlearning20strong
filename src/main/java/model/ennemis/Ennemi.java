@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Dice;
+import model.DiceColor;
 import model.GameState;
 import model.effets.bonus.BonusEffect;
 import model.effets.ennemi.EnnemyEffect;
@@ -52,7 +53,7 @@ public class Ennemi {
    * Calcule si l'ennemi est vaincu en fonction des dégâts assignés.
    */
 
-  public boolean isDefeated(GameState gameState) {
+  public boolean isDefeated() {
     return currentLife <= 0;
   }
 
@@ -153,6 +154,27 @@ public class Ennemi {
       bonusDamage += bonusEffect.getBonusDamage(gameState, this);
     }
 
+    for (Ennemi ennemi : gameState.getActiveEnnemis()) {
+      if (!ennemi.isDefeatedFlag()) {
+         for (EnnemyEffect effect : ennemi.getEffects()) {
+           if (effect.isActivated()) {
+             for (Dice dice : ennemi.getAssignedDice()) {
+               bonusDamage += effect.getModifiedDamage(ennemi, dice);
+             }
+           }
+
+         }
+      }
+    }
+
     currentLife = Math.max(0, life - (totalDamage + bonusDamage));
+  }
+
+  public boolean canAssignDiceWhenParakyste(Dice dice) {
+    DiceColor color = dice.getColor();
+    if (assignedDice.isEmpty()) {
+      return true;
+    }
+    return assignedDice.getFirst().getColor() == color;
   }
 }

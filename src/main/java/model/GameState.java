@@ -1,10 +1,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -36,6 +38,8 @@ public class GameState implements Cloneable {
   private Deque<Ennemi> pile2;
   private Deque<Ennemi> pile3;
   private Queue<Ennemi> bossPile; // (optionnel, si tu veux gérer un boss séparément)
+
+  // ===== Autres infos ======
   private List<Ennemi> activeEnnemis;
   private int nbEnnemisKilled;
   private int nbEnnemisToAvtivate;
@@ -44,6 +48,7 @@ public class GameState implements Cloneable {
   private boolean revealedBoss;
   private boolean activatedBoss;
   private boolean bosskilled;
+  private boolean activateOneMoreEnnemiNextTurn;
 
   // ===== État du tour =====
   private GamePhase phase;
@@ -71,6 +76,7 @@ public class GameState implements Cloneable {
     revealedBoss = false;
     activatedBoss = false;
     bosskilled = false;
+    activateOneMoreEnnemiNextTurn = false;
 
     this.random = random;
 
@@ -170,11 +176,26 @@ public class GameState implements Cloneable {
   public List<Dice> getAvailableDiceToAssign() {
     // dés engagés non assignés qui font au moins 1 dégât
 
-    return engagedDices.stream()
+    List<Dice> assignablesDice = engagedDices.stream()
         .filter(dice -> dice.getState() == DiceState.ENGAGE)
         .filter(dice -> dice.getLastRoll() >= 1)
         .filter(this::isDiceAssignable)
         .collect(Collectors.toList());
+
+    if (limitOneDiceToAssign()) {
+      // Pour chaque couleur de dé assignable, on prend le meilleur résultat
+      return assignablesDice.stream()
+          .collect(Collectors.groupingBy(
+              Dice::getColor,
+              Collectors.maxBy(Comparator.comparingInt(Dice::getLastRoll))
+          ))
+          .values().stream()
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .collect(Collectors.toList());
+    }
+
+    return assignablesDice;
   }
 
   private boolean isDiceAssignable(Dice dice) {
@@ -189,6 +210,13 @@ public class GameState implements Cloneable {
     }
     // Aucun effet n'interdit l'assignation
     return true;
+  }
+
+  private boolean limitOneDiceToAssign() {
+    // s'il y a LimitOneDicePerColorToAssignEffect
+    return activeEnnemis.stream().filter(ennemi -> !ennemi.isDefeatedFlag())
+        .flatMap(ennemi -> ennemi.getEffects().stream())
+        .anyMatch(effect -> effect.isActivated() && effect.getClass().getSimpleName().equals("LimitOneDicePerColorToAssignEffect"));
   }
 
 
@@ -323,6 +351,14 @@ public class GameState implements Cloneable {
 
   public void setBosskilled(boolean bosskilled) {
     this.bosskilled = bosskilled;
+  }
+
+  public boolean isActivateOneMoreEnnemiNextTurn() {
+    return activateOneMoreEnnemiNextTurn;
+  }
+
+  public void setActivateOneMoreEnnemiNextTurn(boolean activateOneMoreEnnemiNextTurn) {
+    this.activateOneMoreEnnemiNextTurn = activateOneMoreEnnemiNextTurn;
   }
 
   public int getMaxEngagedDicePerTurn() {

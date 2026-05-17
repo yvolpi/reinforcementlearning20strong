@@ -74,8 +74,37 @@ public enum EnnemiType {
   MILITAIRE_ASSERVI(1,5,1, List.of(new FleeIfAtLeastTwoFailsEffect()), 1, false,
       new AntenneDeSourcierReward()),
 
+  MOUCHE_DES_CRATERES(1,6,1, List.of(new YellowAndGreenHitsDoOneMoreDamageEffect()), 0, false,
+      new RecoverDicesReward(2)),
+
+  MOUCHE_EVENTREUSE(1,6,1, List.of(new KillEnnemiWhenKilledEffect()), 0, false,
+      new RayonTracteurReward(3)),
+
+  MOUCHE_TRUCIDEUSE(2,8,1, List.of(new ActivateOneMoreEnnemiNextTurnIfNotKilledEffect()), 0, false,
+      new ForteressePortativeReward()),
+
   SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceToEngageEffect()), 0, false,
       new IncreaseRecoveryReward(1)),
+
+  PARAKYSTE(1,3,1, List.of(new ForbidMultipleColorsToAssignEffect()), 1, true,
+      new PistoletEtourdissantReward()),
+
+  PISTOGUEPE(2,7,2, List.of(new LimitOneDicePerColorToAssignEffect()), 0, false,
+      new DardMissileReward()),
+
+  PLASMAKYSTE(2,6,2, List.of(new PlasmakysteEffect()), 0, true,
+      new ADNDeLaHordeReward()),
+
+  PORTE_SPORES_CHERCHEUR(1,2,2, List.of(new MaxEngagedDicePerTurnEffect(4)), 0, false,
+      new GrilleFiltranteReward()),
+
+  PORTE_SPORES_EXPECTORANT(2,6,2, List.of(new PorteSporeExpectorantEffect()), 0, false,
+      new GrilleFiltranteReward()),
+
+  PORTE_SPORES_FRENETIQUE(3,1,1, List.of(new MaxEngagedDicePerTurnEffect(5)), 0, false,
+      new GrilleFiltranteReward())
+
+   ,
 
   // Boss
   BETE_ALPHA(3,12,2, List.of(new BlockAssignIfFailEffect(), new KeepDiceInExhaustEffect()), 2, false,
@@ -93,33 +122,6 @@ public enum EnnemiType {
   seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
 
 Autres ennemis :
-
-  mouche des cratères : 6,1, c1, +0 activation, non obligatoire, effet : les touches jaunes et vertes font +1 dégât
-  récompense : récupérez 2 dés
-
-  mouche éventreuse : 6,1, c1, +0 activation, non obligatoire, effet : spécial : quand il est vaincu, un autre ennemi c1 ou c2 est vaincu
-  récompense : rayon tracteur : consommable : récupérer 3 dés
-
-  mouche trucideuse : 8,1, c2, +0 activation, non obligatoire, effet : subséquent : si vous avez subi au moins 1 dégât, activez 1 ennemi de plus au prochain tour
-  récompense : forteresse portative : consommable : vous récupérez tous les dés épuisés
-
-  parakyste : 3,1,c1, +1 activation, obligatoire, effet : vous ne pouvez assigner qu'une couleur de dé à chaque ennemi
-  récompense : pistolet étourdissant : consommable : défaussez un ennemi c2
-
-  pistoguepe : 7,2, c2, +0 activation, non obligatoire, effet : à chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
-  récompense : dard-missile : permanent : si la zone d'épuisement contient au moins 8 dés, les touches bleues font +1 dégât
-
-  plasmakyste : 6,2, c2, +0 activation, obligatoire, effet : cet ennemi ne peut être vaincu qu'à condition d'avoir au moins 4 couleurs de dés assignés
-  récompense : adn de la horde : permanent : 1 fois par tour, vous pouvez épuiser un dé en réserve pour transformer une touche en touche critique
-
-  porte spores chercheur : 2,2, c1, +0 activation, non obligatoire, effet : vous ne pouvez engager qu'un maximum de 4 dés
-  récompense : grille filtrante : consommable : retourner la 1ere carte de la pile boss.
-
-  porte spores expectorant : 6,2, c2, +0 activation, non obligatoire, effet : vous ne pouvez engager qu'un maximum de 8 dés. Quand vous assignez un dé autre jaune, vous devez aussi assiigner un dé jaune
-  récompense : grille filtrante : consommable : retourner la 1ere carte de la pile boss.
-
-  porte spores frénétique : 3,1, c1, +0 activation, non obligatoire, effet : vous ne pouvez engager qu'un maximum de 5 dés
-  récompense : grille filtrante : consommable : retourner la 1ere carte de la pile boss.
 
   rampecratère : 3,1, c1, +1 activation, non obligatoire, effet : subséquent : après chaque lancer, le joueur perd 1 pv par échec
   récompense : jus d'insecte : consommable : récupérez 1 pv par ennemi actif

@@ -48,6 +48,10 @@ public interface EnnemyEffect {
     // Par défaut, les ennemis ne font rien de spécial avant l'engagement
   }
 
+  default int getModifiedDamage(Ennemi ennemi, Dice dice) {
+    return 0; // Par défaut, les ennemis ne modifient pas les dégâts
+  }
+
   boolean isActivated();
 
   void desactivate();

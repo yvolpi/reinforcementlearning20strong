@@ -2,6 +2,7 @@ package model.ai;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,11 @@ import model.DiceColor;
 import model.GameState;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
+import model.effets.ennemi.ForbidMultipleColorsToAssignEffect;
 import model.effets.ennemi.MaxAssignDiceEffect;
 import model.effets.ennemi.MaxOneEnnemiToKillEffect;
 import model.effets.ennemi.MustAssignPairDiceEffect;
+import model.effets.ennemi.PorteSporeExpectorantEffect;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
@@ -67,15 +70,23 @@ public class ActionSelector {
   public List<GameAction> exploreAssignActions(List<Dice> assignableDice, List<Ennemi> activeEnnemis, double assignRate) {
     if (activeEnnemis.isEmpty()) return List.of();
 
-    boolean mustExhaustOnCrit = hasMustExhaustOnCritEffect(activeEnnemis);
-    boolean mustAssignByPair  = hasMustAssignByPairEffect(activeEnnemis);
-    Integer assignLimit = getMaxAssignDiceEffectValue(activeEnnemis);
-    boolean maxOneEnnemiToKill = getMaxOneEnnemiToKillEffect(activeEnnemis);
+    boolean mustExhaustOnCrit               = hasMustExhaustOnCritEffect(activeEnnemis);
+    boolean mustAssignByPair                = hasMustAssignByPairEffect(activeEnnemis);
+    Integer assignLimit                     = getMaxAssignDiceEffectValue(activeEnnemis);
+    boolean maxOneEnnemiToKill              = getMaxOneEnnemiToKillEffect(activeEnnemis);
+    boolean mustAssignOneDiceColorPerEnnemi = hasMustAssignOneDiceColorPerEnnemi(activeEnnemis);
 
-    List<Dice> exhausted  = new ArrayList<>();
-    List<Dice> assigned   = new ArrayList<>();
-    List<Dice> remaining  = new ArrayList<>(assignableDice);
+    List<Dice> exhausted = new ArrayList<>();
+    List<Dice> assigned  = new ArrayList<>();
+    List<Dice> remaining = new ArrayList<>(assignableDice);
     List<GameAction> actions = new ArrayList<>();
+
+    Map<Ennemi, DiceColor> couleurParEnnemi = new HashMap<>();
+    for (Ennemi ennemi : activeEnnemis) {
+      if (!ennemi.getAssignedDice().isEmpty()) {
+        couleurParEnnemi.put(ennemi, ennemi.getAssignedDice().getFirst().getColor());
+      }
+    }
 
     Ennemi uniqueTarget = null;
 
@@ -84,20 +95,49 @@ public class ActionSelector {
       if (random.nextDouble() >= assignRate) continue;
       if (assigned.size() >= assignLimit) break;
 
-      // Si la contrainte est active, on choisit la cible unique au premier passage
+      // Filtre les cibles valides : si la contrainte est inactive, validTargets == activeEnnemis
+      List<Ennemi> validTargets = mustAssignOneDiceColorPerEnnemi
+          ? activeEnnemis.stream()
+            .filter(e -> !couleurParEnnemi.containsKey(e)
+                         || couleurParEnnemi.get(e) == dice.getColor())
+            .toList()
+          : activeEnnemis;
+
+      if (validTargets.isEmpty()) continue;
+
+      // Un seul endroit pour initialiser la cible unique
       if (maxOneEnnemiToKill && uniqueTarget == null) {
-        uniqueTarget = pickRandomEnemy(activeEnnemis);
+        uniqueTarget = pickRandomEnemy(validTargets);
       }
 
+      Ennemi target = maxOneEnnemiToKill ? uniqueTarget : pickRandomEnemy(validTargets);
+
+      // Décision du type d'assignation
+      boolean needsYellowCompanion = target.getEffects().stream()
+          .anyMatch(effect -> effect instanceof PorteSporeExpectorantEffect && effect.isActivated())
+          && dice.getColor() != DiceColor.JAUNE;
+
       if (mustAssignByPair) {
-        if (assigned.size() >= assignLimit - 1) break; // S'assurer qu'on a la place d'assigner les 2 dés
-        tryAssignPair(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions, maxOneEnnemiToKill, uniqueTarget);
+        if (assigned.size() >= assignLimit - 1) break;
+        if (needsYellowCompanion && dice.getColor() != DiceColor.JAUNE) {
+          // Contrainte impossible à satisfaire : on ne génère pas l'action
+          continue;
+        }
+
+        tryAssignPair(dice, target, remaining, assigned, exhausted,
+            mustExhaustOnCrit, actions, couleurParEnnemi);
+      } else if (needsYellowCompanion) {
+        if (assigned.size() >= assignLimit - 1) break; // il faut de la place pour 2 dés
+        tryAssignSingleWithYellow(dice, target, remaining, assigned, exhausted,
+            mustExhaustOnCrit, actions, couleurParEnnemi);
       } else {
-        tryAssignSingle(dice, activeEnnemis, remaining, assigned, exhausted, mustExhaustOnCrit, actions, maxOneEnnemiToKill, uniqueTarget);
+        tryAssignSingle(dice, target, remaining, assigned, exhausted,
+            mustExhaustOnCrit, actions, couleurParEnnemi);
       }
     }
     return actions;
   }
+
 
   public List<GameAction> exploreUseActions(List<Item> usableItems, GamePhase phase) {
     List<GameAction> actions = new ArrayList<>();
@@ -251,37 +291,78 @@ public class ActionSelector {
     return false;
   }
 
+  private boolean hasMustAssignOneDiceColorPerEnnemi(List<Ennemi> ennemis) {
+    for (Ennemi ennemi : ennemis) {
+      if (!ennemi.isDefeatedFlag()) {
+        for (var effect : ennemi.getEffects()) {
+          if (effect instanceof ForbidMultipleColorsToAssignEffect && effect.isActivated()) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
-  private void tryAssignSingle(Dice dice, List<Ennemi> activeEnnemis,
+
+  private void tryAssignSingle(Dice dice, Ennemi target,
       List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
-      boolean mustExhaustOnCrit, List<GameAction> actions, boolean maxOneEnnemiToKill, Ennemi uniqueTarget) {
+      boolean mustExhaustOnCrit, List<GameAction> actions,
+      Map<Ennemi, DiceColor> ennemiDiceColorMap) {
 
     if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
-
-    Ennemi target = maxOneEnnemiToKill ? uniqueTarget : pickRandomEnemy(activeEnnemis);
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
     markAssigned(dice, assigned, remaining);
+    ennemiDiceColorMap.put(target, dice.getColor());
   }
 
   // ---- Assignation par paire ----
 
-  private void tryAssignPair(Dice dice, List<Ennemi> activeEnnemis,
+  private void tryAssignPair(Dice dice, Ennemi target,
       List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
-      boolean mustExhaustOnCrit, List<GameAction> actions, boolean maxOneEnnemiToKill, Ennemi uniqueTarget) {
+      boolean mustExhaustOnCrit, List<GameAction> actions,
+      Map<Ennemi, DiceColor> ennemiDiceColorMap) {
 
     Dice partner = findPartner(dice, remaining, assigned, exhausted);
     if (partner == null) return;
-
     if (!prepareExhaustIfCrit(dice, null, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
     if (!prepareExhaustIfCrit(partner, dice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
-
-    Ennemi target = maxOneEnnemiToKill ? uniqueTarget : pickRandomEnemy(activeEnnemis);
-
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
     actions.add(new GameAction(GamePhase.ASSIGN_DICE, partner, target));
     markAssigned(dice, assigned, remaining);
     markAssigned(partner, assigned, remaining);
+    ennemiDiceColorMap.put(target, dice.getColor());
   }
+
+  private void tryAssignSingleWithYellow(Dice dice, Ennemi target,
+      List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
+      boolean mustExhaustOnCrit, List<GameAction> actions,
+      Map<Ennemi, DiceColor> ennemiDiceColorMap) {
+
+    // Chercher un dé jaune disponible
+    Dice yellowDice = remaining.stream()
+        .filter(d -> d.getColor() == DiceColor.JAUNE
+            && !assigned.contains(d)
+            && !exhausted.contains(d)
+            && d.getLastRoll() >= 1)
+        .findFirst().orElse(null);
+
+    if (yellowDice == null) {
+      // Contrainte impossible à satisfaire : on ne génère pas l'action
+      return;
+    }
+
+    if (!prepareExhaustIfCrit(dice, yellowDice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
+    if (!prepareExhaustIfCrit(yellowDice, dice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
+
+    actions.add(new GameAction(GamePhase.ASSIGN_DICE, dice, target));
+    actions.add(new GameAction(GamePhase.ASSIGN_DICE, yellowDice, target));
+    markAssigned(dice, assigned, remaining);
+    markAssigned(yellowDice, assigned, remaining);
+    // Pas de mise à jour de couleurParEnnemi : le PorteSporeExpectorant
+    // accepte plusieurs couleurs par nature
+  }
+
 
   // ---- Utilitaires ----
 

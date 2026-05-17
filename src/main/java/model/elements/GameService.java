@@ -1,7 +1,7 @@
 package model.elements;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,6 @@ import model.Player;
 import model.ai.GameAi;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.EnnemyEffectType;
-import model.effets.ennemi.GuepeChercheuseEffect;
 import model.effets.ennemi.KeepDiceInExhaustEffect;
 import model.effets.ennemi.SkipRecoverPhaseEffect;
 import model.ennemis.Ennemi;
@@ -58,6 +57,16 @@ public class GameService {
     return ennemi;
   }
 
+  public static Ennemi activateEnemy(GameState gameState, Ennemi ennemi) {
+
+    if (ennemi == null) {
+      throw new IllegalStateException("L'ennemi à activer est null.");
+    }
+
+    gameState.addActiveEnnemi(ennemi);
+    return ennemi;
+  }
+
   private static Ennemi pollEnemyFromPile(GameState gameState, int pileNumber) {
     return switch (pileNumber) {
       case 1 -> gameState.getPile1().poll();
@@ -77,6 +86,12 @@ public class GameService {
 
     // Récupère le nombre d'ennemis à attirer (gardes du boss)
     int nbToActivate = boss.getForcedActivations();
+
+    // effet de la mouche trucideuse si elle n'a pas été vaincue au tour précédent
+    if (gameState.isActivateOneMoreEnnemiNextTurn()) {
+      nbToActivate += 1;
+      gameState.setActivateOneMoreEnnemiNextTurn(false);
+    }
 
     // moins une activation s'il y a le bonus FleauLunaire
     if (gameState.getBonusEffectsTurn().stream().anyMatch(effect -> effect.getName().equals("FleauLunaireEffect"))) {
@@ -243,7 +258,25 @@ public class GameService {
 
   private static void checkAndApplyDefeat(GameState gameState, Ennemi ennemi) {
     ennemi.computeCurrentLife(gameState);
-    if (ennemi.isDefeated(gameState) && !ennemi.isDefeatedFlag()) {
+    if (ennemi.isDefeated() && !ennemi.isDefeatedFlag()) {
+      // s'il s'agit du plasmakyste et que son effet est actif, il faut vérifier s'il y a au moins 4 couleurs différentes parmi les dés assignés pour le vaincre
+      if ("PLASMAKYSTE".equals(ennemi.getName())) {
+        // Vérifier si son effet Plasmakyste est toujours actif
+        boolean plasmakysteEffectActive = ennemi.getEffects().stream()
+            .filter(EnnemyEffect::isActivated)
+            .anyMatch(effect -> effect.getName().equals("PlasmakysteEffect"));
+        if (plasmakysteEffectActive) {
+          long distinctColors = ennemi.getAssignedDice().stream()
+              .map(Dice::getColor)
+              .distinct()
+              .count();
+          if (distinctColors < 4) {
+            // L'effet du plasmakyste empêche la défaite de l'ennemi
+            return;
+          }
+        }
+      }
+
       ennemi.setDefeated(true);
       if(gameState.getNbEnnemisKilled() > 0 && Objects.equals(ennemi.getName(),
           EnnemiType.ARACHNOPOULPE.name())) {
@@ -263,32 +296,11 @@ public class GameService {
       }
       if(gameState.getNbEnnemisKilled() == 0 && Objects.equals(ennemi.getName(),
           EnnemiType.CIVIL_ASSERVI.name())) {
-        // Si le civil asservi est le premier ennemi vaincu, il retourne sur la première pile non vide
-        // Pénalité
-        gameState.setPenalityKillCivilAsserviFirst(true);
-
-        //les dés assignés à cet ennemi sont épuisés
-        ennemi.getAssignedDice().forEach(dice -> {
-          dice.setState(DiceState.EPUISE);
-          gameState.getExhaustedDice().add(dice);
-          gameState.getEngagedDices().remove(dice);
-        });
-        gameState.getActiveEnnemis().remove(ennemi); // on le retire temporairement de la zone active pour éviter les interactions avec les effets des ennemis actifs
-
-
-        if (!gameState.getPile1().isEmpty()) {
-          gameState.getPile1().addFirst(ennemi);
-          ennemi.setPileNumber(1);
-
-        } else if (!gameState.getPile2().isEmpty()) {
-          gameState.getPile2().addFirst(ennemi);
-          ennemi.setPileNumber(2);
-        } else if (!gameState.getPile3().isEmpty()) {
-          gameState.getPile3().add(ennemi);
-          ennemi.setPileNumber(3);
-        } else {
-          gameState.getActiveEnnemis().remove(ennemi);
-        }
+        returnEnnemiToFirstNonEmptyPile(gameState, ennemi);
+      }
+      if(gameState.getNbEnnemisKilled() == 0 && Objects.equals(ennemi.getName(),
+          EnnemiType.MOUCHE_EVENTREUSE.name())) {
+        killAnotherEnnemi(gameState, ennemi);
       }
       if (ennemi.getClassValue() == 3) {
         // Le boss est vaincu
@@ -562,4 +574,49 @@ public class GameService {
       }
     }
   }
+
+  public static void returnEnnemiToFirstNonEmptyPile(GameState gameState, Ennemi ennemi) {
+    // Pénalité spécifique
+    gameState.setPenalityKillCivilAsserviFirst(true);
+
+    // Épuiser les dés assignés
+    ennemi.getAssignedDice().forEach(dice -> {
+      dice.setState(DiceState.EPUISE);
+      gameState.getExhaustedDice().add(dice);
+      gameState.getEngagedDices().remove(dice);
+    });
+
+    // Retirer temporairement de la zone active
+    gameState.getActiveEnnemis().remove(ennemi);
+
+    // Retour sur la première pile non vide
+    if (!gameState.getPile1().isEmpty()) {
+      gameState.getPile1().addFirst(ennemi);
+      ennemi.setPileNumber(1);
+    } else if (!gameState.getPile2().isEmpty()) {
+      gameState.getPile2().addFirst(ennemi);
+      ennemi.setPileNumber(2);
+    } else if (!gameState.getPile3().isEmpty()) {
+      gameState.getPile3().add(ennemi);
+      ennemi.setPileNumber(3);
+    } else {
+      // Si toutes les piles sont vides, on retire l’ennemi définitivement
+      gameState.getActiveEnnemis().remove(ennemi);
+    }
+  }
+
+  public static void killAnotherEnnemi(GameState gameState, Ennemi ennemi) {
+    // Logique pour trouver et tuer un ennemi de classe c1 ou c2 autre que lui même
+    // Celui qui a en priorité le plus de vie
+    Ennemi target = gameState.getActiveEnnemis().stream()
+        .filter(e -> (e.getClassValue() == 1 || e.getClassValue() == 2) && !e.equals(ennemi) && !e.isDefeatedFlag())
+        .max(Comparator.comparingInt(Ennemi::getLife))
+        .orElse(null);
+    if (target != null) {
+      target.setDefeated(true);
+      gameState.setNbEnnemisKilled(gameState.getNbEnnemisKilled() + 1);
+      applyInstantReward(gameState, target);
+    }
+  }
+
 }
