@@ -96,12 +96,22 @@ public class ActionSelector {
       if (assigned.size() >= assignLimit) break;
 
       // Filtre les cibles valides : si la contrainte est inactive, validTargets == activeEnnemis
-      List<Ennemi> validTargets = mustAssignOneDiceColorPerEnnemi
-          ? activeEnnemis.stream()
+      List<Ennemi> validTargets = new ArrayList<>();
+      if (activeEnnemis.size() > 1) {
+        // on ne doit pas prendre le seigneur de l'essaim (invincible tant qu'il reste d'autres ennemis)
+        validTargets = activeEnnemis.stream()
+            .filter(e -> !e.getName().equals("SEIGNEUR_DE_LESSAIM"))
+            .toList();
+      } else {
+        validTargets = activeEnnemis;
+      }
+
+      validTargets = mustAssignOneDiceColorPerEnnemi
+          ? validTargets.stream()
             .filter(e -> !couleurParEnnemi.containsKey(e)
                          || couleurParEnnemi.get(e) == dice.getColor())
             .toList()
-          : activeEnnemis;
+          : validTargets;
 
       if (validTargets.isEmpty()) continue;
 

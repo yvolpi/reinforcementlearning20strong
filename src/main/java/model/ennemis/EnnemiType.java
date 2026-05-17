@@ -110,16 +110,21 @@ public enum EnnemiType {
   BETE_ALPHA(3,12,2, List.of(new BlockAssignIfFailEffect(), new KeepDiceInExhaustEffect()), 2, false,
       null),
 
+  //  mère des spores : 9,0, c3, +1 activation, obligatoire, effet : Après le lancer de dé, vous perdez 1 pv par échec. A chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
+  MERE_DES_SPORES(3,9,0, List.of(new LoseLifePerFailEffect(), new ForbidMultipleColorsToAssignEffect()), 1, true,
+      null),
+
   MONARQUE_RUCHE(3,8,1, List.of(new LimitedDamageEffect(3), new AttackAjustmentEffect(1), new KeepDiceInExhaustEffect()), 2, false,
+      null),
+
+  //  seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
+  SEIGNEUR_DE_LESSAIM(3,9,3, List.of(new ForbidDamageIfEnnemiAliveEffect()), 3, true,
       null)
 
   ;
 
   /*
   Autres boss :
-
-  mère des spores : 9,0, c3, +1 activation, obligatoire, effet : Après le lancer de dé, vous perdez 1 pv par échec. A chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
-  seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
 
 Autres ennemis :
 
