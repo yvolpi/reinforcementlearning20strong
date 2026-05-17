@@ -10,7 +10,6 @@ public class Stimulant extends Item {
     this.nbPvsGain = nbPvsGain;
   }
 
-
   @Override
   public String getName() {
     return "Stimulant" + nbPvsGain;

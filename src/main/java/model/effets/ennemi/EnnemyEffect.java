@@ -12,6 +12,7 @@ public interface EnnemyEffect {
   }
 
   EnnemyEffectType getType();
+
   default void apply(Player player, GameState gameState, Ennemi ennemi) {
     // Par défaut, les effets n'ont pas d'impact immédiat sur le joueur ou l'état du jeu
   }

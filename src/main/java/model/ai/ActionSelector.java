@@ -2,15 +2,19 @@ package model.ai;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
+import model.effets.ennemi.EngageAllSameColorDiceEffect;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
 import model.effets.ennemi.ForbidMultipleColorsToAssignEffect;
@@ -53,13 +57,42 @@ public class ActionSelector {
       throw new IllegalStateException("Doublon détecté dans ActionSelector.exploreEngageActions : " + availableDice);
     }
 
+    boolean hasMustEngageAllDiceColorEffect = hasMustEngageAllDiceColorEffect(gameState.getActiveEnnemis());
+
     List<GameAction> actions = new ArrayList<>();
-    List<Dice> shuffled = new ArrayList<>(availableDice);
-    random.shuffle(shuffled);
-    int nbDiceToEngage =  random.nextInt(availableDice.size() + 1); // 0 à tous les dés
-    nbDiceToEngage = Math.min(nbDiceToEngage, nbMaxDiceToEngage); // ne pas dépasser le maximum autorisé
-    for (int i = 0; i < nbDiceToEngage; i++) {
-      actions.add(new GameAction(GamePhase.ENGAGE_DICE, shuffled.get(i)));
+
+    if (hasMustEngageAllDiceColorEffect) {
+      int nbDiceBeingEngaged = 0;
+      // 1. Grouper les dés par couleur
+      Map<DiceColor, List<Dice>> diceByColor = new TreeMap<>();
+      for (Dice dice : availableDice) {
+        diceByColor.computeIfAbsent(dice.getColor(), k -> new ArrayList<>()).add(dice);
+      }
+
+      List<DiceColor> orderedColors = diceByColor.keySet().stream()
+          .sorted(Comparator.comparingInt(this::getDiceColorPriority))
+          .toList();
+
+      for (DiceColor diceColor : orderedColors) {
+        if (nbDiceBeingEngaged + diceByColor.get(diceColor).size() > nbMaxDiceToEngage ) {
+          continue; // on ne peut pas engager tous les dés de cette couleur sans dépasser la limite, on les ignore
+        }
+        if (random.nextDouble() < 0.5) { // 50% de chances d'engager les dés de cette couleur
+          for (Dice dice : diceByColor.get(diceColor)) {
+            actions.add(new GameAction(GamePhase.ENGAGE_DICE, dice));
+            nbDiceBeingEngaged++;
+          }
+        }
+      }
+
+    } else {
+      List<Dice> shuffled = new ArrayList<>(availableDice);
+      random.shuffle(shuffled);
+      int nbDiceToEngage =  random.nextInt(availableDice.size() + 1); // 0 à tous les dés
+      nbDiceToEngage = Math.min(nbDiceToEngage, nbMaxDiceToEngage); // ne pas dépasser le maximum autorisé
+      for (int i = 0; i < nbDiceToEngage; i++) {
+        actions.add(new GameAction(GamePhase.ENGAGE_DICE, shuffled.get(i)));
+      }
     }
 
     //System.out.println("Exploration : " + nbDiceToEngage + " dés engagés.");
@@ -263,6 +296,13 @@ public class ActionSelector {
   }
 
   // ---- Effets actifs ----
+
+  private boolean hasMustEngageAllDiceColorEffect(List<Ennemi> ennemis) {
+    return ennemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .flatMap(e -> e.getEffects().stream())
+        .anyMatch(effect -> effect instanceof EngageAllSameColorDiceEffect && effect.isActivated());
+  }
 
   private boolean hasMustExhaustOnCritEffect(List<Ennemi> ennemis) {
     return ennemis.stream()

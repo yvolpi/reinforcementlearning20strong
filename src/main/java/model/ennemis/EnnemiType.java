@@ -83,9 +83,6 @@ public enum EnnemiType {
   MOUCHE_TRUCIDEUSE(2,8,1, List.of(new ActivateOneMoreEnnemiNextTurnIfNotKilledEffect()), 0, false,
       new ForteressePortativeReward()),
 
-  SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceToEngageEffect()), 0, false,
-      new IncreaseRecoveryReward(1)),
-
   PARAKYSTE(1,3,1, List.of(new ForbidMultipleColorsToAssignEffect()), 1, true,
       new PistoletEtourdissantReward()),
 
@@ -102,7 +99,37 @@ public enum EnnemiType {
       new GrilleFiltranteReward()),
 
   PORTE_SPORES_FRENETIQUE(3,1,1, List.of(new MaxEngagedDicePerTurnEffect(5)), 0, false,
-      new GrilleFiltranteReward())
+      new GrilleFiltranteReward()),
+
+  RAMPECRATERE(1,3,1, List.of(new LoseLifePerTwoFailsEffect()), 1, false,
+      new JusInsecteReward()),
+
+  RIPOSTEUR_ESSAIM(2,5,2, List.of(new ForbidCriticHitsEffect()), 1, true,
+      new StimulantReward(5)),
+
+  RODECRATERE(2,5,1, List.of(new LoseLifePerTwoHitsColorEffect()), 0, false,
+      new MiniTerraformeuseReward()),
+
+  SENTINELLE_ASSIMILEE(1,3,2, List.of(new EngageAllSameColorDiceEffect()), 1, false,
+      new IncreaseStrategyRewerd()),
+
+  SENTINELLE_LUNAIRE(2,8,2, List.of(), 0, false,
+      new RecoverDicesReward(5)),
+
+  SENTINELLE_PERDUE(1,3,1, List.of(new ForbidGreenDiceToEngageEffect()), 0, false,
+      new IncreaseRecoveryReward(1)),
+
+  SOLODRONE(1,4,1, List.of(new SolodroneEffect()), 1, true,
+      new IncreaseRecoveryReward(1)),
+
+  SPORE_DE_GUERRE_TOTALE(2,5,3, List.of(new BanishPurpleDiceIfTwoHitsEffect()), 0, true,
+      new LuneBruleeReward()),
+
+  //spore guerrière : 3,1, c1, +0 activation, non obligatoire, effet : au lancer, vous ne pouvez pas relancer les échecs
+  //  récompense : vous récupérez 2 dés
+  SPORE_GUERRIERE(3,1,1, List.of(new ForbidRerollFailsEffect()), 0, false,
+      new RecoverDicesReward(2))
+
 
    ,
 
@@ -110,47 +137,19 @@ public enum EnnemiType {
   BETE_ALPHA(3,12,2, List.of(new BlockAssignIfFailEffect(), new KeepDiceInExhaustEffect()), 2, false,
       null),
 
-  //  mère des spores : 9,0, c3, +1 activation, obligatoire, effet : Après le lancer de dé, vous perdez 1 pv par échec. A chaque étape assigner, vous ne pouvez assigner qu'un dé par couleur
   MERE_DES_SPORES(3,9,0, List.of(new LoseLifePerFailEffect(), new ForbidMultipleColorsToAssignEffect()), 1, true,
       null),
 
   MONARQUE_RUCHE(3,8,1, List.of(new LimitedDamageEffect(3), new AttackAjustmentEffect(1), new KeepDiceInExhaustEffect()), 2, false,
       null),
 
-  //  seigneur de l'essaim : 0,3, +3 activations, c3, obligatoire, effet : s'il reste des ennemis c1 ou c2 invaincus, les touches infligent 0 dégat à ce boss
   SEIGNEUR_DE_LESSAIM(3,9,3, List.of(new ForbidDamageIfEnnemiAliveEffect()), 3, true,
       null)
-
   ;
 
   /*
-  Autres boss :
 
 Autres ennemis :
-
-  rampecratère : 3,1, c1, +1 activation, non obligatoire, effet : subséquent : après chaque lancer, le joueur perd 1 pv par échec
-  récompense : jus d'insecte : consommable : récupérez 1 pv par ennemi actif
-
-  riposteur de l'essaim : 5,2, c2, +1 activation, obligatoire, effet : vous ne pouvez pas assigner de touche critique aux ennemis
-  récompense : relique de scab : consommable : vous récupérez 5 pv
-
-  rodecratère : 5,2, c2, +0 activation, non obligatoire, effet : après chaque lancer, vous perdez 1 pv pour chaque couleur avec au moins 2 touches
-  récompense : mini terraformeuse : permanent : après chaque étape récupérer, vous récupérez 1 dé jaune et un dé vert de la zone épuisée s'il y en a.
-
-  sentinelle assimilée : 3,2,c1, +1 activation, non obligatoire, effet : pour chaque dé que vous engagez, vous devez engager tous les dés de la même couleur
-  récompense : 1 point de stratégie
-
-  sentinelle lunaire : 8,2, c2, +0 activation, non obligatoire, effet : aucun
-  récompense : récupérez jusqu'à 5 dés
-
-  solodrone : 4,1, c1, +1 activation, obligatoire, effet : après chaque lancer, pour chaque échec, vous devez relancer une touche
-  récompense : 1 point de récupération
-
-  spore de guerre totale : 5,3, c2, +0 activation, obligatoire, effet : subséquent : lancez les 3 dés les plus faibles : sur 2 touches vous devez bannir un dé violet
-  récompense : lune brûlée : permanent : -1 point de récupération. Au début de chaque stratégie, renvoyez tous les échecs engagés
-
-  spore guerrière : 3,1, c1, +0 activation, non obligatoire, effet : au lancer, vous ne pouvez pas relancer les échecs
-  récompense : vous récupérez 2 dés
 
   tas de vers : 3,3, c1, +0 activation, non obligatoire, effet : subséquent : si des dés rouges ou violets ont été assignés, défaussez le 1er ennemi de chaque pile
   récompense : bouteille d'eau : consommable : vous récupérez tous les dés bleus de la zone épuisée

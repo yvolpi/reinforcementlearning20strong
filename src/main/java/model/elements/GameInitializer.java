@@ -59,7 +59,16 @@ public class GameInitializer {
       PLASMAKYSTE,
       PORTE_SPORES_CHERCHEUR,
       PORTE_SPORES_EXPECTORANT,
-      PORTE_SPORES_FRENETIQUE
+      PORTE_SPORES_FRENETIQUE,
+      RAMPECRATERE,
+      RIPOSTEUR_ESSAIM,
+      RODECRATERE,
+      SENTINELLE_ASSIMILEE,
+      SENTINELLE_LUNAIRE,
+      SENTINELLE_PERDUE,
+      SOLODRONE,
+      SPORE_DE_GUERRE_TOTALE,
+      SPORE_GUERRIERE
   );
 
   public static final List<EnnemiType> bossList = List.of(

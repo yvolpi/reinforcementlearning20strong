@@ -150,18 +150,29 @@ public class GameService {
    */
   public static void engageDicePhase(GameState gameState, List<GameAction> actions) {
     gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+    // en présence de ForbidRerollFailsEffect, ne pas relancer les échecs
+    boolean hasForbidRerollFailsEffect = gameState.getActiveEnnemis().stream()
+        .filter(ennemi -> !ennemi.isDefeatedFlag())
+        .flatMap(ennemi -> ennemi.getEffects().stream())
+        .anyMatch(effect -> effect.isActivated() && effect.getClass().getSimpleName().equals("ForbidRerollFailsEffect"));
+
+    List<Dice> dicesNotToReroll = new ArrayList<>();
     if (gameState.getBonusEffectsTurn().stream().anyMatch(effect -> effect.getClass().getSimpleName().equals("IchorVeriteEffect"))) {
       // ne pas relancer les touches, excepté celle du dé rouge
-      List<Dice> dicesNotToReroll = gameState.getEngagedDices().stream()
+      dicesNotToReroll.addAll(gameState.getEngagedDices().stream()
           .filter(dice -> (dice.getColor() == DiceColor.ROUGE && dice.getLastRoll() == dice.getFaces()[5])
               || (dice.getColor() != DiceColor.ROUGE && dice.getLastRoll() != 0))
-          .toList();
-
-      engageSelectedDice(gameState, actions);
-      rollEngagedDice(gameState, dicesNotToReroll);
-    } else {
-      rollEngagedDice(gameState);
+          .toList());
     }
+    if (hasForbidRerollFailsEffect) {
+      // ne pas relancer les échecs
+      dicesNotToReroll.addAll(gameState.getEngagedDices().stream()
+          .filter(dice -> dice.getLastRoll() == 0)
+          .toList());
+    }
+
+    engageSelectedDice(gameState, actions);
+    rollEngagedDice(gameState, dicesNotToReroll);
     new ArrayList<>(gameState.getActiveEnnemis()).forEach(ennemi ->
         {
           //System.out.println("Effets après engagement et lancer pour l'ennemi : " + ennemi.getName());
@@ -185,12 +196,6 @@ public class GameService {
         gameState.getDicePool().remove(dice);
       }
     }
-  }
-
-  private static void rollEngagedDice(GameState gameState) {
-    gameState.getEngagedDices().stream()
-        .filter(dice -> dice.getState() == DiceState.ENGAGE)
-        .forEach(dice -> dice.roll(gameState.getRandom()));
   }
 
   private static void rollEngagedDice(GameState gameState, List<Dice> diceWhichDoNotRoll) {
@@ -350,7 +355,8 @@ public class GameService {
   }
 
   public static void applyEnnemisSubsequentEffects(GameState gameState) {
-    for (Ennemi ennemi : gameState.getActiveEnnemis()) {
+    gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+    for (Ennemi ennemi : new ArrayList<>(gameState.getActiveEnnemis())) {
       for (EnnemyEffect effect : ennemi.getEffects()) {
         if (effect.getType() == EnnemyEffectType.SUBSEQUENT && effect.isActivated()) {
           effect.apply(gameState.getPlayer(), gameState, ennemi);
@@ -430,19 +436,26 @@ public class GameService {
     int recoveryAmount = gameState.getPlayer().getRecovery();
     List<Dice> exhaustedDice = gameState.getExhaustedDice();
 
-    if (exhaustedDice.isEmpty() || recoveryAmount <= 0) {
+    if (exhaustedDice.isEmpty()) {
       return;
     }
 
-    List<Dice> diceToRecover = ai.chooseDiceToRecover(exhaustedDice, recoveryAmount);
+    if (recoveryAmount > 0) {
+      List<Dice> diceToRecover = ai.chooseDiceToRecover(exhaustedDice, recoveryAmount);
 
-    diceToRecover.forEach(dice -> {
-      dice.setState(DiceState.RESERVE);
-      gameState.getDicePool().add(dice);
-    });
+      diceToRecover.forEach(dice -> {
+        dice.setState(DiceState.RESERVE);
+        gameState.getDicePool().add(dice);
+      });
 
-    exhaustedDice.removeAll(diceToRecover);
-    gameState.setPhase(GamePhase.ACTIVATE_PILE);
+      exhaustedDice.removeAll(diceToRecover);
+    }
+
+    // bonus
+    gameState.getBonusEffectsTurn()
+            .forEach(effect -> effect.recoverDice(gameState));
+
+    gameState.setPhase(GamePhase.CLEAR);
   }
 
   // ===== Phase de récompenses =====
@@ -619,4 +632,19 @@ public class GameService {
     }
   }
 
+  public static void applyBonusLunaire(GameState game) {
+    boolean checkBonusLuneBrulee = game.getBonusEffectsTurn().stream()
+        .anyMatch(effect -> effect.getClass().getSimpleName().equals("LuneBruleeEffect"));
+    if (checkBonusLuneBrulee) {
+      List<Dice> failedEngagedDice = game.getEngagedDices().stream()
+          .filter(dice -> dice.getState() == DiceState.ENGAGE && dice.getLastRoll() == 0)
+          .toList();
+
+      for (Dice dice : failedEngagedDice) {
+        dice.setState(DiceState.RESERVE);
+        game.getDicePool().add(dice);
+      }
+      game.getEngagedDices().removeAll(failedEngagedDice);
+    }
+  }
 }

@@ -14,4 +14,8 @@ public interface BonusEffect {
     return 0;
   }
 
+  default void recoverDice(GameState gameState) {
+    // Default implementation does nothing
+  }
+
 }

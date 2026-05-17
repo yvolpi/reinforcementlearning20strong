@@ -59,6 +59,9 @@ public class TurnExecutor {
       if (game.playerCanUseItem()) {
         game.setPhase(GamePhase.USE_ITEM_BEFORE_ENGAGE);
         phaseExecutor.executeUsagePhase(game);
+        // si game contient le bonus lunaire, le joueur récupère tous les dés engagés qui ont donné un échec
+        GameService.applyBonusLunaire(game);
+
       }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- engage dice");
