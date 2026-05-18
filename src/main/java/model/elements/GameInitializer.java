@@ -68,7 +68,12 @@ public class GameInitializer {
       SENTINELLE_PERDUE,
       SOLODRONE,
       SPORE_DE_GUERRE_TOTALE,
-      SPORE_GUERRIERE
+      SPORE_GUERRIERE,
+      TAS_DE_VERS,
+      TORTUE_MORTIER,
+      TORTUEUSE,
+      TRIODRONE,
+      VAINCAFARD
   );
 
   public static final List<EnnemiType> bossList = List.of(

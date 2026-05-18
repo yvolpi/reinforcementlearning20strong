@@ -125,10 +125,25 @@ public enum EnnemiType {
   SPORE_DE_GUERRE_TOTALE(2,5,3, List.of(new BanishPurpleDiceIfTwoHitsEffect()), 0, true,
       new LuneBruleeReward()),
 
-  //spore guerrière : 3,1, c1, +0 activation, non obligatoire, effet : au lancer, vous ne pouvez pas relancer les échecs
-  //  récompense : vous récupérez 2 dés
   SPORE_GUERRIERE(3,1,1, List.of(new ForbidRerollFailsEffect()), 0, false,
-      new RecoverDicesReward(2))
+      new RecoverDicesReward(2)),
+
+  TAS_DE_VERS(1,3,3, List.of(new RemoveFirstEnnemisIfRedOrPurpleAssignedEffect(), new ForbidGreenDiceToEngageEffect()), 0, false,
+      new BouteilleDEauReward()),
+
+  TORTUE_MORTIER(2,7,3, List.of(), 0, false,
+      new RecoverDicesAndLifeReward(2)),
+
+  TORTUEUSE(1,6,1, List.of(), 1, false,
+      new KeratineReward(3)),
+
+  TRIODRONE(2,6,2, List.of(new TriodroneEffect()), 0, false,
+      new SecondeChanceReward()),
+
+  //vaincafard : 5,3, c2, +1 activation, non obligatoire, effet : vous ne pouvez engager que 3 dés maximum par engagement
+  //  récompense : sacrifice solaire ; permanent : banissez un dé de votre réserve pour infliger à un ennemi c1 ou c2 un nb de dégâts égal au nb de touches du dé sacrifié
+  VAINCAFARD(2,5,3, List.of(new MaxEngagedDicePerEngageEffect(3)), 1, false,
+      new SacrificeSolaireReward())
 
 
    ,
@@ -151,20 +166,6 @@ public enum EnnemiType {
 
 Autres ennemis :
 
-  tas de vers : 3,3, c1, +0 activation, non obligatoire, effet : subséquent : si des dés rouges ou violets ont été assignés, défaussez le 1er ennemi de chaque pile
-  récompense : bouteille d'eau : consommable : vous récupérez tous les dés bleus de la zone épuisée
-
-  tortue mortier : 7,3, c2, +0 activation, non obligatoire, effet : aucun
-  récompense : 2 pv et récupérez 2 dés
-
-  tortueuse : 6,1, c1, +1 activation, non obligatoire, effet : aucun
-  récompense : supplément de kératine : consommable : épuisez 2 échecs bleus pour régler la récupération à 3 et récupérer 3 dés
-
-  triodrone : 6,2,c2, +0 activation, non obligatoire, effet : vous ne pouvez assigner des dés aux ennemis que si la zone épuisée contient au moins un dé de la même couleur
-  récompense : seconde chance : permanent : 1 fois par tour, vous pouvez transformer une paire d'échecs de même couleur en touches
-
-  vaincafard : 5,3, c2, +1 activation, non obligatoire, effet : vous ne pouvez engager que 3 dés maximum par engagement
-  récompense : sacrifice solaire ; permanent : banissez un dé de votre réserve pour infliger à un ennemi c1 ou c2 un nb de dégâts égal au nb de touches du dé sacrifié
 
 
 

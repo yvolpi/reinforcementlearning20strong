@@ -19,6 +19,7 @@ import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.ExhaustHitWhenAssignCritHitEffect;
 import model.effets.ennemi.ForbidMultipleColorsToAssignEffect;
 import model.effets.ennemi.MaxAssignDiceEffect;
+import model.effets.ennemi.MaxEngagedDicePerEngageEffect;
 import model.effets.ennemi.MaxOneEnnemiToKillEffect;
 import model.effets.ennemi.MustAssignPairDiceEffect;
 import model.effets.ennemi.PorteSporeExpectorantEffect;
@@ -51,6 +52,9 @@ public class ActionSelector {
 
   public List<GameAction> exploreEngageActions(List<Dice> availableDice, GameState gameState) {
     int nbMaxDiceToEngage = gameState.getMaxEngagedDicePerTurn() - gameState.getEngagedDices().size();
+    int maxEngagedDicePerEngageEffect = maxEngagedDicePerEngageEffect(availableDice.size(), gameState.getActiveEnnemis());
+    nbMaxDiceToEngage = Math.min(nbMaxDiceToEngage, maxEngagedDicePerEngageEffect);
+
     // exception s'il y a un doublon
     Set<Dice> set = new HashSet<>(availableDice);
     if (set.size() != availableDice.size()) {
@@ -296,6 +300,16 @@ public class ActionSelector {
   }
 
   // ---- Effets actifs ----
+
+  private int maxEngagedDicePerEngageEffect(int defaultMax, List<Ennemi> ennemis) {
+    return ennemis.stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .flatMap(e -> e.getEffects().stream())
+        .filter(effect -> effect instanceof MaxEngagedDicePerEngageEffect && effect.isActivated())
+        .map(effect -> ((MaxEngagedDicePerEngageEffect) effect).getMaxEngagedDicePerEngage())
+        .min(Integer::compareTo)
+        .orElse(defaultMax);
+  }
 
   private boolean hasMustEngageAllDiceColorEffect(List<Ennemi> ennemis) {
     return ennemis.stream()
