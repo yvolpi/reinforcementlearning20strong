@@ -53,6 +53,31 @@ public class GameAi {
 
   // ===== Décisions =====
 
+  public GameAction decidePileForM10(GameState gameState) {
+    String encodedState = encoder.encodeStateForM10(gameState);
+    GameAction action;
+    List<GameAction> possible = new ArrayList<>();
+    if (!gameState.getPile1().isEmpty()) {
+      possible.add(new GameAction(1));
+    }
+    if (!gameState.getPile2().isEmpty()) {
+      possible.add(new GameAction(2));
+    }
+    if (!gameState.getPile3().isEmpty()) {
+      possible.add(new GameAction(3));
+    }
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = possible.get(random.nextInt(possible.size()));
+    } else {
+
+      action = selector.findBestDecidePileM10Action(possible, learner.getActionValues(encodedState));
+      if (action == null) action = possible.get(random.nextInt(possible.size()));
+    }
+
+    mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeDecidePileM10Action(action));
+    return action;
+  }
+
   public GameAction decideBossActivation(GameState gameState) {
     String encodedState = encoder.encodeStateWithBoss(gameState);
     GameAction action;

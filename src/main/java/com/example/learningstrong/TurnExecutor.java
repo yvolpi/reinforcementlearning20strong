@@ -4,6 +4,7 @@ import model.GameState;
 import model.ai.GameAi;
 import model.elements.GamePhase;
 import model.elements.GameService;
+import model.missions.M10;
 
 public class TurnExecutor {
 
@@ -24,6 +25,11 @@ public class TurnExecutor {
     game.resetBonusEffectTurn();
 
     GameService.triggeredAutomaticItemsEffectBeforeActivation(game);
+    // Mission remplie ?
+    if (game.getActiveMission().isSuccess()) {
+      game.removeActiveMission();
+    }
+
 
     // Phase 1 : Activation
     if (game.playerCanUseItem()) {
@@ -39,6 +45,10 @@ public class TurnExecutor {
       phaseExecutor.executeDecideActiveBoss(game);
     }
     if (!game.isActivatedBoss()) {
+      if (game.getActiveMission() instanceof M10 && game.atLeastOneEnnemiOnPiles()) {
+        phaseExecutor.executeChoosePileForM10(game);
+      }
+
       phaseExecutor.executeActivatePhase(game);
     }
 

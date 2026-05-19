@@ -87,6 +87,12 @@ public class GameService {
     // Récupère le nombre d'ennemis à attirer (gardes du boss)
     int nbToActivate = boss.getForcedActivations();
 
+    // Chaque mission non remplie : + 1
+    nbToActivate += gameState.numberOfMissions();
+
+    // Vider les missions
+    gameState.clearMissions();
+
     // effet de la mouche trucideuse si elle n'a pas été vaincue au tour précédent
     if (gameState.isActivateOneMoreEnnemiNextTurn()) {
       nbToActivate += 1;

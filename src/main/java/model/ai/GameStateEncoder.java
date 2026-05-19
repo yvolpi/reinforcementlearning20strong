@@ -79,6 +79,31 @@ public class GameStateEncoder {
     return sb.toString();
   }
 
+  public String encodeStateForM10(GameState gameState) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("CHOIXPILEM10|");
+    // Stats du joueur
+    sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append(gameState.getPlayer().getRecovery()).append("|");
+
+    // nb d'ennemis dans chaque pile + 1er ennemi de chaque pile
+    String enemies = "";
+    if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
+      enemies += gameState.getPile1().peek().getName() + ":PILE1:" + gameState.getPile1().size() + ";";
+    }
+    if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
+      enemies += gameState.getPile2().peek().getName() + ":PILE2:" + gameState.getPile2().size() + ";";
+    }
+    if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
+      enemies += gameState.getPile3().peek().getName() + ":PILE3:" + gameState.getPile3().size() + ";";
+    }
+    sb.append(enemies);
+
+
+    return sb.toString();
+  }
+
   public String encodeStateForEngage(GameState gameState) {
     StringBuilder sb = new StringBuilder();
     sb.append("ENGAGE").append(gameState.getEngageAssignStep()).append("|");

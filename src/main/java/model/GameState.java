@@ -18,6 +18,7 @@ import model.effets.ennemi.EnnemyEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
+import model.missions.M10;
 import model.missions.Mission;
 import model.random.CustomRandom;
 
@@ -135,9 +136,24 @@ public class GameState implements Cloneable {
   public List<Ennemi> getMandatoryEnnemies() {
     List<Ennemi> mandatory = new ArrayList<>();
 
+
     addIfMandatory(pile1.peek(), mandatory);
     addIfMandatory(pile2.peek(), mandatory);
     addIfMandatory(pile3.peek(), mandatory);
+
+    // Ajout spécifique pour la mission M10
+    if (getActiveMission() instanceof M10 m10 && !m10.isSuccess()) {
+      int pileNumber = m10.getNumberPile();
+      Ennemi ennemi = null;
+      switch (pileNumber) {
+        case 1: ennemi = pile1.peek(); break;
+        case 2: ennemi = pile2.peek(); break;
+        case 3: ennemi = pile3.peek(); break;
+      }
+      if (ennemi != null && !mandatory.contains(ennemi)) {
+        mandatory.add(ennemi);
+      }
+    }
 
     return mandatory;
   }
@@ -485,5 +501,13 @@ public class GameState implements Cloneable {
 
   public int numberOfMissions() {
     return missions.size();
+  }
+
+  public void clearMissions() {
+    missions.clear();
+  }
+
+  public void removeActiveMission() {
+    missions.poll();
   }
 }

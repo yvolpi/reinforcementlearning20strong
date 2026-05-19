@@ -1,5 +1,7 @@
 package model.elements;
 
+import static model.elements.GamePhase.NEW_MISSION;
+
 import java.util.ArrayList;
 import java.util.List;
 import model.Dice;
@@ -17,6 +19,11 @@ public class GameAction {
   private Item item;
   // ... autres champs selon le type d’action
   private List<Dice> diceList;
+
+  public GameAction(int pileNumber) {
+    this.type = NEW_MISSION;
+    this.pileNumber = pileNumber;
+  }
 
   public GameAction(GamePhase type, Dice dice) {
     this.type = type;
@@ -71,5 +78,9 @@ public class GameAction {
 
   public EnnemyEffect getEnnemyEffect() {
     return ennemyEffect;
+  }
+
+  public int getPileNumber() {
+    return pileNumber;
   }
 }

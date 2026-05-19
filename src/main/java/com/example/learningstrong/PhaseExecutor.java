@@ -16,6 +16,8 @@ import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
 import model.items.Item;
+import model.missions.M10;
+import model.missions.Mission;
 
 public class PhaseExecutor {
 
@@ -23,6 +25,15 @@ public class PhaseExecutor {
 
   public PhaseExecutor(GameAi ai) {
     this.ai = ai;
+  }
+
+  public void executeChoosePileForM10(GameState game) {
+    Mission mission = game.getActiveMission();
+    if (!(mission instanceof M10)) {
+      throw new IllegalStateException("Mission active n'est pas M10, ne peut pas choisir une pile pour M10");
+    }
+    GameAction action = ai.decidePileForM10(game);
+    ((M10) mission).setNumberPile(action.getPileNumber());
   }
 
   public void executeDecideActiveBoss(GameState game) {
