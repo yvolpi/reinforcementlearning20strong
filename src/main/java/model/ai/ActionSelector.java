@@ -28,6 +28,7 @@ import model.elements.GamePhase;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiEffectCouple;
 import model.items.Item;
+import model.missions.M11;
 import model.random.CustomRandom;
 
 /**
@@ -102,7 +103,7 @@ public class ActionSelector {
     return actions;
   }
 
-  public List<GameAction> exploreAssignActions(List<Dice> assignableDice, List<Ennemi> activeEnnemis, double assignRate) {
+  public List<GameAction> exploreAssignActions(GameState gameState, List<Dice> assignableDice, List<Ennemi> activeEnnemis, double assignRate) {
     if (activeEnnemis.isEmpty()) return List.of();
 
     boolean mustExhaustOnCrit               = hasMustExhaustOnCritEffect(activeEnnemis);
@@ -141,12 +142,21 @@ public class ActionSelector {
         validTargets = activeEnnemis;
       }
 
+      boolean isActiveMissionM11 = gameState.getActiveMission() != null && gameState.getActiveMission() instanceof M11;
+
       validTargets = mustAssignOneDiceColorPerEnnemi
           ? validTargets.stream()
             .filter(e -> !couleurParEnnemi.containsKey(e)
                          || couleurParEnnemi.get(e) == dice.getColor())
             .toList()
           : validTargets;
+
+      if (!isActiveMissionM11) {
+        // on ne doit pas assigner de dé aux ennemis vaincus
+        validTargets = validTargets.stream()
+            .filter(e -> !e.isDefeatedFlag())
+            .toList();
+      }
 
       if (validTargets.isEmpty()) continue;
 

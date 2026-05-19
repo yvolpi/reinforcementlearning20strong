@@ -147,9 +147,9 @@ public class GameAi {
     if (learner.shouldExplore(random.nextDouble())) {
       // Exploration
       if (lastAssignPhase) {
-        actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 1.0);
+        actions = selector.exploreAssignActions(gameState, assignableDice, activeEnnemis, 1.0);
       } else {
-        actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 0.5);
+        actions = selector.exploreAssignActions(gameState, assignableDice, activeEnnemis, 0.5);
       }
 
     } else {
@@ -158,9 +158,9 @@ public class GameAi {
       if (bestLearnedAssignActions == null) {
         // Si aucune action apprise, fallback sur assignation naïve
         if (lastAssignPhase) {
-          actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 1.0);
+          actions = selector.exploreAssignActions(gameState, assignableDice, activeEnnemis, 1.0);
         } else {
-          actions = selector.exploreAssignActions(assignableDice, activeEnnemis, 0.5);
+          actions = selector.exploreAssignActions(gameState, assignableDice, activeEnnemis, 0.5);
         }
       } else {
         actions = ActionDecoder.decodeAssignActions(assignableDice, bestLearnedAssignActions, activeEnnemis);

@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import model.Dice;
+import model.DiceState;
 import model.GameState;
 import model.ai.ActionKeyEncoder;
 import model.ai.Experience;
@@ -17,6 +18,7 @@ import model.elements.GameService;
 import model.ennemis.Ennemi;
 import model.items.Item;
 import model.missions.M10;
+import model.missions.M2;
 import model.missions.Mission;
 
 public class PhaseExecutor {
@@ -101,6 +103,22 @@ public class PhaseExecutor {
 
     List<GameAction> assignActions = ai.chooseActionsToAssign(assignableDice, game.getActiveEnnemis(), game);
     GameService.assignDicePhase(game, assignActions);
+
+    // M2 = épuiser des touches critiques non assignées
+    Mission mission = game.getActiveMission();
+    if (mission instanceof M2) {
+      List<Dice> criticalHitDicesToExhaust =
+      game.getEngagedDices()          .stream()
+          .filter(dice -> dice.getState() == DiceState.ENGAGE && dice.isCriticHit())
+          .limit(((M2) mission).getNumberOfCriticalHitsToExhaust())
+          .toList();
+      for (Dice dice : criticalHitDicesToExhaust) {
+        dice.setState(DiceState.EPUISE);
+        game.getEngagedDices().remove(dice);
+        game.getExhaustedDice().add(dice);
+        ((M2) mission).onExhaustCriticalHit(game);
+      }
+    }
   }
 
   public void executeClear(GameState game) {

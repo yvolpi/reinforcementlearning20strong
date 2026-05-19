@@ -3,7 +3,7 @@ package model.missions;
 import model.GameState;
 
 public class M2 extends Mission {
-  int count;
+  private int count;
 
   public M2() {
     super();
@@ -27,4 +27,7 @@ public class M2 extends Mission {
     }
   }
 
+  public int getNumberOfCriticalHitsToExhaust() {
+    return 4 - count;
+  }
 }

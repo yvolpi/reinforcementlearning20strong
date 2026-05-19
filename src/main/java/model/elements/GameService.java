@@ -21,6 +21,8 @@ import model.effets.ennemi.SkipRecoverPhaseEffect;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
 import model.items.Item;
+import model.missions.M11;
+import model.missions.Mission;
 import model.recompenses.Reward;
 import model.recompenses.RewardType;
 
@@ -126,14 +128,17 @@ public class GameService {
    * Phase d'usage d'objets : les objets choisis par l'IA sont utilisés.
    */
   public static void useItemsPhase(GameState gameState, List<GameAction> actions, GameAi ai) {
-    // inventaire du joueur
-    /*System.out.println("Inventaire du joueur : " + gameState.getPlayer().getItems().stream()
-        .map(Item::getName)
-        .collect(Collectors.joining(", ")));*/
     for (GameAction action : actions) {
-      if ((action.getType() == GamePhase.USE_ITEM_BEFORE_ENGAGE
+      if ((action.getType() == GamePhase.USE_ITEM_BEFORE_ACTIVATE
+          || action.getType() == GamePhase.USE_ITEM_BEFORE_ENGAGE
           || action.getType() == GamePhase.USE_ITEM_BEFORE_ASSIGN)
           && action.getItem() != null) {
+
+        Mission activeMission = gameState.getActiveMission();
+        if (activeMission != null) {
+          activeMission.onUseItem(gameState);
+        }
+
         //System.out.println("Utilisation de l'objet : " + action.getItem().getName());
         action.getItem().use(gameState.getPlayer(), gameState);
         if (action.getItem().getName().equals("Lunoculation")) {
@@ -156,6 +161,12 @@ public class GameService {
    */
   public static void engageDicePhase(GameState gameState, List<GameAction> actions) {
     gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+
+    Mission activeMission = gameState.getActiveMission();
+    if (activeMission != null) {
+      activeMission.onEngage(gameState, actions);
+    }
+
     // en présence de ForbidRerollFailsEffect, ne pas relancer les échecs
     boolean hasForbidRerollFailsEffect = gameState.getActiveEnnemis().stream()
         .filter(ennemi -> !ennemi.isDefeatedFlag())
@@ -246,6 +257,11 @@ public class GameService {
       }
 
       assignDiceToEnemy(gameState, dice, ennemi);
+      Mission activeMission = gameState.getActiveMission();
+      if (activeMission != null) {
+        activeMission.onAssign(gameState, dice, ennemi);
+      }
+
       checkAndApplyDefeat(gameState, ennemi);
     }
   }

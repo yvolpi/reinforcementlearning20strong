@@ -6,6 +6,7 @@ public class M8 extends Mission {
 
   public M8() {
     super();
+    this.canBeAbandoned = true;
   }
 
   @Override

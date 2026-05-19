@@ -6,6 +6,8 @@ public class M3 extends Mission {
 
   public M3() {
     super();
+    this.canBeAbandoned = true;
+
   }
 
   @Override

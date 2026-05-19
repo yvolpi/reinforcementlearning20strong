@@ -5,6 +5,7 @@ import model.ai.GameAi;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.missions.M10;
+import model.missions.Mission;
 
 public class TurnExecutor {
 
@@ -45,11 +46,14 @@ public class TurnExecutor {
       phaseExecutor.executeDecideActiveBoss(game);
     }
     if (!game.isActivatedBoss()) {
-      if (game.getActiveMission() instanceof M10 && game.atLeastOneEnnemiOnPiles()) {
+      Mission mission = game.getActiveMission();
+      if (mission instanceof M10 && game.atLeastOneEnnemiOnPiles() && ((M10) mission).getNumberPile() == null) {
         phaseExecutor.executeChoosePileForM10(game);
       }
-
       phaseExecutor.executeActivatePhase(game);
+      if (mission != null) {
+        mission.afterActivation(game);
+      }
     }
 
     game.resetNdEnnemisKilled();

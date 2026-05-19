@@ -13,6 +13,7 @@ public class M11 extends Mission {
 
   public M11() {
     super();
+    this.canBeAbandoned = true;
   }
 
   @Override
@@ -26,23 +27,16 @@ public class M11 extends Mission {
   }
 
   @Override
-  public void onAssign(GameState gameState, GameAction assignAction) {
-    if (assignAction.getType() != GamePhase.ASSIGN_DICE) {
-      throw new IllegalArgumentException("L'action doit être de type ASSIGN_DICE");
-    }
-    Ennemi targetEnnemi = assignAction.getTarget();
-
+  public void onAssign(GameState gameState, Dice dice, Ennemi ennemi) {
     List<DiceColor> colorsUsed = new ArrayList<>();
-    for (Dice dice: targetEnnemi.getAssignedDice()) {
-      if (!colorsUsed.contains(dice.getColor())) {
-        colorsUsed.add(dice.getColor());
+    for (Dice d: ennemi.getAssignedDice()) {
+      if (!colorsUsed.contains(d.getColor())) {
+        colorsUsed.add(d.getColor());
       }
     }
 
-    Dice diceToAssign = assignAction.getDice();
-
-    if (!colorsUsed.contains(diceToAssign.getColor())) {
-      colorsUsed.add(diceToAssign.getColor());
+    if (!colorsUsed.contains(dice.getColor())) {
+      colorsUsed.add(dice.getColor());
       if (colorsUsed.size() >= 5) {
         setSuccess(true);
       }

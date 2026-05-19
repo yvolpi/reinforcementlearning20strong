@@ -3,7 +3,7 @@ package model.missions;
 import model.GameState;
 
 public class M1 extends Mission {
-  public int count;
+  private int count;
 
   public M1() {
     super();

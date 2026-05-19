@@ -11,6 +11,11 @@ import model.elements.GamePhase;
 
 public class M6 extends Mission {
 
+  public M6() {
+    super();
+    this.canBeAbandoned = true;
+  }
+
   @Override
   public String getName() {
     return "Sonner l alerte";
