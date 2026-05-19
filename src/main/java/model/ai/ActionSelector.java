@@ -36,11 +36,9 @@ import model.random.CustomRandom;
 public class ActionSelector {
 
   private final CustomRandom random;
-  private final GameStateEncoder encoder;
 
   public ActionSelector(CustomRandom random, GameStateEncoder encoder) {
     this.random = random;
-    this.encoder = encoder;
   }
 
   // ===== Exploration =====
@@ -251,20 +249,6 @@ public class ActionSelector {
     double bestValue = Double.NEGATIVE_INFINITY;
     for (GameAction action : possibleActions) {
       double value = actionValues.getOrDefault(ActionKeyEncoder.encodeActivateAction(action), 0.0);
-      if (value > bestValue) {
-        bestValue = value;
-        bestAction = action;
-      }
-    }
-    return bestAction;
-  }
-
-  public GameAction findBestEngageAction(List<GameAction> possibleActions,
-      Map<String, Double> actionValues) {
-    GameAction bestAction = null;
-    double bestValue = Double.NEGATIVE_INFINITY;
-    for (GameAction action : possibleActions) {
-      double value = actionValues.getOrDefault(encoder.encodeEngageAction(action), 0.0);
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;

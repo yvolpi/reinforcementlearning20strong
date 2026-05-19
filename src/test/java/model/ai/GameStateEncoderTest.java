@@ -59,19 +59,6 @@ class GameStateEncoderTest {
   }
 
   @Test
-  void encodeEngageAction_nullAction_returnsNONE() {
-    assertThat(encoder.encodeEngageAction(null)).isEqualTo("NONE");
-  }
-
-  @Test
-  void encodeEngageAction_validAction_returnsDiceColor() {
-    Dice dice = new Dice(DiceColor.VIOLET);
-    GameAction action = new GameAction(GamePhase.ENGAGE_DICE, dice);
-
-    assertThat(encoder.encodeEngageAction(action)).isEqualTo("ENGAGE:VIOLET");
-  }
-
-  @Test
   void encodeEngageAction_depends_desactivated_effects() {
     Dice dice = new Dice(DiceColor.VIOLET);
     GameAction action = new GameAction(GamePhase.ENGAGE_DICE, dice);

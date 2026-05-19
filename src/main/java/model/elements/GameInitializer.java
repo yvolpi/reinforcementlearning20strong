@@ -9,22 +9,27 @@ import java.util.List;
 import java.util.Queue;
 
 import java.util.Random;
+import model.Avatar;
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
+import model.missions.Mission;
+import model.missions.MissionSupplier;
 import model.random.CustomRandom;
 
 /**
  * Fabrique pour créer l'état initial du jeu.
  */
 public class GameInitializer {
-
+  private static final Avatar INITIAL_AVATAR = Avatar.VALKYRIE;
   private static final int INITIAL_LIFE = 2;
   private static final int INITIAL_STRATEGY = 2;
   private static final int INITIAL_RECOVERY = 2;
+
+  private static final int INITIAL_MISSIONS_NUMBER = 1;
 
   private static final int DICE_PER_COLOR = 4;
 
@@ -93,6 +98,8 @@ public class GameInitializer {
     List<Dice> dicePool = createDicePool();
     List<Deque<Ennemi>> piles = createEnemyPiles(customRandom);
     Queue<Ennemi> bossPile = createBossPile(customRandom);
+    Queue<Mission> missions = createMissions(customRandom);
+
     return new GameState(
         player,
         dicePool,
@@ -100,12 +107,13 @@ public class GameInitializer {
         piles.get(1),
         piles.get(2),
         bossPile,
+        missions,
         customRandom
     );
   }
 
   private static Player createPlayer() {
-    return new Player(INITIAL_LIFE, INITIAL_STRATEGY, INITIAL_RECOVERY);
+    return new Player(INITIAL_AVATAR, INITIAL_LIFE, INITIAL_STRATEGY, INITIAL_RECOVERY);
   }
 
   private static List<Dice> createDicePool() {
@@ -166,5 +174,13 @@ public class GameInitializer {
       bossPile.add(new Ennemi(bossType, 0)); // Les boss n'ont pas de pile spécifique, on peut leur attribuer 0 ou une valeur spéciale
     }
     return bossPile;
+  }
+
+  private static Queue<Mission> createMissions(CustomRandom random) {
+    Queue<Mission> missions = new LinkedList<>();
+    for (int i = 0; i < INITIAL_MISSIONS_NUMBER; i++) {
+      missions.add(MissionSupplier.createMission(random.nextInt(MissionSupplier.NUMBER_OF_MISSIONS) + 1));
+    }
+    return missions;
   }
 }

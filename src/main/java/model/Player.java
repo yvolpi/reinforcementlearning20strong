@@ -5,12 +5,14 @@ import java.util.List;
 import model.items.Item;
 
 public class Player {
+  private final Avatar avatar;
   private int life;
   private int strategy;
   private int recovery;
   private final List<Item> items;
 
-  public Player(int life, int strategy, int recovery) {
+  public Player(Avatar avatar,int life, int strategy, int recovery) {
+    this.avatar = avatar;
     this.life = life;
     this.strategy = strategy;
     this.recovery = recovery;
@@ -19,10 +21,11 @@ public class Player {
 
   @Override
   public Player clone() {
-    return new Player(this.life, this.strategy, this.recovery);
+    return new Player(this.avatar ,this.life, this.strategy, this.recovery);
   }
 
   // Getters
+  public Avatar getAvatar() { return avatar; }
   public int getLife() { return life; }
   public int getStrategy() { return strategy; }
   public int getRecovery() { return recovery; }

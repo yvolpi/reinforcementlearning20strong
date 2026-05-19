@@ -47,7 +47,7 @@ class ActionSelectorTest {
     Dice d1 = new Dice(DiceColor.BLEU);
     Dice d2 = new Dice(DiceColor.ROUGE);
     Dice d3 = new Dice(DiceColor.VERT);
-    GameState gameState = new GameState(null, List.of(d1, d2, d3), null, null, null, null, new CustomRandom(41,2,1,0));
+    GameState gameState = new GameState(null, List.of(d1, d2, d3), null, null, null, null, null, new CustomRandom(41,2,1,0));
 
 
     List<GameAction> actions = selector.exploreEngageActions(List.of(d1, d2, d3), gameState);
@@ -58,7 +58,7 @@ class ActionSelectorTest {
   @Test
   void exploreEngageActions_throwsOnDuplicateDice() {
     Dice d = new Dice(DiceColor.BLEU);
-    GameState gameState = new GameState(null, List.of(d), null, null, null, null, new CustomRandom(41,2,1,0));
+    GameState gameState = new GameState(null, List.of(d), null, null, null, null, null, new CustomRandom(41,2,1,0));
 
 
     assertThatThrownBy(() -> selector.exploreEngageActions(List.of(d, d), gameState))
@@ -72,7 +72,7 @@ class ActionSelectorTest {
   void exploreAssignActions_emptyEnnemis_returnsEmpty() {
     Dice d = new Dice(DiceColor.BLEU);
 
-    List<GameAction> actions = selector.exploreAssignActions(List.of(d), List.of());
+    List<GameAction> actions = selector.exploreAssignActions(List.of(d), List.of(), 1.0);
 
     assertThat(actions).isEmpty();
   }
@@ -99,24 +99,5 @@ class ActionSelectorTest {
   @Test
   void getDiceColorPriority_jauneIsLowest() {
     assertThat(selector.getDiceColorPriority(DiceColor.JAUNE)).isEqualTo(1);
-  }
-
-  // ===== findBestEngageAction =====
-
-  @Test
-  void findBestEngageAction_returnsActionWithHighestQValue() {
-    Dice rouge = new Dice(DiceColor.ROUGE);
-    Dice bleu  = new Dice(DiceColor.BLEU);
-    GameAction actionRouge = new GameAction(GamePhase.ENGAGE_DICE, rouge);
-    GameAction actionBleu  = new GameAction(GamePhase.ENGAGE_DICE, bleu);
-
-    Map<String, Double> qValues = Map.of(
-        "ENGAGE:ROUGE", 5.0,
-        "ENGAGE:BLEU",  1.0
-    );
-
-    GameAction best = selector.findBestEngageAction(List.of(actionRouge, actionBleu), qValues);
-
-    assertThat(best.getDice().getColor()).isEqualTo(DiceColor.ROUGE);
   }
 }

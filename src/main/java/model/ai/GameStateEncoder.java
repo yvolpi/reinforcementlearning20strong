@@ -7,6 +7,7 @@ import model.GameState;
 import model.elements.GameAction;
 import model.ennemis.Ennemi;
 import model.items.Item;
+import model.missions.Mission;
 import model.recompenses.Reward;
 
 /**
@@ -25,6 +26,10 @@ public class GameStateEncoder {
         .map(Ennemi::getName)
         .collect(Collectors.joining(";"));
     sb.append(enemies);
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
     return sb.toString();
   }
 
@@ -67,6 +72,10 @@ public class GameStateEncoder {
       enemies += gameState.getBossPile().peek().getName() + ":BOSS;";
     }
     sb.append(enemies);
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
     return sb.toString();
   }
 
@@ -90,6 +99,10 @@ public class GameStateEncoder {
                 .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
     sb.append(enemies);
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
     return sb.toString();
   }
 
@@ -111,6 +124,10 @@ public class GameStateEncoder {
                 .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
     sb.append(enemies);
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
     return sb.toString();
   }
 
@@ -146,6 +163,10 @@ public class GameStateEncoder {
     sb.append(enemies);
     // Ajout de la récompense en attente
     sb.append(reward != null ? reward.getName() : "NONE");
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
     return sb.toString();
   }
 
@@ -169,6 +190,9 @@ public class GameStateEncoder {
     String pile2 = !gameState.getPile2().isEmpty() ? gameState.getPile2().peek().getName() : "NONE";
     String pile3 = !gameState.getPile3().isEmpty() ? gameState.getPile3().peek().getName() : "NONE";
     sb.append(pile1).append(";").append(pile2).append(";").append(pile3);
+    // nombre de missions
+    sb.append("|MISSION NUMBER:").append(gameState.numberOfMissions());
+
     return sb.toString();
   }
 
@@ -184,12 +208,11 @@ public class GameStateEncoder {
     String pile2 = !gameState.getPile2().isEmpty() ? gameState.getPile2().peek().getName() : "NONE";
     String pile3 = !gameState.getPile3().isEmpty() ? gameState.getPile3().peek().getName() : "NONE";
     sb.append(pile1).append(";").append(pile2).append(";").append(pile3);
-    return sb.toString();
-  }
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
 
-  public String encodeEngageAction(GameAction action) {
-    if (action == null) return "NONE";
-    return "ENGAGE:" + action.getDice().getColor().name();
+    return sb.toString();
   }
 
   public String encodeStateForLunoculation(GameState gameState) {

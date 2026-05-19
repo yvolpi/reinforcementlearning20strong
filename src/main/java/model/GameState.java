@@ -18,6 +18,7 @@ import model.effets.ennemi.EnnemyEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
+import model.missions.Mission;
 import model.random.CustomRandom;
 
 /**
@@ -39,6 +40,9 @@ public class GameState implements Cloneable {
   private Deque<Ennemi> pile3;
   private Queue<Ennemi> bossPile; // (optionnel, si tu veux gérer un boss séparément)
 
+  // ===== Missions =====
+  private Queue<Mission> missions;
+
   // ===== Autres infos ======
   private List<Ennemi> activeEnnemis;
   private int nbEnnemisKilled;
@@ -55,6 +59,7 @@ public class GameState implements Cloneable {
   private int engageAssignStep;
   private int maxEngagedDicePerTurn;
   private List<BonusEffect> bonusEffectsTurn;
+  private int avancementMissions;
 
   // ===== Générateur pseudo-aléatoire =====
   private final CustomRandom random;
@@ -64,6 +69,7 @@ public class GameState implements Cloneable {
   public GameState(Player player, List<Dice> dicePool,
       Deque<Ennemi> pile1, Deque<Ennemi> pile2, Deque<Ennemi> pile3,
       Queue<Ennemi> bossPile,
+      Queue<Mission> missions,
       CustomRandom random) {
     this.player = player;
     this.dicePool = dicePool;
@@ -73,6 +79,7 @@ public class GameState implements Cloneable {
     this.pile2 = pile2;
     this.pile3 = pile3;
     this.bossPile = bossPile;
+    this.missions = missions;
     revealedBoss = false;
     activatedBoss = false;
     bosskilled = false;
@@ -100,6 +107,7 @@ public class GameState implements Cloneable {
         new LinkedList<>(pile2),
         new LinkedList<>(pile3),
         new LinkedList<>(bossPile),
+        new LinkedList<>(missions),
         random
     );
 
@@ -466,5 +474,16 @@ public class GameState implements Cloneable {
       }
     }
     return false;
+  }
+
+  public Mission getActiveMission() {
+    if (missions.isEmpty()) {
+      return null;
+    }
+    return missions.peek();
+  }
+
+  public int numberOfMissions() {
+    return missions.size();
   }
 }
