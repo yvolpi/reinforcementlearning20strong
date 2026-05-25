@@ -25,6 +25,7 @@ public class M5 extends Mission {
   public void onKillEnnemi(GameState gameState, Ennemi ennemi) {
     if (ennemi.getClassValue() == 2) {
       count++;
+      gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
       if (count >= 4) {
         setSuccess(true);
       }

@@ -11,5 +11,6 @@ public enum GamePhase {
   ASSIGN_DICE,
   RECOVER_DICE,
   THROW_ITEM,
-  CLEAR
+  CLEAR,
+  DROP_ENNEMI,
 }

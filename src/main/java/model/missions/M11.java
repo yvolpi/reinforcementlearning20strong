@@ -39,6 +39,7 @@ public class M11 extends Mission {
       colorsUsed.add(dice.getColor());
       if (colorsUsed.size() >= 5) {
         setSuccess(true);
+        gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
       }
     }
   }

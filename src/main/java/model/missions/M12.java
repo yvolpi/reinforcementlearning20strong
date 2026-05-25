@@ -22,6 +22,7 @@ public class M12 extends Mission {
 
   public void onIgnoreReward(GameState gameState) {
     count++;
+    gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
     if (count >= 2) {
       setSuccess(true);
     }

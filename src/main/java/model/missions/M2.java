@@ -22,6 +22,7 @@ public class M2 extends Mission {
 
   public void onExhaustCriticalHit(GameState gameState) {
     count++;
+    gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
     if (count >= 4) {
       setSuccess(true);
     }

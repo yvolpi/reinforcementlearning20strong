@@ -108,6 +108,7 @@ public class TurnExecutor {
       GameService.clearDeadNonBossEnnemis(game);
     } else {
       phaseExecutor.executeClear(game);
+      phaseExecutor.executeDropNonMandatoryEnnemis(game);
     }
   }
 }

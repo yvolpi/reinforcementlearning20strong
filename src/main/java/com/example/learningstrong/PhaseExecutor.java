@@ -4,12 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import model.Dice;
 import model.DiceState;
 import model.GameState;
-import model.ai.ActionKeyEncoder;
-import model.ai.Experience;
 import model.ai.GameAi;
 import model.elements.GameAction;
 import model.elements.GameInitializer;
@@ -123,5 +120,10 @@ public class PhaseExecutor {
 
   public void executeClear(GameState game) {
     GameService.clearActiveZone(game);
+  }
+
+  public void executeDropNonMandatoryEnnemis(GameState game) {
+    GameService.dropNonMandatoryEnnemis(game, ai);
+    game.getActiveMission().onEndTurn(game);
   }
 }

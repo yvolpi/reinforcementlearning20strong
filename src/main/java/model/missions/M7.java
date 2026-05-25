@@ -23,6 +23,7 @@ public class M7 extends Mission {
   @Override
   public void onExtraDropEnnemi(GameState gameState) {
     count ++;
+    gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
     if (count >= 3) {
       setSuccess(true);
     }

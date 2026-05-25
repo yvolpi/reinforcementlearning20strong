@@ -107,4 +107,11 @@ public class ActionKeyEncoder {
     if (action == null || action.getItem() == null) return prefix + "NONE";
     return prefix + action.getTarget().getName() + ":" + action.getEnnemyEffect().getName();
   }
+
+  public static String encodeDropNonMandatoryEnnemiAction(GameAction action) {
+    String prefix = "ENNEMI_TO_DROP:";
+    // num pile
+    if (action == null || action.getTarget() == null) return prefix + "NONE";
+    return prefix + "PILE_" + action.getPileNumber();
+  }
 }

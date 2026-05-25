@@ -247,6 +247,21 @@ public class GameAi {
     return action;
   }
 
+  public GameAction chooseNonMandatoryEnnemiToDrop(List<Ennemi> nonMandatoryEnnemis, GameState gameState) {
+    GameAction action;
+    String state = encoder.encodeStateForDropEnnemi(gameState);
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = selector.exploreDropNonMandatoryEnnemiAction(nonMandatoryEnnemis);
+    } else {
+      List<GameAction> possibleActions = factory.createPossibleDropNonMandatoryEnnemiActions(nonMandatoryEnnemis);
+      action = selector.findBestDropNonMandatoryEnnemiAction(possibleActions, learner.getActionValues(state));
+      if (action == null) action = selector.exploreDropNonMandatoryEnnemiAction(nonMandatoryEnnemis);
+    }
+    String encodedActions = ActionKeyEncoder.encodeDropNonMandatoryEnnemiAction(action);
+    mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    return action;
+  }
+
   // ===== Apprentissage =====
 
   public void learnFromExperience(int finalScore) {

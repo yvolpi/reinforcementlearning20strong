@@ -253,6 +253,29 @@ public class GameState implements Cloneable {
     };
   }
 
+  public List<Ennemi> getNonMandatoryEnnemis() {
+    List<Ennemi> nonMandatoryEnnemis = new ArrayList<>();
+    if (pile1 != null && !pile1.isEmpty()) {
+      Ennemi top1 = pile1.peek();
+      if (top1 != null && !top1.isForcedActivationMandatory()) {
+        nonMandatoryEnnemis.add(top1);
+      }
+    }
+    if (pile2 != null && !pile2.isEmpty()) {
+      Ennemi top2 = pile2.peek();
+      if (top2 != null && !top2.isForcedActivationMandatory()) {
+        nonMandatoryEnnemis.add(top2);
+      }
+    }
+    if (pile3 != null && !pile3.isEmpty()) {
+      Ennemi top3 = pile3.peek();
+      if (top3 != null && !top3.isForcedActivationMandatory()) {
+        nonMandatoryEnnemis.add(top3);
+      }
+    }
+    return nonMandatoryEnnemis;
+  }
+
   public boolean canActiveBoss() {
     return pile1.isEmpty() || pile2.isEmpty() || pile3.isEmpty();
   }
@@ -391,6 +414,14 @@ public class GameState implements Cloneable {
 
   public void setMaxEngagedDicePerTurn(int maxEngagedDicePerTurn) {
     this.maxEngagedDicePerTurn = maxEngagedDicePerTurn;
+  }
+
+  public int getAvancementMissions() {
+    return avancementMissions;
+  }
+
+  public void setAvancementMissions(int avancementMissions) {
+    this.avancementMissions = avancementMissions;
   }
 
   public List<BonusEffect> getBonusEffectsTurn() {

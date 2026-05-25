@@ -32,6 +32,7 @@ public class M10 extends Mission {
 
   public void onEndTurn(GameState gameState) {
     count++;
+    gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
     if (count >= 5) {
       setSuccess(true);
     }

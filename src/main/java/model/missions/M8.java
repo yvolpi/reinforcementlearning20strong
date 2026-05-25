@@ -22,6 +22,7 @@ public class M8 extends Mission {
   public void afterActivation(GameState gameState) {
     if (gameState.getActiveEnnemis().size() >= 3) {
       setSuccess(true);
+      gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
     }
   }
 }

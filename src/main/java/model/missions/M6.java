@@ -48,6 +48,7 @@ public class M6 extends Mission {
 
       if (countToEngage > 0 && countInPool == countToEngage) {
         colorCount++;
+        gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
       }
     }
     if (colorCount >= 3) {

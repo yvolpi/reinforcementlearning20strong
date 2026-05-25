@@ -23,6 +23,7 @@ public class M3 extends Mission {
   @Override
   public void onDamageTaken(GameState gameState) {
     if (gameState.getPlayer().getLife() == 1) {
+      gameState.setAvancementMissions(gameState.getAvancementMissions() + 1);
       setSuccess(true);
     }
   }

@@ -236,6 +236,10 @@ public class ActionSelector {
 
   }
 
+  public GameAction exploreDropNonMandatoryEnnemiAction(List<Ennemi> nonMandatoryEnnemis) {
+    return new GameAction(nonMandatoryEnnemis.get(random.nextInt(nonMandatoryEnnemis.size())).getPileNumber());
+  }
+
 
   // ===== Exploitation =====
 
@@ -286,6 +290,19 @@ public class ActionSelector {
     double bestValue = Double.NEGATIVE_INFINITY;
     for (GameAction action : possibleActions) {
       double value = actionValues.getOrDefault(ActionKeyEncoder.encodeActivateAction(action), 0.0);
+      if (value > bestValue) {
+        bestValue = value;
+        bestAction = action;
+      }
+    }
+    return bestAction;
+  }
+
+  public GameAction findBestDropNonMandatoryEnnemiAction(List<GameAction> possibleActions, Map<String, Double> actionValues) {
+    GameAction bestAction = null;
+    double bestValue = Double.NEGATIVE_INFINITY;
+    for (GameAction action : possibleActions) {
+      double value = actionValues.getOrDefault(ActionKeyEncoder.encodeDropNonMandatoryEnnemiAction(action), 0.0);
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;
@@ -490,4 +507,5 @@ public class ActionSelector {
     if (candidates.isEmpty()) return null;
     return candidates.get(random.nextInt(candidates.size()));
   }
+
 }

@@ -22,6 +22,7 @@ import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
 import model.items.Item;
 import model.missions.M11;
+import model.missions.M12;
 import model.missions.Mission;
 import model.recompenses.Reward;
 import model.recompenses.RewardType;
@@ -286,6 +287,10 @@ public class GameService {
   private static void checkAndApplyDefeat(GameState gameState, Ennemi ennemi) {
     ennemi.computeCurrentLife(gameState);
     if (ennemi.isDefeated() && !ennemi.isDefeatedFlag()) {
+      if (gameState.getActiveMission() != null) {
+        gameState.getActiveMission().onKillEnnemi(gameState, ennemi);
+      }
+
       // s'il s'agit du plasmakyste et que son effet est actif, il faut vérifier s'il y a au moins 4 couleurs différentes parmi les dés assignés pour le vaincre
       if ("PLASMAKYSTE".equals(ennemi.getName())) {
         // Vérifier si son effet Plasmakyste est toujours actif
@@ -345,6 +350,11 @@ public class GameService {
     }
 
     if (reward.getType() == RewardType.INSTANT) {
+      // si M12,  onIgnoreReward
+      if (gameState.getActiveMission() instanceof M12) {
+        ((M12) gameState.getActiveMission()).onIgnoreReward(gameState);
+        return;
+      }
       reward.apply(gameState);
     }
     // si le joueur a le réplicateur et s'il n'y a pas d'ennemi actif vivant avec BlockUseItemsEffect :
@@ -372,6 +382,9 @@ public class GameService {
   public static void sufferDamagePhase(GameState gameState) {
     int totalDamage = calculateTotalDamage(gameState);
     gameState.getPlayer().loseLife(totalDamage);
+    if (totalDamage > 0 && gameState.getActiveMission() != null) {
+      gameState.getActiveMission().onDamageTaken(gameState);
+    }
 
     System.out.println("Le joueur subit " + totalDamage + " dégâts.");
   }
@@ -524,6 +537,52 @@ public class GameService {
     gameState.getActiveEnnemis().clear();
   }
 
+  //
+
+  public static void dropNonMandatoryEnnemis(GameState gameState, GameAi ai) {
+    // Vérifier s'il y a au moins un ennemi non obligatoire (s'il y en a au moins 2, c'est à l'ia de décider) au-dessus des 3 piles
+    List<Ennemi> nonMandatoryEnnemis = gameState.getNonMandatoryEnnemis();
+
+    if (nonMandatoryEnnemis.isEmpty()) return;
+
+    Ennemi ennemiToDrop;
+    if (nonMandatoryEnnemis.size() == 1) {
+      ennemiToDrop = nonMandatoryEnnemis.getFirst();
+    } else {
+      GameAction action = ai.chooseNonMandatoryEnnemiToDrop(nonMandatoryEnnemis, gameState);
+      int pileNumber = action.getPileNumber();
+      ennemiToDrop = nonMandatoryEnnemis.stream()
+          .filter(e -> e.getPileNumber() == pileNumber)
+          .findFirst()
+          .orElse(null);
+    }
+    if (ennemiToDrop != null) {
+      removeEnnemiFromPile(gameState, ennemiToDrop);
+    }
+
+
+
+    if (gameState.getActiveMission() instanceof M11) {
+      nonMandatoryEnnemis = gameState.getNonMandatoryEnnemis();
+      if (nonMandatoryEnnemis.isEmpty()) return;
+
+      if (nonMandatoryEnnemis.size() == 1) {
+        ennemiToDrop = nonMandatoryEnnemis.getFirst();
+      } else {
+        GameAction action = ai.chooseNonMandatoryEnnemiToDrop(nonMandatoryEnnemis, gameState);
+        int pileNumber = action.getPileNumber();
+        ennemiToDrop = nonMandatoryEnnemis.stream()
+            .filter(e -> e.getPileNumber() == pileNumber)
+            .findFirst()
+            .orElse(null);
+      }
+      if (ennemiToDrop != null) {
+        removeEnnemiFromPile(gameState, ennemiToDrop);
+      }
+      gameState.getActiveMission().onExtraDropEnnemi(gameState);
+    }
+  }
+
   // ===== Évaluation =====
 
   /**
@@ -534,9 +593,10 @@ public class GameService {
     int deltaLife = currentPlayer.getLife() - previous.getPlayer().getLife();
     int gainDes = currentPlayer.getRecovery() - current.getWastedDiceThisTurn();
     int penalityForKillCivilAsserviFirst = current.isPenalityKillCivilAsserviFirst()? -50 : 0;
+    int avancementMissions = current.getAvancementMissions();
 
     // Pondération : perte de PV très pénalisante
-    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + 5 * currentPlayer.getStrategy() + 4 * currentPlayer.getRecovery();
+    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + 5 * currentPlayer.getStrategy() + 4 * currentPlayer.getRecovery() + 30 * avancementMissions;
   }
 
   // ===== Utilitaires =====
@@ -667,6 +727,24 @@ public class GameService {
         game.getDicePool().add(dice);
       }
       game.getEngagedDices().removeAll(failedEngagedDice);
+    }
+  }
+
+  private static void removeEnnemiFromPile(GameState gameState, Ennemi ennemi) {
+    int pileNumber = ennemi.getPileNumber();
+    switch (pileNumber) {
+      case 1 -> {
+        if (!gameState.getPile1().isEmpty() && gameState.getPile1().peek() == ennemi)
+          gameState.getPile1().poll();
+      }
+      case 2 -> {
+        if (!gameState.getPile2().isEmpty() && gameState.getPile2().peek() == ennemi)
+          gameState.getPile2().poll();
+      }
+      case 3 -> {
+        if (!gameState.getPile3().isEmpty() && gameState.getPile3().peek() == ennemi)
+          gameState.getPile3().poll();
+      }
     }
   }
 }
