@@ -31,18 +31,8 @@ public class MegaEpinephrine extends Item {
     // Transforme un dé en échec en touche (le plus faible en priorité
     Dice failedDice = gameState.getEngagedDices().stream()
         .filter(d -> d.getState() == model.DiceState.ENGAGE && d.getLastRoll() == 0)
-        .min(Comparator.comparingInt((Dice d) -> getDiceColorPriority(d.getColor())))
+        .min(Comparator.comparingInt(Dice::getStrengthRanking))
         .orElseThrow(() -> new IllegalStateException("Aucun dé en échec trouvé"));
     failedDice.setToHit();
-  }
-
-  private int getDiceColorPriority(DiceColor color) {
-    return switch (color) {
-      case JAUNE  -> 1;
-      case VERT   -> 2;
-      case BLEU   -> 3;
-      case VIOLET -> 4;
-      case ROUGE  -> 5;
-    };
   }
 }

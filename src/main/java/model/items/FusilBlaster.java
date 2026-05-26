@@ -29,7 +29,7 @@ public class FusilBlaster extends Item {
     // on épuise de préférence les échecs des 3 dés les plus faibles
     List<Dice> diceToExhaust = gameState.getEngagedDices().stream()
         .filter(d -> d.getLastRoll() == 0)
-        .sorted(Comparator.comparingInt((Dice d) -> getDiceColorPriority(d.getColor())))
+        .sorted(Comparator.comparingInt(Dice::getStrengthRanking))
         .limit(3)
         .toList();
 
@@ -40,16 +40,6 @@ public class FusilBlaster extends Item {
     });
 
     player.removeItem(this);
-  }
-
-  private int getDiceColorPriority(DiceColor color) {
-    return switch (color) {
-      case JAUNE  -> 1;
-      case VERT   -> 2;
-      case BLEU   -> 3;
-      case VIOLET -> 4;
-      case ROUGE  -> 5;
-    };
   }
 
 }

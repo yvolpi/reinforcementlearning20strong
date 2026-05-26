@@ -1,6 +1,7 @@
 package model.elements;
 
 public enum GamePhase {
+  GIVE_UP_MISSION,
   NEW_MISSION,
   USE_ITEM_BEFORE_ACTIVATE,
   ACTIVATE_PILE,

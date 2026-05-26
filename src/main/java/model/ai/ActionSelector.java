@@ -73,7 +73,7 @@ public class ActionSelector {
       }
 
       List<DiceColor> orderedColors = diceByColor.keySet().stream()
-          .sorted(Comparator.comparingInt(this::getDiceColorPriority))
+          .sorted(Comparator.comparingInt(DiceColor::getStrengthRanking)) // trier par ordre de force
           .toList();
 
       for (DiceColor diceColor : orderedColors) {
@@ -243,6 +243,19 @@ public class ActionSelector {
 
   // ===== Exploitation =====
 
+  public GameAction findBestDecideGiveUpMissionAction(List<GameAction> possibleActions, Map<String, Double> actionValues) {
+    GameAction bestAction = null;
+    double bestValue = Double.NEGATIVE_INFINITY;
+    for (GameAction action : possibleActions) {
+      double value = actionValues.getOrDefault(ActionKeyEncoder.encodeDecideGiveUpMissionAction(action), 0.0);
+      if (value > bestValue) {
+        bestValue = value;
+        bestAction = action;
+      }
+    }
+    return bestAction;
+  }
+
   public GameAction findBestDecidePileM10Action(List<GameAction> possibleActions, Map<String, Double> actionValues) {
     GameAction bestAction = null;
     double bestValue = Double.NEGATIVE_INFINITY;
@@ -312,16 +325,6 @@ public class ActionSelector {
   }
 
   // ===== Utilitaires =====
-
-  public int getDiceColorPriority(DiceColor color) {
-    return switch (color) {
-      case ROUGE  -> 5;
-      case VIOLET -> 4;
-      case BLEU   -> 3;
-      case VERT   -> 2;
-      case JAUNE  -> 1;
-    };
-  }
 
   // ---- Effets actifs ----
 

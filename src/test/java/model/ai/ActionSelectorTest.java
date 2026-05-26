@@ -72,7 +72,9 @@ class ActionSelectorTest {
   void exploreAssignActions_emptyEnnemis_returnsEmpty() {
     Dice d = new Dice(DiceColor.BLEU);
 
-    List<GameAction> actions = selector.exploreAssignActions(List.of(d), List.of(), 1.0);
+    List<GameAction> actions = selector.exploreAssignActions(
+        new GameState(null,null,null,null,null,null,null,null)
+        ,List.of(d), List.of(), 1.0);
 
     assertThat(actions).isEmpty();
   }
@@ -86,18 +88,5 @@ class ActionSelectorTest {
     assertThat(action).isNotNull();
     assertThat(action.getItem()).isNull();
     assertThat(action.getType()).isEqualTo(GamePhase.THROW_ITEM);
-  }
-
-  // ===== getDiceColorPriority =====
-
-  @Test
-  void getDiceColorPriority_rougeIsHighest() {
-    assertThat(selector.getDiceColorPriority(DiceColor.ROUGE))
-        .isGreaterThan(selector.getDiceColorPriority(DiceColor.VIOLET));
-  }
-
-  @Test
-  void getDiceColorPriority_jauneIsLowest() {
-    assertThat(selector.getDiceColorPriority(DiceColor.JAUNE)).isEqualTo(1);
   }
 }

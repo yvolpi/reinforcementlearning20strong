@@ -16,4 +16,14 @@ public enum DiceColor {
   public int[] getFaces() {
     return faces.clone();
   }
+
+  public int getStrengthRanking() {
+    return switch (this) {
+      case JAUNE  -> 1;
+      case VERT   -> 2;
+      case BLEU   -> 3;
+      case VIOLET -> 4;
+      case ROUGE  -> 5;
+    };
+  }
 }

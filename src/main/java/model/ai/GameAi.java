@@ -55,6 +55,24 @@ public class GameAi {
 
   // ===== Décisions =====
 
+  public GameAction decideAbandonMission(GameState game) {
+    String encodedState = encoder.encodeGlobalState(game);
+    GameAction action;
+    List<GameAction> possible = new ArrayList<>();
+    possible.add(new GameAction(GamePhase.GIVE_UP_MISSION, true));
+    possible.add(new GameAction(GamePhase.GIVE_UP_MISSION, false));
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = possible.get(random.nextInt(possible.size()));
+    } else {
+
+      action = selector.findBestDecideGiveUpMissionAction(possible, learner.getActionValues(encodedState));
+      if (action == null) action = possible.get(random.nextInt(possible.size()));
+    }
+    mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeDecideGiveUpMissionAction(action));
+    history.add(new StateAction(encodedState, ActionKeyEncoder.encodeDecideGiveUpMissionAction(action)));
+    return action;
+  }
+
   public GameAction decidePileForM10(GameState gameState) {
     String encodedState = encoder.encodeStateForM10(gameState);
     GameAction action;
@@ -212,7 +230,7 @@ public class GameAi {
 
   public List<Dice> chooseDiceToRecover(List<Dice> exhaustedDice, int maxToRecover) {
     return exhaustedDice.stream()
-        .sorted(Comparator.comparingInt(d -> -selector.getDiceColorPriority(d.getColor())))
+        .sorted(Comparator.comparingInt(Dice::getStrengthRanking).reversed())
         .limit(maxToRecover)
         .collect(Collectors.toList());
   }

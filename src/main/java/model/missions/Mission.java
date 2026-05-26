@@ -51,6 +51,10 @@ public abstract class Mission {
     // Par défaut, ne fait rien à la fin du tour
   }
 
+  public boolean canBeAbandoned() {
+    return canBeAbandoned;
+  }
+
   public boolean isSuccess() {
     return isSuccess;
   }

@@ -1,5 +1,6 @@
 package model.items;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,7 +73,7 @@ public class SecondeChance extends Item {
         .filter(entry -> entry.getValue().size() >= 2)
         .map(Map.Entry::getKey)
         // rangé selon priorityColor
-        .sorted((c1, c2) -> Integer.compare(priorityColor(c2), priorityColor(c1)))
+        .sorted(Comparator.comparingInt(DiceColor::getStrengthRanking))
         .toList();
 
     // On prend la première couleur de la liste (celle avec la plus haute priorité)

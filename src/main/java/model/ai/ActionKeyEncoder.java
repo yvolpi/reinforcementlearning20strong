@@ -10,6 +10,11 @@ import model.ennemis.Ennemi;
 
 public class ActionKeyEncoder {
 
+  public static String encodeDecideGiveUpMissionAction(GameAction action) {
+    if (action == null || action.getPileNumber() < 0) return "NONE";
+    return "GIVE UP MISSION : " + action.isGiveUpMission();
+  }
+
   public static String encodeDecidePileM10Action(GameAction action) {
     if (action == null || action.getPileNumber() < 0) return "NONE";
     return "MISSION M10 : PILE_" + action.getPileNumber();

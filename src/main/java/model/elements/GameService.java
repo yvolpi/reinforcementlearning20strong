@@ -593,10 +593,11 @@ public class GameService {
     int deltaLife = currentPlayer.getLife() - previous.getPlayer().getLife();
     int gainDes = currentPlayer.getRecovery() - current.getWastedDiceThisTurn();
     int penalityForKillCivilAsserviFirst = current.isPenalityKillCivilAsserviFirst()? -50 : 0;
+    int penalityGiveUpMission = current.isPenaltyGiveUpMission() ? -30 : 0;
     int avancementMissions = current.getAvancementMissions();
 
     // Pondération : perte de PV très pénalisante
-    return penalityForKillCivilAsserviFirst + 10 * deltaLife + gainDes + 5 * currentPlayer.getStrategy() + 4 * currentPlayer.getRecovery() + 30 * avancementMissions;
+    return penalityForKillCivilAsserviFirst + penalityGiveUpMission + 10 * deltaLife + gainDes + 5 * currentPlayer.getStrategy() + 4 * currentPlayer.getRecovery() + 30 * avancementMissions;
   }
 
   // ===== Utilitaires =====

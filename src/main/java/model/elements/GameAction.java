@@ -19,6 +19,7 @@ public class GameAction {
   private Item item;
   // ... autres champs selon le type d’action
   private List<Dice> diceList;
+  private boolean giveUpMission;
 
   public GameAction(int pileNumber) {
     this.type = NEW_MISSION;
@@ -56,6 +57,11 @@ public class GameAction {
     this.target = randomEnnemi;
   }
 
+  public GameAction(GamePhase phase,boolean giveUpMission) {
+    this.giveUpMission = giveUpMission;
+    this.type = phase;
+  }
+
   public boolean isActivateBoss() {
     return activateBoss;
   }
@@ -82,5 +88,9 @@ public class GameAction {
 
   public int getPileNumber() {
     return pileNumber;
+  }
+
+  public boolean isGiveUpMission() {
+    return giveUpMission;
   }
 }

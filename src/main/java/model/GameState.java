@@ -49,6 +49,7 @@ public class GameState implements Cloneable {
   private int nbEnnemisKilled;
   private int nbEnnemisToAvtivate;
   private int wastedDiceThisTurn;
+  private boolean penaltyGiveUpMission;
   private boolean penalityKillCivilAsserviFirst;
   private boolean revealedBoss;
   private boolean activatedBoss;
@@ -372,8 +373,16 @@ public class GameState implements Cloneable {
     return penalityKillCivilAsserviFirst;
   }
 
+  public boolean isPenaltyGiveUpMission() {
+    return penaltyGiveUpMission;
+  }
+
   public void setPenalityKillCivilAsserviFirst(boolean penalityKillCivilAsserviFirst) {
     this.penalityKillCivilAsserviFirst = penalityKillCivilAsserviFirst;
+  }
+
+  public void setPenaltyGiveUpMission(boolean penaltyGiveUpMission) {
+    this.penaltyGiveUpMission = penaltyGiveUpMission;
   }
 
   public boolean isRevealedBoss() {

@@ -22,6 +22,7 @@ public class TurnExecutor {
     game.getPlayer().resetUsableItems();
     game.setWastedDiceThisTurn(0);
     game.setPenalityKillCivilAsserviFirst(false);
+    game.setPenaltyGiveUpMission(false);
     game.setEngageAssignStep(1);
     game.resetBonusEffectTurn();
 
@@ -29,6 +30,13 @@ public class TurnExecutor {
     // Mission remplie ?
     if (game.getActiveMission().isSuccess()) {
       game.removeActiveMission();
+    }
+
+    // Si le boss n'est pas activé et que la mission active peut être abandonnée, le joueur peut l'abandonner
+    if (!game.isActivatedBoss() && game.getActiveMission() != null && game.getActiveMission().canBeAbandoned()) {
+      game.setPhase(GamePhase.GIVE_UP_MISSION);
+      phaseExecutor.executeAbandonMissionPhase(game);
+
     }
 
 

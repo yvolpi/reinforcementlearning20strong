@@ -126,4 +126,11 @@ public class PhaseExecutor {
     GameService.dropNonMandatoryEnnemis(game, ai);
     game.getActiveMission().onEndTurn(game);
   }
+
+  public void executeAbandonMissionPhase(GameState game) {
+    GameAction action = ai.decideAbandonMission(game);
+    if (action.isGiveUpMission()) {
+      game.setPenaltyGiveUpMission(true);
+    }
+  }
 }
