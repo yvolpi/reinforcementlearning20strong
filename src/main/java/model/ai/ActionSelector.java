@@ -54,6 +54,10 @@ public class ActionSelector {
     int maxEngagedDicePerEngageEffect = maxEngagedDicePerEngageEffect(availableDice.size(), gameState.getActiveEnnemis());
     nbMaxDiceToEngage = Math.min(nbMaxDiceToEngage, maxEngagedDicePerEngageEffect);
 
+    int maxPotentialToEngage = (int) Math.ceil((double) availableDice.size() / gameState.getEngageAssignStep());
+
+    nbMaxDiceToEngage = Math.min(nbMaxDiceToEngage, maxPotentialToEngage);
+
     // exception s'il y a un doublon
     Set<Dice> set = new HashSet<>(availableDice);
     if (set.size() != availableDice.size()) {
