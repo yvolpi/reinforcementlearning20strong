@@ -93,6 +93,10 @@ public class QLearner {
     experiences.add(experiencesThisTurn);
   }
 
+  public void setEpsilon(double epsilon) {
+    this.epsilon = epsilon;
+  }
+
   public void decayEpsilon() {
     epsilon *= EPSILON_DECAY;
   }

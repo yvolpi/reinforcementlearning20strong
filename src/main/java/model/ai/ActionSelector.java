@@ -440,6 +440,10 @@ public class ActionSelector {
       return;
     }
 
+    // On doit vérifier séparément si chacun des deux dés (le principal et le jaune) déclenche un effet critique.*
+    // Pour chaque dé, on interdit d’épuiser l’autre (car il va aussi être assigné dans ce tour).
+    // Si l’un des deux effets ne peut pas être appliqué (pas de dé à épuiser), on annule toute l’assignation.
+
     if (!prepareExhaustIfCrit(dice, yellowDice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
     if (!prepareExhaustIfCrit(yellowDice, dice, remaining, assigned, exhausted, mustExhaustOnCrit)) return;
 
@@ -478,7 +482,7 @@ public class ActionSelector {
       List<Dice> remaining, List<Dice> assigned, List<Dice> exhausted,
       boolean mustExhaustOnCrit) {
 
-    if (!mustExhaustOnCrit || dice.getLastRoll() != dice.getFaces()[5]) return true;
+    if (!mustExhaustOnCrit || !dice.isCriticHit()) return true;
 
     Dice toExhaust = pickDiceToExhaust(remaining, dice, assigned, exhausted);
     if (toExhaust == null || toExhaust.equals(forbidden)) return false;

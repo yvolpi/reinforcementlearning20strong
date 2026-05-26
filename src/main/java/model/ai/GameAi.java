@@ -33,6 +33,7 @@ public class GameAi {
   private List<GameAction> lastActions;
   private List<List<GameAction>> actionsInTurn;
   private Map<String, String> mapEncodedStatesAndActionsThisTurn;
+  private List<StateAction> history;
 
   // ===== Constructeurs =====
 
@@ -49,6 +50,7 @@ public class GameAi {
     this.lastActions = new ArrayList<>();
     this.actionsInTurn = new ArrayList<>();
     mapEncodedStatesAndActionsThisTurn = new HashMap<>();
+    history = new ArrayList<>();
   }
 
   // ===== Décisions =====
@@ -75,6 +77,7 @@ public class GameAi {
     }
 
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeDecidePileM10Action(action));
+    history.add(new StateAction(encodedState, ActionKeyEncoder.encodeDecidePileM10Action(action)));
     return action;
   }
 
@@ -90,6 +93,7 @@ public class GameAi {
     }
 
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateBossAction(action));
+    history.add(new StateAction(encodedState, ActionKeyEncoder.encodeActivateBossAction(action)));
     return action;
   }
 
@@ -110,6 +114,7 @@ public class GameAi {
     lastActions = List.of(action);
     actionsInTurn.add(List.of(action));
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeActivateAction(action));
+    history.add(new StateAction(encodedState, ActionKeyEncoder.encodeActivateAction(action)));
     return action;
   }
 
@@ -132,6 +137,7 @@ public class GameAi {
     }
 
     String encodedActions = ActionKeyEncoder.encodeEngageAction(actions, gameState.getEngageAssignStep());
+    history.add(new StateAction(state, ActionKeyEncoder.encodeEngageAction(actions, gameState.getEngageAssignStep())));
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
 
     return actions;
@@ -177,6 +183,7 @@ public class GameAi {
     lastActions = actions;
     String encodedActions = ActionKeyEncoder.encodeAssignActions(actions, gameState.getEngageAssignStep());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    history.add(new StateAction(state, ActionKeyEncoder.encodeAssignActions(actions, gameState.getEngageAssignStep())));
     return actions;
   }
 
@@ -199,6 +206,7 @@ public class GameAi {
     lastActions = actions;
     String encodedActions = ActionKeyEncoder.encodeUseItemsAction(actions, gameState.getPhase());
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    history.add(new StateAction(state, ActionKeyEncoder.encodeUseItemsAction(actions, gameState.getPhase())));
     return actions;
   }
 
@@ -225,6 +233,7 @@ public class GameAi {
     lastActions = List.of(action);
     String encodedActions = ActionKeyEncoder.encodeRemoveItemAction(action);
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    history.add(new StateAction(state, ActionKeyEncoder.encodeRemoveItemAction(action)));
     return action;
   }
 
@@ -244,6 +253,7 @@ public class GameAi {
 
     String encodedActions = ActionKeyEncoder.encodeLunoculationAction(action);
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    history.add(new StateAction(state, ActionKeyEncoder.encodeLunoculationAction(action)));
     return action;
   }
 
@@ -259,6 +269,7 @@ public class GameAi {
     }
     String encodedActions = ActionKeyEncoder.encodeDropNonMandatoryEnnemiAction(action);
     mapEncodedStatesAndActionsThisTurn.put(state, encodedActions);
+    history.add(new StateAction(state, ActionKeyEncoder.encodeDropNonMandatoryEnnemiAction(action)));
     return action;
   }
 
@@ -288,5 +299,24 @@ public class GameAi {
 
   public QLearner getLearner() { return learner; }
 
+  public List<StateAction> getHistory() { return history; }
 
+  // ===== Clear history =====
+
+  public void clearHistory() {
+    history.clear();
+  }
+
+
+  public void writeGameHistoryToFile(String file) {
+    if (history == null || history.isEmpty()) return;
+    try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(file))) {
+      for (StateAction sa : history) {
+        writer.write(sa.toString()); // ou une autre méthode pour formater
+        writer.newLine();
+      }
+    } catch (java.io.IOException e) {
+      e.printStackTrace();
+    }
+  }
 }

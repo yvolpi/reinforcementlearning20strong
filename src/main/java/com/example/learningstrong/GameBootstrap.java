@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GameBootstrap implements CommandLineRunner {
 
-  private static final int NB_GAMES = 2000;
+  private static final int NB_GAMES = 1;
 
   //Custom random for game
   private static final int GAME_RANDOM_SEED = 0; // seed fixe pour la reproductibilité
@@ -68,6 +68,7 @@ public class GameBootstrap implements CommandLineRunner {
       }
       ai.decayEpsilon();
       System.out.println("Récompense totale : " + totalReward);
+      ai.clearHistory(); // on efface l'historique des expériences après chaque partie pour ne garder que celles de la dernière partie
     }
     System.out.println("Record Récompense  : " + bestReward);
     System.out.println("Nombre de victoires : " + nbVictories + " sur " + NB_GAMES + " parties");
@@ -80,5 +81,16 @@ public class GameBootstrap implements CommandLineRunner {
       Double qValue = ai.getLearner().getQTable().get(firstBestExp.state()).get(firstBestExp.action());
       System.out.println(" - Meilleur premier coup : " + firstBestExp.action() + ", Q-value : " + qValue);
     }
+
+    // Dernière partie en mode full exploitation
+    System.out.println("=== Partie finale en full exploitation ===");
+    ai.getLearner().setEpsilon(0.0); // full exploitation
+    CustomRandom gameCustomRandom = new CustomRandom(GAME_RANDOM_MODULO, GAME_RANDOM_COEFFICIENT, GAME_RANDOM_INCREMENT, GAME_RANDOM_SEED);
+    GameState game = GameInitializer.createInitialGameState(gameCustomRandom);
+    GameLoop loop = new GameLoop(ai);
+    loop.runGameLoop(game, ai);
+
+    // écrire dans un fichier txt l'ensemble de l'historique des StateAction (private List<StateAction> history; dans Learner) de la meilleure partie
+     ai.writeGameHistoryToFile("last_game_history.txt");
   }
 }

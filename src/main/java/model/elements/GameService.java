@@ -178,7 +178,7 @@ public class GameService {
     if (gameState.getBonusEffectsTurn().stream().anyMatch(effect -> effect.getClass().getSimpleName().equals("IchorVeriteEffect"))) {
       // ne pas relancer les touches, excepté celle du dé rouge
       dicesNotToReroll.addAll(gameState.getEngagedDices().stream()
-          .filter(dice -> (dice.getColor() == DiceColor.ROUGE && dice.getLastRoll() == dice.getFaces()[5])
+          .filter(dice -> (dice.getColor() == DiceColor.ROUGE && dice.isCriticHit())
               || (dice.getColor() != DiceColor.ROUGE && dice.getLastRoll() != 0))
           .toList());
     }

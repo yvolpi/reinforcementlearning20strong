@@ -13,7 +13,7 @@ public class EnsanglanteuseEffect implements BonusEffect {
     int bonusDamage = 0;
     for (Dice dice : ennemi.getAssignedDice()) {
       if (dice.getColor() == DiceColor.ROUGE) {
-        if (dice.getLastRoll() == dice.getFaces()[5]) {
+        if (dice.isCriticHit()) {
           bonusDamage++; // touche critique +1
         } else {
           bonusDamage += 2; // touche normale +2
