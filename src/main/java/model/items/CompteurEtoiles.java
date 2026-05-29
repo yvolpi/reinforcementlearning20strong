@@ -16,6 +16,11 @@ public class CompteurEtoiles extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
     List<Dice> engagedDiceWithFail = gameState.getEngagedDices().stream()
         .filter(d -> d.getState() == DiceState.ENGAGE && d.getLastRoll() == 0)

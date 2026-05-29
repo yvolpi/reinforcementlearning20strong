@@ -2,6 +2,7 @@ package com.example.learningstrong;
 
 import model.GameState;
 import model.ai.GameAi;
+import model.ai.StateAction;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.ennemis.Ennemi;
@@ -29,6 +30,7 @@ public class GameLoop {
     while (!game.isVictory() && !game.isDefeat()) {
       turn++;
       System.out.println("--- Tour " + turn + " ---");
+      ai.getHistory().add(new StateAction("TURN", String.valueOf(turn)));
       ai.resetMapEncodedStatesAndActionsThisTurn();
 
       turnExecutor.executeTurn(game);

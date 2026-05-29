@@ -24,6 +24,11 @@ public class AntenneDeSourcier extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(model.Player player, model.GameState gameState) {
     // Épuise un dé de la réserve (le plus faible)
     Dice dice = gameState.getDicePool()        .stream()

@@ -3,11 +3,13 @@ package model.elements;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.stream.Collectors;
+import model.Avatar;
 import model.Dice;
 import model.DiceColor;
 import model.DiceState;
@@ -24,6 +26,7 @@ import model.items.Item;
 import model.missions.M11;
 import model.missions.M12;
 import model.missions.Mission;
+import model.recompenses.RecoverDicesReward;
 import model.recompenses.Reward;
 import model.recompenses.RewardType;
 
@@ -149,6 +152,15 @@ public class GameService {
               .filter(ennemyEffect -> ennemyEffect.getName().equals(lunoculationAction.getEnnemyEffect().getName()))
               .forEach(EnnemyEffect::desactivate);
 
+        }
+        // Becket effet : reçoit 2 pvs ou récupère 2 dés
+        if (gameState.getPlayer().getAvatar().equals(Avatar.BECKET)) {
+          if (gameState.getPlayer().getLife() < 2 || gameState.getExhaustedDice().size() < 2) {
+            // Choix de se récupérer 2 pv
+            gameState.getPlayer().gainLife(2);
+          } else {
+            (new RecoverDicesReward(2)).apply(gameState);
+          }
         }
 
       }
@@ -424,6 +436,11 @@ public class GameService {
    */
   public static void exhaustionPhase(GameState gameState) {
     //gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+
+    if (gameState.getPlayer().getAvatar().equals(Avatar.GALHAD)) {
+      galhadEffect(gameState);
+    }
+
     List<Dice> engagedDice = gameState.getEngagedDices();
 
     List<Dice> toExhaust = new ArrayList<>();
@@ -747,5 +764,36 @@ public class GameService {
           gameState.getPile3().poll();
       }
     }
+  }
+
+  private static void galhadEffect(GameState gameState) {
+    List<Dice> criticalHits = new ArrayList<>(gameState.getEngagedDices().stream()
+        .filter(dice -> dice.getState() == DiceState.ENGAGE && dice.isCriticHit())
+        .toList());
+
+    Map<Dice, Ennemi> assignedCriticalHitDice = new HashMap<>();
+    for (Ennemi ennemi : gameState.getActiveEnnemis()) {
+      for (Dice dice : ennemi.getAssignedDice()) {
+        if (dice.isCriticHit()) {
+          assignedCriticalHitDice.put(dice, ennemi);
+          criticalHits.add(dice);
+        }
+      }
+    }
+
+    // Peut récupérer jusqu'à 2 touches critiques, priorité aux dés les plus forte
+    criticalHits.stream()
+        .sorted(Comparator.comparingInt(Dice::getStrengthRanking).reversed())
+        .limit(2)
+        .forEach(dice -> {
+          dice.setState(DiceState.RESERVE);
+          gameState.getDicePool().add(dice);
+          gameState.getEngagedDices().remove(dice);
+          // retirer le dé assigner à l'ennemi si le dé est dans assignedCriticalHitDice
+          if (assignedCriticalHitDice.containsKey(dice)) {
+            Ennemi ennemi = assignedCriticalHitDice.get(dice);
+            ennemi.getAssignedDice().remove(dice);
+          }
+        });
   }
 }

@@ -21,7 +21,7 @@ public class SushiSpatial extends Item {
     List<Dice> toRecover = new ArrayList<>();
     for (Dice dice : exhausted) {
       dice.roll(gameState.getRandom()); // suppose que roll() retourne le nombre de dégâts
-      if (dice.getLastRoll() >= 1) {
+      if (dice.getLastRoll() != 0) {
         toRecover.add(dice);
         if (gameState.getDicePool().contains(dice)) {
           throw new IllegalStateException("Le dé est à la fois dans le pool et dans les dés épuisés !");

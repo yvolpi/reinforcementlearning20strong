@@ -27,6 +27,11 @@ public class MegaEpinephrine extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
     // Transforme un dé en échec en touche (le plus faible en priorité
     Dice failedDice = gameState.getEngagedDices().stream()

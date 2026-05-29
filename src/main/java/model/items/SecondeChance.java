@@ -57,6 +57,11 @@ public class SecondeChance extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
 
     Map<DiceColor, List<Dice>> diceFailed = new TreeMap<>();

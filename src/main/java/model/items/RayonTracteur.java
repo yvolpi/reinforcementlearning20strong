@@ -30,6 +30,7 @@ public class RayonTracteur extends Item {
       gameState.getDicePool().add(dice);
 
     }
+    player.removeItem(this);
   }
 
 }

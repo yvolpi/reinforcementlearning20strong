@@ -8,6 +8,7 @@ import model.DiceColor;
 import model.GameState;
 import model.effets.bonus.BonusEffect;
 import model.effets.ennemi.EnnemyEffect;
+import model.random.CustomRandom;
 import model.recompenses.Reward;
 
 /**
@@ -25,7 +26,8 @@ public class Ennemi {
 
   private int pileNumber;
   private boolean defeated;
-  private final int life;
+  private boolean upgradable;
+  private int life;
   private int currentLife;
   private Reward reward;
 
@@ -42,6 +44,7 @@ public class Ennemi {
     this.forcedActivationMandatory = type.forcedActivationMandatory;
     this.reward = type.getReward();
     this.pileNumber = pileNumber;
+    this.upgradable = type.upgradable;
 
     this.assignedDice = new ArrayList<>();
     this.defeated = false;
@@ -120,6 +123,16 @@ public class Ennemi {
   public void setLife(int life) {
     this.currentLife = life;
   }
+
+  public void upgradeBasicLife(int nbUpgrades, CustomRandom random) {
+    if (upgradable) {
+      int additionalLife = random.nextInt(nbUpgrades * classValue);
+      this.life += additionalLife;
+      this.currentLife += additionalLife;
+    }
+  }
+
+
 
   public void setCurrentLife(int currentLife) {
     this.currentLife = currentLife;

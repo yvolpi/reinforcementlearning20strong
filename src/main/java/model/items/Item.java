@@ -14,6 +14,10 @@ public abstract class Item {
     return isUsedThisTurn;
   }
 
+  public boolean isConsummable() {
+    return true;
+  }
+
   public void markAsUsed() {
     this.isUsedThisTurn = true;
   }

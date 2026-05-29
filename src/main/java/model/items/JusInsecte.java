@@ -20,6 +20,6 @@ public class JusInsecte extends Item {
   @Override
   public void use(Player player, GameState gameState) {
     player.gainLife(gameState.getActiveEnnemis().size()); // Restaure des points de vie égaux au nombre d'ennemis actifs
-
+    player.removeItem(this);
   }
 }

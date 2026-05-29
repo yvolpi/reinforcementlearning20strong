@@ -203,7 +203,7 @@ public class GameState implements Cloneable {
 
     List<Dice> assignablesDice = engagedDices.stream()
         .filter(dice -> dice.getState() == DiceState.ENGAGE)
-        .filter(dice -> dice.getLastRoll() >= 1)
+        .filter(dice -> dice.getLastRoll() >= 1 || isOrloYellowFailAssignable(dice))
         .filter(this::isDiceAssignable)
         .collect(Collectors.toList());
 
@@ -549,5 +549,23 @@ public class GameState implements Cloneable {
 
   public void removeActiveMission() {
     missions.poll();
+  }
+
+  /**
+   * Avec Orlo, les échecs jaunes sont assignables s'il y a au moins un ennemi actif de classe 2 non vaincu.
+   */
+  private boolean isOrloYellowFailAssignable(Dice dice) {
+    if (dice.getLastRoll() != 0 || dice.getColor() != DiceColor.JAUNE) {
+      return false;
+    }
+    // Vérifier qu'OrloEffect est actif ce tour
+    boolean hasOrloEffect = bonusEffectsTurn.stream()
+        .anyMatch(effect -> effect instanceof model.effets.bonus.OrloEffect);
+    if (!hasOrloEffect) {
+      return false;
+    }
+    // Il faut au moins un ennemi actif de classe 2 non vaincu
+    return activeEnnemis.stream()
+        .anyMatch(e -> !e.isDefeatedFlag() && e.getClassValue() == 2);
   }
 }

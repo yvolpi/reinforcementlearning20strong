@@ -15,6 +15,11 @@ public class MiniTerraformeuse extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(model.Player player, model.GameState gameState) {
   }
 

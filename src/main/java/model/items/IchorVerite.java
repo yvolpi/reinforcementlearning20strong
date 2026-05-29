@@ -13,6 +13,11 @@ public class IchorVerite extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public String getName() {
     return "IchorVerite";
   }

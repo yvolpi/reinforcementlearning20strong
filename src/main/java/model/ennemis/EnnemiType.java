@@ -29,7 +29,7 @@ public enum EnnemiType {
       new IncreaseRecoveryReward(1)
       ),
   CIVIL_ASSERVI(1,1,3, List.of(new MaxEngagedDicePerTurnEffect(3)), 1, true,
-      new EnsanglanteuseReward()),
+      new EnsanglanteuseReward(), false),
   DUODRONE(1,4,2, List.of(new ExhaustHitWhenAssignCritHitEffect()), 0, false,
       new PizzaReward()),
   ESCROCAFARD(1,3,2, List.of(new BanishFailedDiceEffect(), new ForbidGreenDiceToEngageEffect()), 0, false,
@@ -48,7 +48,7 @@ public enum EnnemiType {
       new MegaEpinephrineReward()),
 
   ICHORKYSTE(2,4,0, List.of(new MaxAssignDiceToItEffect(2)), 0, true,
-      new IchorVeriteReward()),
+      new IchorVeriteReward(), false),
 
   LARVE_A_MOELLE(2,2,4, List.of(new LarveAMoelleEffect()), 0, false,
       null),
@@ -93,13 +93,13 @@ public enum EnnemiType {
       new ADNDeLaHordeReward()),
 
   PORTE_SPORES_CHERCHEUR(1,2,2, List.of(new MaxEngagedDicePerTurnEffect(4)), 0, false,
-      new GrilleFiltranteReward()),
+      new GrilleFiltranteReward(), false),
 
   PORTE_SPORES_EXPECTORANT(2,6,2, List.of(new PorteSporeExpectorantEffect()), 0, false,
-      new GrilleFiltranteReward()),
+      new GrilleFiltranteReward(), false),
 
   PORTE_SPORES_FRENETIQUE(3,1,1, List.of(new MaxEngagedDicePerTurnEffect(5)), 0, false,
-      new GrilleFiltranteReward()),
+      new GrilleFiltranteReward(), false),
 
   RAMPECRATERE(1,3,1, List.of(new LoseLifePerTwoFailsEffect()), 1, false,
       new JusInsecteReward()),
@@ -140,8 +140,6 @@ public enum EnnemiType {
   TRIODRONE(2,6,2, List.of(new TriodroneEffect()), 0, false,
       new SecondeChanceReward()),
 
-  //vaincafard : 5,3, c2, +1 activation, non obligatoire, effet : vous ne pouvez engager que 3 dés maximum par engagement
-  //  récompense : sacrifice solaire ; permanent : banissez un dé de votre réserve pour infliger à un ennemi c1 ou c2 un nb de dégâts égal au nb de touches du dé sacrifié
   VAINCAFARD(2,5,3, List.of(new MaxEngagedDicePerEngageEffect(3)), 1, false,
       new SacrificeSolaireReward())
 
@@ -180,6 +178,7 @@ Autres ennemis :
   public final int forcedActivations;
   public final boolean forcedActivationMandatory;
   private Reward reward;
+  public final boolean upgradable;
 
   EnnemiType(int classValue, int life, int attack, List<EnnemyEffect> effets, int forcedActivations, boolean forcedActivationMandatory,
       Reward reward) {
@@ -190,6 +189,19 @@ Autres ennemis :
     this.forcedActivations = forcedActivations;
     this.forcedActivationMandatory = forcedActivationMandatory;
     this.reward = reward;
+    upgradable = true;
+  }
+
+  EnnemiType(int classValue, int life, int attack, List<EnnemyEffect> effets, int forcedActivations, boolean forcedActivationMandatory,
+      Reward reward, boolean upgradable) {
+    this.classValue = classValue;
+    this.life = life;
+    this.attack = attack;
+    this.effets = effets;
+    this.forcedActivations = forcedActivations;
+    this.forcedActivationMandatory = forcedActivationMandatory;
+    this.reward = reward;
+    this.upgradable = upgradable;
   }
 
   public Reward getReward() {

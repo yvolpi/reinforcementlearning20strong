@@ -17,6 +17,8 @@ public class Stimulant extends Item {
 
   @Override
   public void use(Player player, GameState gameState) {
+
     player.gainLife(nbPvsGain);
+    player.removeItem(this);
   }
 }

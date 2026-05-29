@@ -12,6 +12,11 @@ public class DardMissile extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
 
   }

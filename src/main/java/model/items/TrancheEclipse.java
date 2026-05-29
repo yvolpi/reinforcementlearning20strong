@@ -22,6 +22,11 @@ public class TrancheEclipse extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
     // le joueur épuise le plus faible dé de sa réserve excepté le dé jaune
     // conséquense : les touches normales jaunes font +1 dégat

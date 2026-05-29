@@ -17,7 +17,7 @@ public class RecoverDicesReward implements Reward {
     // dés à récupérer (priorité aux dés les plus forts)
 
     List<Dice> sortedDice = gameState.getExhaustedDice().stream()
-        .sorted(Comparator.comparingInt(Dice::getStrengthRanking))
+        .sorted(Comparator.comparingInt(Dice::getStrengthRanking).reversed())
         .limit(amountDices)
         .toList();
 

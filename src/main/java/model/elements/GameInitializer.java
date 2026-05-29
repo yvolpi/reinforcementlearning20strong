@@ -16,6 +16,7 @@ import model.GameState;
 import model.Player;
 import model.ennemis.Ennemi;
 import model.ennemis.EnnemiType;
+import model.items.Item;
 import model.missions.Mission;
 import model.missions.MissionSupplier;
 import model.random.CustomRandom;
@@ -28,6 +29,7 @@ public class GameInitializer {
   private static final int INITIAL_LIFE = 2;
   private static final int INITIAL_STRATEGY = 2;
   private static final int INITIAL_RECOVERY = 2;
+  private static final int INITIAL_ENNEMIS_NUMBER_PER_PILE = 1;
 
   private static final int INITIAL_MISSIONS_NUMBER = 1;
 
@@ -144,23 +146,23 @@ public class GameInitializer {
     Deque<Ennemi> pile2 = new LinkedList<>();
     Deque<Ennemi> pile3 = new LinkedList<>();
 
-    // Mélanger les ennemis et les répartir dans les piles
-    List<EnnemiType> shuffledEnnemis = new ArrayList<>(ennemis);
-    random.shuffle(shuffledEnnemis);
     // Chaque pile doit avoir le même nombre d'ennemis, à 1 près
-    int total = shuffledEnnemis.size();
-    int pileSize = total / 3;
-    int remainder = total % 3; // nombre de piles qui auront un ennemi en plus
 
-    int index = 0;
-    for (int i = 0; i < pileSize + (remainder > 0 ? 1 : 0); i++, index++) {
-      pile1.add(new Ennemi(shuffledEnnemis.get(index), 1));
-    }
-    for (int i = 0; i < pileSize + (remainder > 1 ? 1 : 0); i++, index++) {
-      pile2.add(new Ennemi(shuffledEnnemis.get(index), 2));
-    }
-    for (int i = 0; i < pileSize; i++, index++) {
-      pile3.add(new Ennemi(shuffledEnnemis.get(index), 3));
+    for (int i=0; i< INITIAL_ENNEMIS_NUMBER_PER_PILE; i++) {
+      Ennemi e1 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 1);
+      Ennemi e2 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 2);
+      Ennemi e3 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 3);
+
+      if (i >= 15) {
+        int upgradeLevel = i / 15;
+        e1.upgradeBasicLife(upgradeLevel, random);
+        e2.upgradeBasicLife(upgradeLevel, random);
+        e3.upgradeBasicLife(upgradeLevel, random);
+      }
+
+      pile1.add(e1);
+      pile2.add(e2);
+      pile3.add(e3);
     }
 
     return List.of(pile1, pile2, pile3);

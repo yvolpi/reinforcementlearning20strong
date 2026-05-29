@@ -9,6 +9,11 @@ public class ForteressePortative extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(model.Player player, model.GameState gameState) {
     // le joueur récupère tous ses dés épuisés
     for (Dice dice : gameState.getExhaustedDice()) {

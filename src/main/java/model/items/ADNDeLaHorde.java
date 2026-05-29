@@ -21,6 +21,11 @@ public class ADNDeLaHorde extends Item {
     return hasEngagedNormalHit && hasDiceInReserve;
   }
 
+  @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
 
   @Override
   public void use(model.Player player, model.GameState gameState) {

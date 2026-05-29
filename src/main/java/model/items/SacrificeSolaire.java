@@ -22,6 +22,11 @@ public class SacrificeSolaire extends Item {
   }
 
   @Override
+  public boolean isConsummable() {
+    return false;
+  }
+
+  @Override
   public void use(Player player, GameState gameState) {
     // Le joueur bannit un dé de sa réserve pour infliger un certain nombre de dégâts à un ennemi actif de classe 1 ou 2 vivant
 

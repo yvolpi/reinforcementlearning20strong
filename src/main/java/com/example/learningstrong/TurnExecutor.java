@@ -1,7 +1,9 @@
 package com.example.learningstrong;
 
+import model.Avatar;
 import model.GameState;
 import model.ai.GameAi;
+import model.effets.bonus.OrloEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
 import model.missions.M10;
@@ -25,6 +27,10 @@ public class TurnExecutor {
     game.setPenaltyGiveUpMission(false);
     game.setEngageAssignStep(1);
     game.resetBonusEffectTurn();
+
+    if (game.getPlayer().getAvatar().equals(Avatar.ORLO)) {
+      game.getBonusEffectsTurn().add(new OrloEffect());
+    }
 
     GameService.triggeredAutomaticItemsEffectBeforeActivation(game);
     // Mission remplie ?
