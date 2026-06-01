@@ -15,6 +15,14 @@ public class ActionKeyEncoder {
     return "GIVE UP MISSION : " + action.isGiveUpMission();
   }
 
+  public static String encodeDecidePileRavenAction(List<GameAction> action) {
+    if (action == null || action.isEmpty()) return "NONE";
+    return "RAVEN EFFECT : " + action.stream()
+        .filter(a -> a.getPileNumber() >= 0)
+        .map(a -> "PILE_" + a.getPileNumber())
+        .collect(Collectors.joining(","));
+  }
+
   public static String encodeDecidePileM10Action(GameAction action) {
     if (action == null || action.getPileNumber() < 0) return "NONE";
     return "MISSION M10 : PILE_" + action.getPileNumber();

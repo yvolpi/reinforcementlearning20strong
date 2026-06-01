@@ -64,6 +64,9 @@ public class TurnExecutor {
       if (mission instanceof M10 && game.atLeastOneEnnemiOnPiles() && ((M10) mission).getNumberPile() == null) {
         phaseExecutor.executeChoosePileForM10(game);
       }
+      if (game.getPlayer().getAvatar().equals(Avatar.RAVEN)) {
+        phaseExecutor.executeChoosePilesRaven(game);
+      }
       phaseExecutor.executeActivatePhase(game);
       if (mission != null) {
         mission.afterActivation(game);
@@ -114,7 +117,7 @@ public class TurnExecutor {
     // Phases finales
     GameService.sufferDamagePhase(game);
     GameService.applyEnnemisSubsequentEffects(game);
-    GameService.exhaustionPhase(game);
+    GameService.exhaustionPhase(game, ai);
     GameService.recoverDicePhase(game, ai);
     GameService.applyPendingRewards(game, ai);
     game.setPhase(GamePhase.CLEAR);

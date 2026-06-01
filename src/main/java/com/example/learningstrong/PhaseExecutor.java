@@ -2,6 +2,7 @@ package com.example.learningstrong;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import model.Dice;
@@ -24,6 +25,19 @@ public class PhaseExecutor {
 
   public PhaseExecutor(GameAi ai) {
     this.ai = ai;
+  }
+
+  public void executeChoosePilesRaven(GameState game) {
+    List<GameAction> actions = ai.decidePilesForRaven(game);
+    for (GameAction action : actions) {
+      int pileNumber = action.getPileNumber();
+      // récupérer l'ennemi du dessus de la pile pour le mettre en-dessous
+      Queue<Ennemi> pile = getPileByNumber(game, pileNumber);
+      Ennemi ennemi = pile.poll();
+      if (ennemi != null) {
+        pile.add(ennemi);
+      }
+    }
   }
 
   public void executeChoosePileForM10(GameState game) {
@@ -98,8 +112,10 @@ public class PhaseExecutor {
   public void executeAssignPhase(GameState game) {
     List<Dice> assignableDice = game.getAvailableDiceToAssign();
 
-    List<GameAction> assignActions = ai.chooseActionsToAssign(assignableDice, game.getActiveEnnemis(), game);
-    GameService.assignDicePhase(game, assignActions);
+    if (!assignableDice.isEmpty()) {
+      List<GameAction> assignActions = ai.chooseActionsToAssign(assignableDice, game.getActiveEnnemis(), game);
+      GameService.assignDicePhase(game, assignActions);
+    }
 
     // M2 = épuiser des touches critiques non assignées
     Mission mission = game.getActiveMission();
@@ -132,5 +148,14 @@ public class PhaseExecutor {
     if (action.isGiveUpMission()) {
       game.setPenaltyGiveUpMission(true);
     }
+  }
+
+  private Queue<Ennemi> getPileByNumber(GameState game, int pileNumber) {
+    return switch (pileNumber) {
+      case 1 -> game.getPile1();
+      case 2 -> game.getPile2();
+      case 3 -> game.getPile3();
+      default -> throw new IllegalStateException("Numéro de pile invalide pour Raven : " + pileNumber);
+    };
   }
 }

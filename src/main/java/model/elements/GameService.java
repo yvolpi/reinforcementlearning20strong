@@ -154,7 +154,7 @@ public class GameService {
 
         }
         // Becket effet : reçoit 2 pvs ou récupère 2 dés
-        if (gameState.getPlayer().getAvatar().equals(Avatar.BECKET)) {
+        if (gameState.getPlayer().getAvatar().equals(Avatar.BECKET) && action.getItem().isConsummable()) {
           if (gameState.getPlayer().getLife() < 2 || gameState.getExhaustedDice().size() < 2) {
             // Choix de se récupérer 2 pv
             gameState.getPlayer().gainLife(2);
@@ -434,8 +434,14 @@ public class GameService {
   /**
    * Tous les dés engagés passent en zone épuisée.
    */
-  public static void exhaustionPhase(GameState gameState) {
+  public static void exhaustionPhase(GameState gameState, GameAi ai) {
     //gameState.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
+
+    // Iseult : choisit une couleur de dé utilisée autre que vert : récupère un nb de dés verts inférieur ou égal au nb de dés de cette couleur utilisés
+    if (gameState.getPlayer().getAvatar().equals(Avatar.ISEULT)) {
+      iseultEffect(gameState, ai);
+    }
+
 
     if (gameState.getPlayer().getAvatar().equals(Avatar.GALHAD)) {
       galhadEffect(gameState);
@@ -795,5 +801,50 @@ public class GameService {
             ennemi.getAssignedDice().remove(dice);
           }
         });
+  }
+
+  private static void iseultEffect(GameState gameState, GameAi ai) {
+    List<Dice> usedDices = gameState.getEngagedDices();
+
+    Map<DiceColor, List<Dice>> dicesByColor = usedDices.stream()
+        .filter(dice -> dice.getColor()!= DiceColor.VERT)
+        .collect(Collectors.groupingBy(Dice::getColor));
+
+    List<Dice> usedGreenDices = usedDices.stream()
+        .filter(dice -> dice.getColor() == DiceColor.VERT)
+        .toList();
+
+    if (dicesByColor.isEmpty() || usedGreenDices.isEmpty()) {
+      return;
+    }
+
+    // L'ia choisit une couleur parmi celles utilisées
+    DiceColor chosenColor = ai.chooseDiceColorToRecover(dicesByColor, gameState);
+    if (chosenColor == null) {
+      return;
+    }
+
+    long countOfChosenColor = usedDices.stream()
+        .filter(dice -> dice.getColor() == chosenColor)
+        .count();
+
+    int recoveryAmount = (int) Math.min(countOfChosenColor, usedGreenDices.size());
+
+    List<Dice> dicesToRecover = usedGreenDices.stream()
+        .limit(recoveryAmount)
+        .toList();
+
+    dicesToRecover.forEach(dice -> {
+      if (dice.getState().equals(DiceState.ASSIGNE)) {
+        gameState.getActiveEnnemis().forEach(ennemi -> {
+          ennemi.getAssignedDice().remove(dice);
+        });
+      }
+      gameState.getEngagedDices().remove(dice);
+
+      dice.setState(DiceState.RESERVE);
+      gameState.getDicePool().add(dice);
+    });
+
   }
 }

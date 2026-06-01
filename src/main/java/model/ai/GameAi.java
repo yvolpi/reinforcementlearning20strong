@@ -1,14 +1,19 @@
 package model.ai;
 
+import static model.elements.GamePhase.*;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import model.Dice;
+import model.DiceColor;
 import model.DiceState;
 import model.GameState;
 import model.effets.ennemi.EnnemyEffect;
@@ -59,8 +64,8 @@ public class GameAi {
     String encodedState = encoder.encodeGlobalState(game);
     GameAction action;
     List<GameAction> possible = new ArrayList<>();
-    possible.add(new GameAction(GamePhase.GIVE_UP_MISSION, true));
-    possible.add(new GameAction(GamePhase.GIVE_UP_MISSION, false));
+    possible.add(new GameAction(GIVE_UP_MISSION, true));
+    possible.add(new GameAction(GIVE_UP_MISSION, false));
     if (learner.shouldExplore(random.nextDouble())) {
       action = possible.get(random.nextInt(possible.size()));
     } else {
@@ -78,13 +83,13 @@ public class GameAi {
     GameAction action;
     List<GameAction> possible = new ArrayList<>();
     if (!gameState.getPile1().isEmpty()) {
-      possible.add(new GameAction(1));
+      possible.add(new GameAction(NEW_MISSION,1));
     }
     if (!gameState.getPile2().isEmpty()) {
-      possible.add(new GameAction(2));
+      possible.add(new GameAction(NEW_MISSION,2));
     }
     if (!gameState.getPile3().isEmpty()) {
-      possible.add(new GameAction(3));
+      possible.add(new GameAction(NEW_MISSION,3));
     }
     if (learner.shouldExplore(random.nextDouble())) {
       action = possible.get(random.nextInt(possible.size()));
@@ -96,6 +101,48 @@ public class GameAi {
 
     mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeDecidePileM10Action(action));
     history.add(new StateAction(encodedState, ActionKeyEncoder.encodeDecidePileM10Action(action)));
+    return action;
+  }
+
+  public List<GameAction> decidePilesForRaven(GameState gameState) {
+    // Raven peut mettre jusqu'à 2 ennemis en-dessous de leurs piles
+    String encodedState = encoder.encodeStateForM10(gameState);
+    List<GameAction> action;
+    List<List<GameAction>> possible = new ArrayList<>();
+    possible.add(List.of());
+    if (gameState.getPile1().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,1)));
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,1), new GameAction(RAVEN_EFFECT,1)));
+    }
+    if (gameState.getPile2().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,2)));
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,2), new GameAction(RAVEN_EFFECT,2)));
+    }
+    if (gameState.getPile3().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,3)));
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,3), new GameAction(RAVEN_EFFECT,3)));
+    }
+
+    if (gameState.getPile1().size() > 1 && gameState.getPile2().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,1), new GameAction(RAVEN_EFFECT,2)));
+    }
+    if (gameState.getPile1().size() > 1 && gameState.getPile3().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,1), new GameAction(RAVEN_EFFECT,3)));
+    }
+    if (gameState.getPile2().size() > 1 && gameState.getPile3().size() > 1) {
+      possible.add(List.of(new GameAction(RAVEN_EFFECT,2), new GameAction(RAVEN_EFFECT,3)));
+    }
+
+    if (learner.shouldExplore(random.nextDouble())) {
+      action = possible.get(random.nextInt(possible.size()));
+    } else {
+
+      action = selector.findBestDecidePileRavenAction(possible, learner.getActionValues(encodedState));
+      if (action == null) action = possible.get(random.nextInt(possible.size()));
+    }
+
+    mapEncodedStatesAndActionsThisTurn.put(encodedState, ActionKeyEncoder.encodeDecidePileRavenAction(action));
+    history.add(new StateAction(encodedState, ActionKeyEncoder.encodeDecidePileRavenAction(action)));
     return action;
   }
 
@@ -336,5 +383,15 @@ public class GameAi {
     } catch (java.io.IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public DiceColor chooseDiceColorToRecover(Map<DiceColor, List<Dice>> dicesByColor, GameState gameState) {
+    // Heuristique : on préfère choisir la couleur la plus utilisée
+    DiceColor diceColor = dicesByColor.entrySet().stream()
+        .max(Comparator.comparingInt(entry -> entry.getValue().size()))
+        .map(Entry::getKey)
+            .orElseThrow(() -> new IllegalStateException("Aucune couleur de dé trouvée pour récupération"));
+    history.add(new StateAction("ISEULT EFFECT", diceColor.name()));
+    return diceColor;
   }
 }

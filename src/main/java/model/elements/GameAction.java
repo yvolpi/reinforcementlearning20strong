@@ -5,6 +5,7 @@ import static model.elements.GamePhase.NEW_MISSION;
 import java.util.ArrayList;
 import java.util.List;
 import model.Dice;
+import model.DiceColor;
 import model.effets.ennemi.EnnemyEffect;
 import model.ennemis.Ennemi;
 import model.items.Item;
@@ -20,9 +21,10 @@ public class GameAction {
   // ... autres champs selon le type d’action
   private List<Dice> diceList;
   private boolean giveUpMission;
+  private DiceColor color;
 
-  public GameAction(int pileNumber) {
-    this.type = NEW_MISSION;
+  public GameAction(GamePhase type ,int pileNumber) {
+    this.type = type;
     this.pileNumber = pileNumber;
   }
 

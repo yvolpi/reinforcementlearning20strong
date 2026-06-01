@@ -1,5 +1,7 @@
 package model.ai;
 
+import static model.elements.GamePhase.DROP_ENNEMI;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -241,7 +243,7 @@ public class ActionSelector {
   }
 
   public GameAction exploreDropNonMandatoryEnnemiAction(List<Ennemi> nonMandatoryEnnemis) {
-    return new GameAction(nonMandatoryEnnemis.get(random.nextInt(nonMandatoryEnnemis.size())).getPileNumber());
+    return new GameAction(DROP_ENNEMI,nonMandatoryEnnemis.get(random.nextInt(nonMandatoryEnnemis.size())).getPileNumber());
   }
 
 
@@ -258,6 +260,19 @@ public class ActionSelector {
       }
     }
     return bestAction;
+  }
+
+  public List<GameAction> findBestDecidePileRavenAction(List<List<GameAction>> possibleActions, Map<String, Double> actionValues) {
+    List<GameAction> bestActions = null;
+    double bestValue = Double.NEGATIVE_INFINITY;
+    for (List<GameAction> actions : possibleActions) {
+      double value = actionValues.getOrDefault(ActionKeyEncoder.encodeDecidePileRavenAction(actions), 0.0);
+      if (value > bestValue) {
+        bestValue = value;
+        bestActions = actions;
+      }
+    }
+    return bestActions;
   }
 
   public GameAction findBestDecidePileM10Action(List<GameAction> possibleActions, Map<String, Double> actionValues) {

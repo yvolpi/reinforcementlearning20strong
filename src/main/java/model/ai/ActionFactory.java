@@ -56,7 +56,7 @@ public class ActionFactory {
   public List<GameAction> createPossibleDropNonMandatoryEnnemiActions(List<Ennemi> nonMandatoryEnnemis) {
     List<GameAction> actions = new ArrayList<>();
     for (Ennemi ennemi : nonMandatoryEnnemis) {
-      actions.add(new GameAction(ennemi.getPileNumber()));
+      actions.add(new GameAction(GamePhase.DROP_ENNEMI ,ennemi.getPileNumber()));
     }
     return actions;
   }

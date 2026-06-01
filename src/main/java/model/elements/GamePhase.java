@@ -3,6 +3,7 @@ package model.elements;
 public enum GamePhase {
   GIVE_UP_MISSION,
   NEW_MISSION,
+  RAVEN_EFFECT,
   USE_ITEM_BEFORE_ACTIVATE,
   ACTIVATE_PILE,
   ENGAGE_DICE,
@@ -10,6 +11,7 @@ public enum GamePhase {
   USE_ITEM_BEFORE_ASSIGN,
   USE_ITEM_EFFECT,
   ASSIGN_DICE,
+  ISEULT_EFFECT,
   RECOVER_DICE,
   THROW_ITEM,
   CLEAR,

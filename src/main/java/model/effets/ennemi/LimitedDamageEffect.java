@@ -17,7 +17,7 @@ public class LimitedDamageEffect implements EnnemyEffect {
 
   @Override
   public EnnemyEffectType getType() {
-    return null;
+    return EnnemyEffectType.PERMANENT;
   }
 
   @Override

@@ -22,10 +22,10 @@ public class GameStateEncoder {
         .filter(d -> d.getState() == DiceState.RESERVE)
         .count();
     sb.append(reserveDiceCount).append("|");
-    String enemies = gameState.getActiveEnnemis().stream()
+    String ennemies = gameState.getActiveEnnemis().stream()
         .map(Ennemi::getName)
         .collect(Collectors.joining(";"));
-    sb.append(enemies);
+    sb.append(ennemies);
     // mission active
     Mission activeMission = gameState.getActiveMission();
     sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
@@ -58,20 +58,20 @@ public class GameStateEncoder {
 
     //1ers ennemis de chaque piles
 
-    String enemies = "";
+    String ennemies = "";
     if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
-      enemies += gameState.getPile1().peek().getName() + ":PILE1;";
+      ennemies += gameState.getPile1().peek().getName() + ":PILE1;";
     }
     if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
-      enemies += gameState.getPile2().peek().getName() + ":PILE2;";
+      ennemies += gameState.getPile2().peek().getName() + ":PILE2;";
     }
     if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
-      enemies += gameState.getPile3().peek().getName() + ":PILE3;";
+      ennemies += gameState.getPile3().peek().getName() + ":PILE3;";
     }
     if (gameState.isRevealedBoss()) {
-      enemies += gameState.getBossPile().peek().getName() + ":BOSS;";
+      ennemies += gameState.getBossPile().peek().getName() + ":BOSS;";
     }
-    sb.append(enemies);
+    sb.append(ennemies);
     // mission active
     Mission activeMission = gameState.getActiveMission();
     sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
@@ -88,17 +88,17 @@ public class GameStateEncoder {
     sb.append(gameState.getPlayer().getRecovery()).append("|");
 
     // nb d'ennemis dans chaque pile + 1er ennemi de chaque pile
-    String enemies = "";
+    String ennemies = "";
     if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
-      enemies += gameState.getPile1().peek().getName() + ":PILE1:" + gameState.getPile1().size() + ";";
+      ennemies += gameState.getPile1().peek().getName() + ":PILE1:" + gameState.getPile1().size() + ";";
     }
     if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
-      enemies += gameState.getPile2().peek().getName() + ":PILE2:" + gameState.getPile2().size() + ";";
+      ennemies += gameState.getPile2().peek().getName() + ":PILE2:" + gameState.getPile2().size() + ";";
     }
     if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
-      enemies += gameState.getPile3().peek().getName() + ":PILE3:" + gameState.getPile3().size() + ";";
+      ennemies += gameState.getPile3().peek().getName() + ":PILE3:" + gameState.getPile3().size() + ";";
     }
-    sb.append(enemies);
+    sb.append(ennemies);
 
 
     return sb.toString();
@@ -113,17 +113,17 @@ public class GameStateEncoder {
     sb.append(gameState.getPlayer().getRecovery()).append("|");
 
     // nb d'ennemis dans chaque pile + 1er ennemi de chaque pile
-    String enemies = "";
+    String ennemies = "";
     if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
-      enemies += gameState.getPile1().peek().getName() + ":PILE1:" + gameState.getPile1().size() + ";";
+      ennemies += gameState.getPile1().peek().getName() + ":PILE1:" + gameState.getPile1().size() + ";";
     }
     if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
-      enemies += gameState.getPile2().peek().getName() + ":PILE2:" + gameState.getPile2().size() + ";";
+      ennemies += gameState.getPile2().peek().getName() + ":PILE2:" + gameState.getPile2().size() + ";";
     }
     if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
-      enemies += gameState.getPile3().peek().getName() + ":PILE3:" + gameState.getPile3().size() + ";";
+      ennemies += gameState.getPile3().peek().getName() + ":PILE3:" + gameState.getPile3().size() + ";";
     }
-    sb.append(enemies);
+    sb.append(ennemies);
 
 
     return sb.toString();
@@ -141,14 +141,14 @@ public class GameStateEncoder {
         .filter(d -> d.getState() == DiceState.ENGAGE)
         .count();
     sb.append(reserveDice).append("|").append(engagedDice).append("|");
-    String enemies = gameState.getActiveEnnemis().stream()
+    String ennemies = gameState.getActiveEnnemis().stream()
         .filter(e -> !e.isDefeatedFlag())
         .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
             e.getEffects().stream()
                 .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
                 .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
-    sb.append(enemies);
+    sb.append(ennemies);
     // mission active
     Mission activeMission = gameState.getActiveMission();
     sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
@@ -166,14 +166,14 @@ public class GameStateEncoder {
         .collect(Collectors.joining(";"));
     sb.append(assignableDice).append("|");
 
-    String enemies = gameState.getActiveEnnemis().stream()
+    String ennemies = gameState.getActiveEnnemis().stream()
         .filter(e -> !e.isDefeatedFlag())
         .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
             e.getEffects().stream()
                 .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
                 .collect(Collectors.joining(",")))
         .collect(Collectors.joining(";"));
-    sb.append(enemies);
+    sb.append(ennemies);
     // mission active
     Mission activeMission = gameState.getActiveMission();
     sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
@@ -196,21 +196,21 @@ public class GameStateEncoder {
         .collect(Collectors.joining(";"));
     sb.append(playerItems).append("|");
     // ennemis des premières piles + boss s'il est révélé
-    String enemies = "";
+    String ennemies = "";
     if (gameState.getPile1() != null && !gameState.getPile1().isEmpty()) {
-      enemies += gameState.getPile1().peek().getName() + ":PILE1;";
+      ennemies += gameState.getPile1().peek().getName() + ":PILE1;";
     }
     if (gameState.getPile2() != null && !gameState.getPile2().isEmpty()) {
-      enemies += gameState.getPile2().peek().getName() + ":PILE2;";
+      ennemies += gameState.getPile2().peek().getName() + ":PILE2;";
     }
     if (gameState.getPile3() != null && !gameState.getPile3().isEmpty()) {
-      enemies += gameState.getPile3().peek().getName() + ":PILE3;";
+      ennemies += gameState.getPile3().peek().getName() + ":PILE3;";
     }
     if (gameState.isRevealedBoss()) {
-      enemies += gameState.getBossPile().peek().getName() + ":BOSS;";
+      ennemies += gameState.getBossPile().peek().getName() + ":BOSS;";
     }
 
-    sb.append(enemies);
+    sb.append(ennemies);
     // Ajout de la récompense en attente
     sb.append(reward != null ? reward.getName() : "NONE");
     // mission active

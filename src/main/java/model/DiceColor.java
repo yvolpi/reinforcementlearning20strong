@@ -1,6 +1,7 @@
 package model;
 
 public enum DiceColor {
+  GRIS(new int[]{0, 0, 0, 0, 0, 2}),
   JAUNE(new int[]{0, 0, 0, 0, 1, 2}),
   VERT(new int[]{0, 0, 0, 1, 1, 2}),
   BLEU(new int[]{0, 0, 1, 1, 1, 2}),
@@ -19,6 +20,7 @@ public enum DiceColor {
 
   public int getStrengthRanking() {
     return switch (this) {
+      case GRIS   -> 0;
       case JAUNE  -> 1;
       case VERT   -> 2;
       case BLEU   -> 3;

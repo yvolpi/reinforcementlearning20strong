@@ -5,9 +5,9 @@ import java.util.Random;
 import model.random.CustomRandom;
 
 public class Dice {
-  private int[] faces; // 6 faces, valeurs possibles : 0, 1, 2
+  int[] faces; // 6 faces, valeurs possibles : 0, 1, 2
   private DiceState state;
-  private int lastRoll;
+  int lastRoll;
   private DiceColor color;
 
   public Dice(DiceColor color) {
@@ -63,6 +63,8 @@ public class Dice {
 
   public int getStrengthRanking() {
     switch (color) {
+      case GRIS:
+        return 0;
       case JAUNE:
         return 1;
       case VERT:
