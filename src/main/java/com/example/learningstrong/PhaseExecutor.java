@@ -9,6 +9,7 @@ import model.Dice;
 import model.DiceState;
 import model.GameState;
 import model.ai.GameAi;
+import model.ai.StateAction;
 import model.elements.GameAction;
 import model.elements.GameInitializer;
 import model.elements.GamePhase;
@@ -115,6 +116,8 @@ public class PhaseExecutor {
     if (!assignableDice.isEmpty()) {
       List<GameAction> assignActions = ai.chooseActionsToAssign(assignableDice, game.getActiveEnnemis(), game);
       GameService.assignDicePhase(game, assignActions);
+    } else {
+      ai.getHistory().add(new StateAction(ai.getEncoder().encodeStateForEndEngage(game), "")); // ajouter une action "ne rien assigner" dans l'historique de l'ia
     }
 
     // M2 = épuiser des touches critiques non assignées
@@ -132,6 +135,7 @@ public class PhaseExecutor {
         ((M2) mission).onExhaustCriticalHit(game);
       }
     }
+    game.setEngageAssignStep(game.getEngageAssignStep() + 1);
   }
 
   public void executeClear(GameState game) {

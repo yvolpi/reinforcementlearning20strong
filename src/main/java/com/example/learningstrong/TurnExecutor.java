@@ -115,7 +115,8 @@ public class TurnExecutor {
     }
 
     // Phases finales
-    GameService.sufferDamagePhase(game);
+    GameService.sufferDamagePhase(game, ai);
+    if (game.isDefeat()) return;
     GameService.applyEnnemisSubsequentEffects(game);
     GameService.exhaustionPhase(game, ai);
     GameService.recoverDicePhase(game, ai);

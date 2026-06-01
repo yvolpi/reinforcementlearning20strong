@@ -16,6 +16,7 @@ import model.DiceState;
 import model.GameState;
 import model.Player;
 import model.ai.GameAi;
+import model.ai.StateAction;
 import model.effets.ennemi.EnnemyEffect;
 import model.effets.ennemi.EnnemyEffectType;
 import model.effets.ennemi.KeepDiceInExhaustEffect;
@@ -391,11 +392,12 @@ public class GameService {
   /**
    * Le joueur subit les dégâts des ennemis actifs non vaincus.
    */
-  public static void sufferDamagePhase(GameState gameState) {
+  public static void sufferDamagePhase(GameState gameState, GameAi ai) {
     int totalDamage = calculateTotalDamage(gameState);
     gameState.getPlayer().loseLife(totalDamage);
     if (totalDamage > 0 && gameState.getActiveMission() != null) {
       gameState.getActiveMission().onDamageTaken(gameState);
+      ai.getHistory().add(new StateAction("LE JOUEUR SUBIT", totalDamage + " DEGATS"));
     }
 
     System.out.println("Le joueur subit " + totalDamage + " dégâts.");

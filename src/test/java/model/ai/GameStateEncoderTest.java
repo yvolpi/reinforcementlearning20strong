@@ -82,6 +82,6 @@ class GameStateEncoderTest {
 
     String result = encoder.encodeStateWithPile(gs);
 
-    assertThat(result).isEqualTo("5|0|NONE;NONE;NONE");
+    assertThat(result).isEqualTo("PV:5|RESERVE:0|NONE;NONE;NONE|MISSION:NONE");
   }
 }

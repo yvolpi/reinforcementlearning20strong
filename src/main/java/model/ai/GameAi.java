@@ -362,6 +362,8 @@ public class GameAi {
 
   // ===== Getters =====
 
+  public GameStateEncoder getEncoder() { return encoder; }
+
   public QLearner getLearner() { return learner; }
 
   public List<StateAction> getHistory() { return history; }

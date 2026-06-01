@@ -2,6 +2,7 @@ package model.ai;
 
 import java.util.Comparator;
 import java.util.stream.Collectors;
+import model.Dice;
 import model.DiceState;
 import model.GameState;
 import model.elements.GameAction;
@@ -127,13 +128,42 @@ public class GameStateEncoder {
     sb.append(gameState.getPlayer().getLife()).append("|");
     sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append("RESERVE:");
     long reserveDice = gameState.getDicePool().stream()
         .filter(d -> d.getState() == DiceState.RESERVE)
         .count();
-    long engagedDice = gameState.getDicePool().stream()
+    sb.append(reserveDice).append("|");
+    sb.append("ENGAGES:");
+    long engagedDice = gameState.getEngagedDices()
+        .size();
+    sb.append(engagedDice).append("|");
+    String ennemies = gameState.getActiveEnnemis().stream()
+        .filter(e -> !e.isDefeatedFlag())
+        .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
+            e.getEffects().stream()
+                .map(effect -> effect.getType().name() + (effect.isActivated() ? ":1" : ":0"))
+                .collect(Collectors.joining(",")))
+        .collect(Collectors.joining(";"));
+    sb.append(ennemies);
+    // mission active
+    Mission activeMission = gameState.getActiveMission();
+    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
+
+    return sb.toString();
+  }
+
+  public String encodeStateForEndEngage(GameState gameState) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("PV:");
+    sb.append(gameState.getPlayer().getLife()).append("|");
+
+    String engagedDice = gameState.getEngagedDices().stream()
         .filter(d -> d.getState() == DiceState.ENGAGE)
-        .count();
-    sb.append(reserveDice).append("|").append(engagedDice).append("|");
+        .sorted(Comparator.comparing(Dice::getName)) // ordre déterministe
+        .map(d -> d.getName() + ":" + d.getLastRoll())
+        .collect(Collectors.joining(";"));
+    sb.append(engagedDice).append("|");
+
     String ennemies = gameState.getActiveEnnemis().stream()
         .filter(e -> !e.isDefeatedFlag())
         .map(e -> e.getName() + ":" + e.getCurrentLife() + ":" +
@@ -155,7 +185,7 @@ public class GameStateEncoder {
     sb.append(gameState.getPlayer().getLife()).append("|");
 
     String assignableDice = gameState.getAvailableDiceToAssign().stream()
-        .sorted(Comparator.comparing(d -> d.getName())) // ordre déterministe
+        .sorted(Comparator.comparing(Dice::getName)) // ordre déterministe
         .map(d -> d.getName() + ":" + d.getLastRoll())
         .collect(Collectors.joining(";"));
     sb.append(assignableDice).append("|");
