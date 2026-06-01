@@ -96,16 +96,4 @@ public class SecondeChance extends Item {
 
     markAsUsed();
   }
-
-  private int priorityColor(DiceColor diceColor) {
-    return switch (diceColor) {
-      case JAUNE -> 5;
-      case VERT -> 4;
-      case BLEU -> 3;
-      case VIOLET -> 2;
-      case ROUGE -> 1;
-    };
-  }
-
-
 }
