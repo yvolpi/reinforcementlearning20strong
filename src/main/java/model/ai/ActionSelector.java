@@ -53,6 +53,19 @@ public class ActionSelector {
 
   public List<GameAction> exploreEngageActions(List<Dice> availableDice, GameState gameState) {
     int nbMaxDiceToEngage = gameState.getMaxEngagedDicePerTurn() - gameState.getEngagedDices().size();
+
+    // pour éviter que l'ia gaspille trop de dés, on peut calculer les pvs des ennemis
+    // nb dés max = Somme(pvs) * (1 + 1/stratégie)
+
+    int sumPvsEnnemis = 0;
+    for (Ennemi ennemi : gameState.getActiveEnnemis()) {
+      if (!ennemi.isDefeatedFlag()) {
+        sumPvsEnnemis += ennemi.getLife();
+      }
+    }
+    int maxDiceBasedOnEnnemis = (int) Math.ceil(sumPvsEnnemis * (1 + 1.0 / gameState.getPlayer().getStrategy()));
+    nbMaxDiceToEngage = Math.min(nbMaxDiceToEngage, maxDiceBasedOnEnnemis);
+
     int maxEngagedDicePerEngageEffect = maxEngagedDicePerEngageEffect(availableDice.size(), gameState.getActiveEnnemis());
     nbMaxDiceToEngage = Math.min(nbMaxDiceToEngage, maxEngagedDicePerEngageEffect);
 
