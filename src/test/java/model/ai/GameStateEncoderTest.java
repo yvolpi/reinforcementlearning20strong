@@ -28,24 +28,6 @@ class GameStateEncoderTest {
   }
 
   @Test
-  void encodeState_returnsLifeAndReserveDiceAndEnemies() {
-    GameState gs = mock(GameState.class);
-    Player player = mock(Player.class);
-    Dice reserveDice = new Dice(DiceColor.BLEU); // state = RESERVE par défaut
-    Ennemi ennemi = new Ennemi(EnnemiType.ARACHNOPOULPE, 1);
-
-    when(gs.getPlayer()).thenReturn(player);
-    when(player.getLife()).thenReturn(10);
-    when(gs.getDicePool()).thenReturn(List.of(reserveDice));
-    when(gs.getActiveEnnemis()).thenReturn(List.of(ennemi));
-
-    String encoded = encoder.encodeState(gs);
-
-    assertThat(encoded).startsWith("10|1|");
-    assertThat(encoded).contains(ennemi.getName());
-  }
-
-  @Test
   void encodeActivateAction_nullAction_returnsNONE() {
     assertThat(ActionKeyEncoder.encodeActivateAction(null)).isEqualTo("NONE");
   }

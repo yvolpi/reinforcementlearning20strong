@@ -15,29 +15,14 @@ import model.recompenses.Reward;
  */
 public class GameStateEncoder {
 
-  public String encodeState(GameState gameState) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(gameState.getPlayer().getLife()).append("|");
-    long reserveDiceCount = gameState.getDicePool().stream()
-        .filter(d -> d.getState() == DiceState.RESERVE)
-        .count();
-    sb.append(reserveDiceCount).append("|");
-    String ennemies = gameState.getActiveEnnemis().stream()
-        .map(Ennemi::getName)
-        .collect(Collectors.joining(";"));
-    sb.append(ennemies);
-    // mission active
-    Mission activeMission = gameState.getActiveMission();
-    sb.append("|MISSION:").append(activeMission != null ? activeMission.getName() : "NONE");
-
-    return sb.toString();
-  }
-
   public String encodeGlobalState(GameState gameState) {
     // stats joueur, items, ennemis sur chaque pile, dés disponibles
     StringBuilder sb = new StringBuilder();
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append("RECUPERATION:");
     sb.append(gameState.getPlayer().getRecovery()).append("|");
 
     // items
@@ -83,8 +68,11 @@ public class GameStateEncoder {
     StringBuilder sb = new StringBuilder();
     sb.append("CHOIXPILEM10|");
     // Stats du joueur
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append("RECUPERATION:");
     sb.append(gameState.getPlayer().getRecovery()).append("|");
 
     // nb d'ennemis dans chaque pile + 1er ennemi de chaque pile
@@ -108,8 +96,11 @@ public class GameStateEncoder {
     StringBuilder sb = new StringBuilder();
     sb.append("CHOIXPILETODROP|");
     // Stats du joueur
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append("RECUPERATION:");
     sb.append(gameState.getPlayer().getRecovery()).append("|");
 
     // nb d'ennemis dans chaque pile + 1er ennemi de chaque pile
@@ -132,7 +123,9 @@ public class GameStateEncoder {
   public String encodeStateForEngage(GameState gameState) {
     StringBuilder sb = new StringBuilder();
     sb.append("ENGAGE").append(gameState.getEngageAssignStep()).append("|");
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
     long reserveDice = gameState.getDicePool().stream()
         .filter(d -> d.getState() == DiceState.RESERVE)
@@ -158,11 +151,12 @@ public class GameStateEncoder {
 
   public String encodeStateForAssign(GameState gameState) {
     StringBuilder sb = new StringBuilder();
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
 
     String assignableDice = gameState.getAvailableDiceToAssign().stream()
-        .sorted(Comparator.comparing(d -> d.getColor().name())) // ordre déterministe
-        .map(d -> d.getColor().name() + ":" + d.getLastRoll())
+        .sorted(Comparator.comparing(d -> d.getName())) // ordre déterministe
+        .map(d -> d.getName() + ":" + d.getLastRoll())
         .collect(Collectors.joining(";"));
     sb.append(assignableDice).append("|");
 
@@ -222,8 +216,11 @@ public class GameStateEncoder {
 
   public String encodeStateWithBoss(GameState gameState) {
     StringBuilder sb = new StringBuilder();
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
+    sb.append("STRATEGIE:");
     sb.append(gameState.getPlayer().getStrategy()).append("|");
+    sb.append("RECUPERATION:");
     sb.append(gameState.getPlayer().getRecovery()).append("|");
     long reserveDiceCount = gameState.getDicePool().stream()
         .filter(d -> d.getState() == DiceState.RESERVE)
@@ -249,10 +246,12 @@ public class GameStateEncoder {
 
   public String encodeStateWithPile(GameState gameState) {
     StringBuilder sb = new StringBuilder();
+    sb.append("PV:");
     sb.append(gameState.getPlayer().getLife()).append("|");
     long reserveDiceCount = gameState.getDicePool().stream()
         .filter(d -> d.getState() == DiceState.RESERVE)
         .count();
+    sb.append("RESERVE:");
     sb.append(reserveDiceCount).append("|");
     String pile1 = !gameState.getPile1().isEmpty() ? gameState.getPile1().peek().getName() : "NONE";
     String pile2 = !gameState.getPile2().isEmpty() ? gameState.getPile2().peek().getName() : "NONE";

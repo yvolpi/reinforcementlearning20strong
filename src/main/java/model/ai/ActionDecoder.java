@@ -29,7 +29,7 @@ public class ActionDecoder {
         // Cherche un dé de la bonne couleur dans la pool
         for (java.util.Iterator<Dice> it = pool.iterator(); it.hasNext(); ) {
           Dice d = it.next();
-          if (d.getColor().name().equals(color)) {
+          if (d.getName().equals(color)) {
             // À adapter selon ton constructeur GameAction
             actions.add(new GameAction( GamePhase.ENGAGE_DICE,d));
             it.remove();
@@ -76,7 +76,7 @@ public class ActionDecoder {
       // Trouve le dé correspondant dans copyAssignableDice
       Dice foundDice = null;
       for (Dice d : copyAssignableDice) {
-        if (d.getColor().name().equals(color) && d.getLastRoll() == value) {
+        if (d.getName().equals(color) && d.getLastRoll() == value) {
           foundDice = d;
           break;
         }

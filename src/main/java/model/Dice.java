@@ -25,6 +25,10 @@ public class Dice {
     return clone;
   }
 
+  public String getName() {
+    return color.name();
+  }
+
   public DiceState getState() { return state; }
   public void setState(DiceState state) { this.state = state; }
   public int[] getFaces() { return Arrays.copyOf(faces, 6); }

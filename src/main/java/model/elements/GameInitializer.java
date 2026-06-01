@@ -129,14 +129,16 @@ public class GameInitializer {
         DiceColor.VIOLET
     };
 
-    for (DiceColor color : standardColors) {
+    /*for (DiceColor color : standardColors) {
       for (int i = 0; i < DICE_PER_COLOR; i++) {
         dicePool.add(new Dice(color));
       }
     }
 
     // Ajouter le dé rouge unique
-    dicePool.add(new Dice(DiceColor.ROUGE));
+    dicePool.add(new Dice(DiceColor.ROUGE));*/
+
+    dicePool.add(new Dice(DiceColor.JAUNE));
 
     return dicePool;
   }

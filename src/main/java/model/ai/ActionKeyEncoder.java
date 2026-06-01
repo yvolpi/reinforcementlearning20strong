@@ -41,7 +41,7 @@ public class ActionKeyEncoder {
   public static String encodeEngageActions(List<GameAction> actions) {
     if (actions.isEmpty()) return "NONE";
     return actions.stream()
-        .map(a -> a.getDice() == null ? "NONE" : a.getDice().getColor().name())
+        .map(a -> a.getDice() == null ? "NONE" : a.getDice().getName())
         .collect(Collectors.joining(","));
   }
 
@@ -58,7 +58,7 @@ public class ActionKeyEncoder {
   }
 
   private static String formatAssignAction(GameAction action) {
-    String dicePart = action.getDice() == null ? "NONE" : action.getDice().getColor().name();
+    String dicePart = action.getDice() == null ? "NONE" : action.getDice().getName();
     String rollPart = String.valueOf(action.getDice().getLastRoll());
     String targetPart = action.getTarget() != null ? action.getTarget().getName() : "NONE";
     return dicePart + ":" + rollPart + "->" + targetPart;
@@ -71,7 +71,7 @@ public class ActionKeyEncoder {
     Map<String, Long> colorCounts = comboActions.stream()
         .filter(a -> a.getDice() != null)
         .collect(Collectors.groupingBy(
-            a -> a.getDice().getColor().name(),
+            a -> a.getDice().getName(),
             Collectors.counting()
         ));
     // Générer une chaîne triée pour garantir l’unicité de la clé
@@ -87,7 +87,7 @@ public class ActionKeyEncoder {
     if (comboActions.isEmpty()) return prefix + "NONE";
     String encoded = comboActions.stream()
         .filter(a -> a.getDice() != null && a.getTarget() != null)
-        .map(a -> a.getDice().getColor().name() + ":" + a.getDice().getLastRoll() + "->" + a.getTarget().getName())
+        .map(a -> a.getDice().getName() + ":" + a.getDice().getLastRoll() + "->" + a.getTarget().getName())
         .sorted() // ordre alphabétique pour unicité
         .collect(Collectors.joining(";"));
     return prefix + encoded;

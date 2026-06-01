@@ -5,11 +5,13 @@ import java.util.Map;
 import model.random.CustomRandom;
 
 public class CustomDice extends Dice {
+  private String name;
   private int indexNormalHit;
   private int indexCriticalHit;
 
-  public CustomDice(DiceColor color, int indexNormalHit, int indexCriticalHit, Map<Integer, Integer> nbFacesByScore) {
+  public CustomDice(String name, DiceColor color, int indexNormalHit, int indexCriticalHit, Map<Integer, Integer> nbFacesByScore) {
      super(color);
+     this.name = name;
 
     // Ordre stable par score (0,1,2,...) pour garantir les mêmes index.
     Map<Integer, Integer> ordered = new java.util.TreeMap<>(nbFacesByScore);
@@ -46,8 +48,9 @@ public class CustomDice extends Dice {
   }
 
   // constructeur interne de copie (privé)
-  private CustomDice(DiceColor color, int indexNormalHit, int indexCriticalHit, int[] faces) {
+  private CustomDice(String name, DiceColor color, int indexNormalHit, int indexCriticalHit, int[] faces) {
     super(color);
+    this.name = name;
     this.indexNormalHit = indexNormalHit;
     this.indexCriticalHit = indexCriticalHit;
     this.faces = Arrays.copyOf(faces, faces.length);
@@ -56,10 +59,15 @@ public class CustomDice extends Dice {
   @Override
   @SuppressWarnings("MethodDoesntCallSuperMethod")
   public CustomDice clone() {
-    CustomDice clone = new CustomDice(this.getColor(), this.indexNormalHit, this.indexCriticalHit, faces);
+    CustomDice clone = new CustomDice(this.name, this.getColor(), this.indexNormalHit, this.indexCriticalHit, faces);
      clone.setState(this.getState());
      clone.lastRoll = this.lastRoll;
     return clone;
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   public int[] getFaces() { return Arrays.copyOf(faces, faces.length); }
