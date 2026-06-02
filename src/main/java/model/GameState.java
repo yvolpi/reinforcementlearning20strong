@@ -55,6 +55,7 @@ public class GameState implements Cloneable {
   private boolean activatedBoss;
   private boolean bosskilled;
   private boolean activateOneMoreEnnemiNextTurn;
+  private int nbMissionsGiveUp;
 
   // ===== État du tour =====
   private GamePhase phase;
@@ -94,6 +95,7 @@ public class GameState implements Cloneable {
     this.activeEnnemis = new ArrayList<>();
     this.phase = GamePhase.ACTIVATE_PILE;
     this.engageAssignStep = 0;
+    nbMissionsGiveUp = 0;
   }
 
   // ===== Clonage =====
@@ -443,6 +445,15 @@ public class GameState implements Cloneable {
 
   public void resetBonusEffectTurn() {
     this.bonusEffectsTurn.clear();
+  }
+
+
+  public int getNbMissionsGiveUp() {
+    return nbMissionsGiveUp;
+  }
+
+  public void incrementNbMissionsGiveUp() {
+    this.nbMissionsGiveUp++;
   }
 
   public boolean atLeastOneEnnemiOnPiles() {

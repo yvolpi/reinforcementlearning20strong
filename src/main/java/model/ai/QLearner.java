@@ -11,9 +11,9 @@ import java.util.Map;
 public class QLearner {
 
   public static final double DEFAULT_LEARNING_RATE  = 1.0;
-  public static final double DEFAULT_DISCOUNT_FACTOR = 0.95;
+  public static final double DEFAULT_DISCOUNT_FACTOR = 1 / 2.0;
   public static final double DEFAULT_EPSILON         = 1.0;
-  public static final double EPSILON_DECAY           = 499.0 / 500.0;
+  public static final double EPSILON_DECAY           = 1 / 2.0;
 
   private final Map<String, Map<String, Double>> qTable;
   private final double learningRate;

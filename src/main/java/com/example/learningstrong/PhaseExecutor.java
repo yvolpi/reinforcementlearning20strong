@@ -151,6 +151,8 @@ public class PhaseExecutor {
     GameAction action = ai.decideAbandonMission(game);
     if (action.isGiveUpMission()) {
       game.setPenaltyGiveUpMission(true);
+      game.removeActiveMission();
+      game.incrementNbMissionsGiveUp();
     }
   }
 

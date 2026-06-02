@@ -96,6 +96,7 @@ public class GameService {
 
     // Chaque mission non remplie : + 1
     nbToActivate += gameState.numberOfMissions();
+    nbToActivate += gameState.getNbMissionsGiveUp();
 
     // Vider les missions
     gameState.clearMissions();

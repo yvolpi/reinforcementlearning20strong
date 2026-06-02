@@ -4,12 +4,15 @@ import static model.ennemis.EnnemiType.*;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import java.util.Random;
 import model.Avatar;
+import model.CustomDice;
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
@@ -32,8 +35,6 @@ public class GameInitializer {
   private static final int INITIAL_ENNEMIS_NUMBER_PER_PILE = 1;
 
   private static final int INITIAL_MISSIONS_NUMBER = 1;
-
-  private static final int DICE_PER_COLOR = 4;
 
   public static final List<EnnemiType> ennemis = List.of(
       ACOLYTE_ESSAIM,
@@ -140,6 +141,13 @@ public class GameInitializer {
 
     dicePool.add(new Dice(DiceColor.JAUNE));
 
+    Map<Integer, Integer> faces = new HashMap<>();
+    faces.put(0,3);
+    faces.put(1,3);
+    faces.put(2,1);
+
+    CustomDice customDice = new CustomDice("BLEU2", DiceColor.BLEU, 3, 6, faces);
+    dicePool.add(customDice);
     return dicePool;
   }
 
