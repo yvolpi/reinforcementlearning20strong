@@ -34,7 +34,7 @@ public class TurnExecutor {
 
     GameService.triggeredAutomaticItemsEffectBeforeActivation(game);
     // Mission remplie ?
-    if (game.getActiveMission().isSuccess()) {
+    if (game.getActiveMission() != null && game.getActiveMission().isSuccess()) {
       game.removeActiveMission();
     }
 

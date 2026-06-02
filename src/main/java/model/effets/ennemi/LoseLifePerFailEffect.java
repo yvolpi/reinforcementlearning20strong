@@ -10,7 +10,7 @@ public class LoseLifePerFailEffect implements EnnemyEffect {
 
   @Override
   public EnnemyEffectType getType() {
-    return null;
+    return EnnemyEffectType.PERMANENT;
   }
 
 

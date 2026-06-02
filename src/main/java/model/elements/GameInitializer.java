@@ -29,12 +29,12 @@ import model.random.CustomRandom;
  */
 public class GameInitializer {
   private static final Avatar INITIAL_AVATAR = Avatar.VALKYRIE;
-  private static final int INITIAL_LIFE = 2;
-  private static final int INITIAL_STRATEGY = 2;
-  private static final int INITIAL_RECOVERY = 2;
+  private static final int INITIAL_LIFE = 1;
+  private static final int INITIAL_STRATEGY = 1;
+  private static final int INITIAL_RECOVERY = 1;
   private static final int INITIAL_ENNEMIS_NUMBER_PER_PILE = 1;
 
-  private static final int INITIAL_MISSIONS_NUMBER = 1;
+  private static final int INITIAL_MISSIONS_NUMBER = 0;
 
   public static final List<EnnemiType> ennemis = List.of(
       ACOLYTE_ESSAIM,
