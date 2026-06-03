@@ -3,6 +3,7 @@ package com.example.learningstrong;
 import model.Avatar;
 import model.GameState;
 import model.ai.GameAi;
+import model.ai.StateAction;
 import model.effets.bonus.OrloEffect;
 import model.elements.GamePhase;
 import model.elements.GameService;
@@ -108,15 +109,20 @@ public class TurnExecutor {
       }
       game.checkIfErrorBetweenPoolAndEngagedAndExhaustedDice();
       //System.out.println("--- Étape " + (step + 1) + " de la stratégie --- assign dice");
-
       game.setPhase(GamePhase.ASSIGN_DICE);
       phaseExecutor.executeAssignPhase(game);
-      if (game.isVictory()) return;
+      if (game.isVictory()) {
+        ai.getHistory().add(new StateAction("Le joueur a gagné.", "Le boss est vaincu."));
+        return;
+      }
     }
 
     // Phases finales
     GameService.sufferDamagePhase(game, ai);
-    if (game.isDefeat()) return;
+    if (game.isDefeat()) {
+      ai.getHistory().add(new StateAction("Le joueur a perdu.", "Le héros est vaincu."));
+      return;
+    }
     GameService.applyEnnemisSubsequentEffects(game);
     GameService.exhaustionPhase(game, ai);
     GameService.recoverDicePhase(game, ai);
