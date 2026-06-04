@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import model.Avatar;
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
@@ -169,6 +170,14 @@ public class ActionSelector {
                          || couleurParEnnemi.get(e) == dice.getColor())
             .toList()
           : validTargets;
+
+      if (dice.getColor() == DiceColor.JAUNE && dice.getLastRoll() == 0 && gameState.getPlayer().getAvatar().equals(
+          Avatar.BECKET)) {
+        // Seuls les ennemis de classe C2 sont des cibles valides
+        validTargets = validTargets.stream()
+            .filter(e -> e.getClassValue() == 2)
+            .toList();
+      }
 
       if (!isActiveMissionM11) {
         // on ne doit pas assigner de dé aux ennemis vaincus

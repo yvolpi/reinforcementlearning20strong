@@ -244,6 +244,16 @@ public class GameService {
 
   public static void assignDicePhase(GameState gameState, List<GameAction> actions) {
     List<Dice> assignableDice = getAssignableDice(gameState);
+    if (gameState.getPlayer().getAvatar().equals(Avatar.BECKET)) {
+      // Tous les dés jaunes en échec à assigner se transforment en touches
+        assignableDice.forEach(dice -> {
+          if (dice.getColor() == DiceColor.JAUNE && dice.getLastRoll() == 0) {
+            dice.setToHit();
+          }
+        });
+    }
+
+
     Map<Dice, Ennemi> assignments = new ArrayList<>(actions).stream()
         .filter(action -> action.getType() == GamePhase.ASSIGN_DICE)
         .filter(action -> action.getDice() != null && action.getTarget() != null)

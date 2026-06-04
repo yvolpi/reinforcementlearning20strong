@@ -3,11 +3,14 @@ package model.ai;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import builders.GameStateBuilder;
 import java.util.List;
 import java.util.Map;
+import model.Avatar;
 import model.Dice;
 import model.DiceColor;
 import model.GameState;
+import model.Player;
 import model.elements.GameAction;
 import model.elements.GamePhase;
 import model.ennemis.Ennemi;
@@ -77,6 +80,23 @@ class ActionSelectorTest {
         ,List.of(d), List.of(), 1.0);
 
     assertThat(actions).isEmpty();
+  }
+
+  @Test
+  void should_not_assign_failed_yellow_on_class_1_ennemi_with_becket() {
+    selector = new ActionSelector(new CustomRandom(3,2,0,0), encoder);
+
+    Dice d = new Dice(DiceColor.JAUNE);
+    GameState gameState = new GameStateBuilder()
+        .withPlayer(new Player(Avatar.BECKET, 1, 1, 1))
+        .build();
+    gameState.getActiveEnnemis().add(new Ennemi(EnnemiType.CIVIL_ASSERVI, 1));
+    gameState.getActiveEnnemis().add(new Ennemi(EnnemiType.LARVE_A_MOELLE, 1));
+
+    List<GameAction> actions = selector.exploreAssignActions(gameState, List.of(d), gameState.getActiveEnnemis(), 1.0);
+
+    assertThat(actions.getFirst().getTarget().getName()).isNotEqualTo(EnnemiType.CIVIL_ASSERVI.name);
+
   }
 
   // ===== exploreItemToThrowAction =====
