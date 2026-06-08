@@ -86,7 +86,9 @@ public class GameInitializer {
 
   public static final List<EnnemiType> bossList = List.of(
       BETE_ALPHA,
-      MONARQUE_RUCHE
+      MERE_DES_SPORES,
+      MONARQUE_RUCHE,
+      SEIGNEUR_DE_LESSAIM
   );
 
   private GameInitializer() {
