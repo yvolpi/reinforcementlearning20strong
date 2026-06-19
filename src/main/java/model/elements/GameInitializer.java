@@ -28,11 +28,11 @@ import model.random.CustomRandom;
  * Fabrique pour créer l'état initial du jeu.
  */
 public class GameInitializer {
-  private static final Avatar INITIAL_AVATAR = Avatar.VALKYRIE;
+  private static final Avatar INITIAL_AVATAR = Avatar.BECKET;
   private static final int INITIAL_LIFE = 1;
   private static final int INITIAL_STRATEGY = 1;
   private static final int INITIAL_RECOVERY = 1;
-  private static final int INITIAL_ENNEMIS_NUMBER_PER_PILE = 1;
+  private static final int INITIAL_ENNEMIS_NUMBER_PER_PILE = 2;
 
   private static final int INITIAL_MISSIONS_NUMBER = 0;
 
@@ -143,13 +143,13 @@ public class GameInitializer {
 
     dicePool.add(new Dice(DiceColor.JAUNE));
 
-    Map<Integer, Integer> faces = new HashMap<>();
+    /*Map<Integer, Integer> faces = new HashMap<>();
     faces.put(0,3);
     faces.put(1,3);
     faces.put(2,1);
 
     CustomDice customDice = new CustomDice("BLEU2", DiceColor.BLEU, 3, 6, faces);
-    dicePool.add(customDice);
+    dicePool.add(customDice);*/
     return dicePool;
   }
 
@@ -159,11 +159,26 @@ public class GameInitializer {
     Deque<Ennemi> pile3 = new LinkedList<>();
 
     // Chaque pile doit avoir le même nombre d'ennemis, à 1 près
+    // tous les 30 ennemis: ennemis différents
+    int count = 0;
+    List<EnnemiType> differentEnnemis = new ArrayList<>(ennemis);
 
     for (int i=0; i< INITIAL_ENNEMIS_NUMBER_PER_PILE; i++) {
-      Ennemi e1 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 1);
-      Ennemi e2 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 2);
-      Ennemi e3 = new Ennemi(ennemis.get(random.nextInt(ennemis.size())), 3);
+      int e1Index = random.nextInt(differentEnnemis.size());
+      Ennemi e1 = new Ennemi(differentEnnemis.get(e1Index), 1);
+      differentEnnemis.remove(e1Index);
+      int e2Index = random.nextInt(differentEnnemis.size());
+      Ennemi e2 = new Ennemi(differentEnnemis.get(e2Index), 2);
+      differentEnnemis.remove(e2Index);
+      int e3Index = random.nextInt(differentEnnemis.size());
+      Ennemi e3 = new Ennemi(differentEnnemis.get(e3Index), 3);
+      differentEnnemis.remove(e3Index);
+
+      count += 3;
+      if (count % 30 == 0) {
+        count = 0;
+        differentEnnemis = new ArrayList<>(ennemis);
+      }
 
       if (i >= 15) {
         int upgradeLevel = i / 15;

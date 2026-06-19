@@ -65,22 +65,18 @@ public class PhaseExecutor {
       game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() + 1);
       game.setActivateOneMoreEnnemiNextTurn(false);
     }
+    int nbEnnemis = 0;
 
     while (game.getNbEnnemisToAvtivate() > 0 && game.atLeastOneEnnemiOnPiles()) {
+      nbEnnemis ++;
+      System.out.println("nb ennemis : " + nbEnnemis);
+      System.out.println("Phase d'activation des ennemis. Il reste " + game.getNbEnnemisToAvtivate() + " ennemis à activer.");
 
       List<Ennemi> availableEnemies = GameService.getAvailableEnemiesForActivation(game);
       GameAction action = ai.choosePileToActivate(availableEnemies, game);
       Ennemi newEnnemi = GameService.activateEnemy(game, action.getTarget().getPileNumber());
-
       game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() - 1 + newEnnemi.getForcedActivations());
 
-    }
-
-    while (game.getNbEnnemisToAvtivate() > 0) {
-      // Si on doit encore activer des ennemis mais qu'il n'y en a plus à activer, on active des ennemis aléatoires
-      Ennemi ennemi = new Ennemi(GameInitializer.ennemis.get(game.getRandom().nextInt(GameInitializer.ennemis.size())), 1);
-      Ennemi newEnnemi = GameService.activateEnemy(game, ennemi);
-      game.setNbEnnemisToActivate(game.getNbEnnemisToAvtivate() - 1 + newEnnemi.getForcedActivations());
     }
   }
 
